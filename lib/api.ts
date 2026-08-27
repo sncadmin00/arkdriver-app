@@ -84,6 +84,7 @@ export async function uploadDocument(id: string, payload: {
   contentBase64: string;
   signatureName?: string;
   notes?: string;
+  stopIndex?: number;
 }): Promise<any> {
   return apiPost<any>(`/api/public/driver/loads/${id}/documents`, payload);
 }

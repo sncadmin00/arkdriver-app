@@ -43,6 +43,8 @@ const s = StyleSheet.create({
   stepAddr: { color: '#E5E7EB', fontSize: 13, lineHeight: 19 },
   stepAddrOff: { color: '#4B5563' },
   done: { color: '#10B981', fontSize: 11, marginTop: 2 },
+  upload: { borderColor: '#F59E0B', borderWidth: 1, borderRadius: 8, paddingVertical: 12, alignItems: 'center', marginBottom: 8 },
+  uploadText: { color: '#F59E0B', fontWeight: '600', fontSize: 14 },
   err: { color: '#EF4444', fontSize: 13 },
   closed: { color: '#10B981', fontSize: 14, fontWeight: '600', textAlign: 'center', paddingVertical: 20 },
 });
@@ -138,6 +140,28 @@ export default function LoadDetail() {
                 )}
                 {current.arrivedAt && !missing.length && current.podRequired === false && (
                   <Text style={s.note}>No paperwork required at this stop.</Text>
+                )}
+
+                {current.arrivedAt && (missing.length > 0 || (current.recommendedDocs ?? []).length > 0) && (
+                  <View style={{ marginTop: 14 }}>
+                    {[...new Set([...(missing ?? []), ...(current.recommendedDocs ?? [])])].map((doc: string) => {
+                      const req = missing.includes(doc);
+                      return (
+                        <TouchableOpacity
+                          key={doc}
+                          style={s.upload}
+                          onPress={() => router.push({
+                            pathname: '/load/upload',
+                            params: { id: String(id), stopIndex: String(idxOf(current, 0)), docKey: doc, kind: current.kind },
+                          })}
+                        >
+                          <Text style={s.uploadText}>
+                            Upload {doc.toUpperCase()}{req ? '' : ' (optional)'}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
                 )}
 
                 {!current.arrivedAt ? (
