@@ -2,14 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIn
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchLoadDetail, checkInLoad, ApiError } from '@/lib/api';
-
-const FLOW = [
-  { key: 'at_pickup', label: 'Arrived at Pickup' },
-  { key: 'in_transit', label: 'Start Transit' },
-  { key: 'at_delivery', label: 'Arrived at Delivery' },
-  { key: 'delivered', label: 'Mark Delivered' },
-];
+import { fetchLoadDetail, checkInStop, ApiError } from '@/lib/api';
 
 const STATUS_COLORS: Record<string, string> = {
   booked: '#3B82F6', dispatched: '#8B5CF6', at_pickup: '#EAB308',
@@ -29,24 +22,29 @@ const s = StyleSheet.create({
   body: { padding: 20, paddingBottom: 40 },
   section: { color: '#6B7280', fontSize: 11, fontWeight: '700', marginBottom: 10, letterSpacing: 0.6, marginTop: 4 },
   card: { backgroundColor: '#1F2937', borderRadius: 12, padding: 16, marginBottom: 20, borderColor: '#374151', borderWidth: 1 },
-  stop: { flexDirection: 'row', marginBottom: 16 },
-  dot: { width: 10, height: 10, borderRadius: 5, marginTop: 5, marginRight: 12 },
-  stopKind: { color: '#6B7280', fontSize: 10, fontWeight: '700', marginBottom: 3 },
-  stopAddr: { color: '#E5E7EB', fontSize: 14, lineHeight: 20 },
-  stopDate: { color: '#9CA3AF', fontSize: 12, marginTop: 3 },
-  arrived: { color: '#10B981', fontSize: 11, marginTop: 3 },
+  active: { borderColor: '#F59E0B', borderWidth: 2 },
+  kind: { color: '#6B7280', fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
+  addr: { color: '#FFFFFF', fontSize: 16, lineHeight: 23, marginTop: 6, fontWeight: '500' },
+  when: { color: '#9CA3AF', fontSize: 12, marginTop: 6 },
+  stamp: { color: '#10B981', fontSize: 11, marginTop: 4 },
+  btn: { borderRadius: 8, paddingVertical: 15, alignItems: 'center', marginTop: 14, backgroundColor: '#F59E0B' },
+  btnOff: { backgroundColor: '#374151' },
+  btnText: { color: '#0B0F14', fontWeight: '700', fontSize: 15 },
+  btnOffText: { color: '#6B7280', fontWeight: '600', fontSize: 15 },
+  missing: { color: '#EAB308', fontSize: 12, marginTop: 12, lineHeight: 18 },
+  note: { color: '#6B7280', fontSize: 12, marginTop: 12, lineHeight: 18 },
   row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 7 },
   label: { color: '#9CA3AF', fontSize: 13 },
   value: { color: '#E5E7EB', fontSize: 13, fontWeight: '500', flexShrink: 1, textAlign: 'right' },
   link: { color: '#F59E0B', fontSize: 13, fontWeight: '600' },
   instructions: { color: '#E5E7EB', fontSize: 13, lineHeight: 21 },
-  btn: { borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginBottom: 10, backgroundColor: '#F59E0B' },
-  btnDone: { backgroundColor: '#1F2937', borderColor: '#10B981', borderWidth: 1 },
-  btnText: { color: '#0B0F14', fontWeight: '700', fontSize: 14 },
-  btnDoneText: { color: '#10B981', fontWeight: '600', fontSize: 14 },
-  warn: { color: '#EAB308', fontSize: 12, marginBottom: 12, lineHeight: 18 },
-  note: { color: '#6B7280', fontSize: 12, marginBottom: 12, lineHeight: 18 },
+  step: { flexDirection: 'row', marginBottom: 14 },
+  dot: { width: 12, height: 12, borderRadius: 6, marginTop: 4, marginRight: 12 },
+  stepAddr: { color: '#E5E7EB', fontSize: 13, lineHeight: 19 },
+  stepAddrOff: { color: '#4B5563' },
+  done: { color: '#10B981', fontSize: 11, marginTop: 2 },
   err: { color: '#EF4444', fontSize: 13 },
+  closed: { color: '#10B981', fontSize: 14, fontWeight: '600', textAlign: 'center', paddingVertical: 20 },
 });
 
 function Row({ label, value }: { label: string; value?: string | number | null }) {
@@ -71,29 +69,34 @@ export default function LoadDetail() {
   });
 
   const load = data?.load ?? data;
+  const stops: any[] = data?.stops ?? load?.stops ?? [];
+  const idxOf = (stop: any, i: number) => stop.index ?? i;
+  const current = stops.find((st: any) => st.current) ?? stops.find((st: any) => !st.complete);
 
   const checkIn = useMutation({
-    mutationFn: (status: string) => checkInLoad(id!, status),
-    onSuccess: () => {
+    mutationFn: ({ index, event }: { index: number; event: 'arrived' | 'departed' }) =>
+      checkInStop(id!, index, event),
+    onSuccess: (res: any) => {
       qc.invalidateQueries({ queryKey: ['load', id] });
       qc.invalidateQueries({ queryKey: ['loads'] });
+      if (res?.closed) Alert.alert('Load closed', 'Final stop departed — this load is now delivered.');
     },
     onError: (e: Error) => {
       const code = e instanceof ApiError ? e.code : undefined;
-      if (code === 'pod_required') {
-        Alert.alert('POD required', e.message);
-      } else {
-        Alert.alert('Check-in failed', e.message);
-      }
+      const titles: Record<string, string> = {
+        docs_required: 'Documents required',
+        pod_required: 'POD required',
+        stop_locked: 'Finish the current stop first',
+        arrival_required: 'Check in as arrived first',
+        already_arrived: 'Already checked in',
+        already_departed: 'Already departed',
+      };
+      Alert.alert(titles[code ?? ''] ?? 'Check-in failed', e.message);
     },
   });
 
-  const doneMap: Record<string, boolean> = {
-    at_pickup: !!load?.arrivedPickupAt,
-    in_transit: !!load?.arrivedPickupAt && load?.status !== 'at_pickup',
-    at_delivery: !!load?.arrivedDeliveryAt,
-    delivered: !!load?.deliveredAt,
-  };
+  const missing: string[] = current?.missingDocs ?? [];
+  const blocked = !!current?.arrivedAt && missing.length > 0;
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
@@ -117,6 +120,76 @@ export default function LoadDetail() {
           {isLoading && <ActivityIndicator color="#F59E0B" />}
           {error && <Text style={s.err}>{(error as Error).message}</Text>}
 
+          {current ? (
+            <>
+              <Text style={s.section}>CURRENT STOP · {idxOf(current, 0) + 1} OF {stops.length}</Text>
+              <View style={[s.card, s.active]}>
+                <Text style={s.kind}>{String(current.kind ?? '').toUpperCase()}</Text>
+                <Text style={s.addr}>{current.address}</Text>
+                {current.date && <Text style={s.when}>{current.date} {current.time ?? ''}</Text>}
+                {current.arrivedAt && (
+                  <Text style={s.stamp}>✓ Arrived {new Date(current.arrivedAt).toLocaleString()}</Text>
+                )}
+
+                {blocked && (
+                  <Text style={s.missing}>
+                    Upload before departing: {missing.join(', ').toUpperCase()}
+                  </Text>
+                )}
+                {current.arrivedAt && !missing.length && current.podRequired === false && (
+                  <Text style={s.note}>No paperwork required at this stop.</Text>
+                )}
+
+                {!current.arrivedAt ? (
+                  <TouchableOpacity
+                    style={s.btn}
+                    disabled={checkIn.isPending}
+                    onPress={() => checkIn.mutate({ index: idxOf(current, 0), event: 'arrived' })}
+                  >
+                    <Text style={s.btnText}>{checkIn.isPending ? '…' : 'Arrived'}</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={[s.btn, blocked && s.btnOff]}
+                    disabled={checkIn.isPending || blocked}
+                    onPress={() => checkIn.mutate({ index: idxOf(current, 0), event: 'departed' })}
+                  >
+                    <Text style={blocked ? s.btnOffText : s.btnText}>
+                      {checkIn.isPending ? '…' : blocked ? 'Departed (docs missing)' : 'Departed'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </>
+          ) : stops.length > 0 ? (
+            <Text style={s.closed}>✓ All stops complete</Text>
+          ) : null}
+
+          {stops.length > 0 && (
+            <>
+              <Text style={s.section}>ALL STOPS</Text>
+              <View style={s.card}>
+                {stops.map((stop: any, i: number) => {
+                  const color = stop.complete ? '#10B981' : stop.current ? '#F59E0B' : '#374151';
+                  return (
+                    <View key={i} style={s.step}>
+                      <View style={[s.dot, { backgroundColor: color }]} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={s.kind}>
+                          {idxOf(stop, i) + 1} · {String(stop.kind ?? '').toUpperCase()}
+                        </Text>
+                        <Text style={[s.stepAddr, stop.locked && s.stepAddrOff]}>{stop.address}</Text>
+                        {stop.departedAt && (
+                          <Text style={s.done}>✓ Departed {new Date(stop.departedAt).toLocaleString()}</Text>
+                        )}
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            </>
+          )}
+
           {load?.driverInstructions ? (
             <>
               <Text style={s.section}>DRIVER INSTRUCTIONS</Text>
@@ -126,36 +199,13 @@ export default function LoadDetail() {
             </>
           ) : null}
 
-          {Array.isArray(load?.stops) && load.stops.length > 0 && (
-            <>
-              <Text style={s.section}>STOPS</Text>
-              <View style={s.card}>
-                {load.stops.map((stop: any, i: number) => (
-                  <View key={i} style={s.stop}>
-                    <View style={[s.dot, { backgroundColor: stop.kind === 'pickup' ? '#3B82F6' : '#10B981' }]} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={s.stopKind}>{String(stop.kind ?? '').toUpperCase()}</Text>
-                      <Text style={s.stopAddr}>{stop.address}</Text>
-                      {stop.date && <Text style={s.stopDate}>{stop.date} {stop.time ?? ''}</Text>}
-                      {stop.kind === 'pickup' && load.arrivedPickupAt && (
-                        <Text style={s.arrived}>✓ Arrived {new Date(load.arrivedPickupAt).toLocaleString()}</Text>
-                      )}
-                      {stop.kind !== 'pickup' && load.arrivedDeliveryAt && (
-                        <Text style={s.arrived}>✓ Arrived {new Date(load.arrivedDeliveryAt).toLocaleString()}</Text>
-                      )}
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </>
-          )}
-
           <Text style={s.section}>DETAILS</Text>
           <View style={s.card}>
             <Row label="Miles" value={load?.miles ? `${load.miles} mi` : null} />
             <Row label="Equipment" value={load?.equipmentType?.replace('_', ' ')} />
             <Row label="Commodity" value={load?.commodity} />
             <Row label="Weight" value={load?.weightLbs ? `${load.weightLbs} lbs` : null} />
+            <Row label="Billing" value={load?.selfBill ? 'Self bill' : null} />
             <Row label="Customer" value={load?.customer?.name} />
             {load?.customer?.phone ? (
               <View style={s.row}>
@@ -165,45 +215,7 @@ export default function LoadDetail() {
                 </TouchableOpacity>
               </View>
             ) : null}
-            <Row label="Billing" value={load?.selfBill ? 'Self bill' : null} />
-            <Row
-              label="POD on file"
-              value={load?.podOnFile ? 'Yes' : load?.podRequired === false ? 'No (not required)' : 'No'}
-            />
           </View>
-
-          <Text style={s.section}>CHECK IN</Text>
-          {load?.podRequired && !load?.podOnFile && (
-            <Text style={s.warn}>
-              POD not uploaded — "Mark Delivered" will be blocked.
-              {Array.isArray(load?.requiredDocs) && load.requiredDocs.length > 0
-                ? ` Required: ${load.requiredDocs.join(', ').toUpperCase()}.`
-                : ''}
-            </Text>
-          )}
-          {load?.podRequired === false && (
-            <Text style={s.note}>
-              Self-bill load — no POD needed to close it.
-              {Array.isArray(load?.recommendedDocs) && load.recommendedDocs.length > 0
-                ? ` Recommended: ${load.recommendedDocs.join(', ').toUpperCase()}.`
-                : ''}
-            </Text>
-          )}
-          {FLOW.map((st) => {
-            const done = doneMap[st.key];
-            return (
-              <TouchableOpacity
-                key={st.key}
-                style={[s.btn, done && s.btnDone]}
-                disabled={checkIn.isPending}
-                onPress={() => checkIn.mutate(st.key)}
-              >
-                <Text style={done ? s.btnDoneText : s.btnText}>
-                  {checkIn.isPending ? '…' : done ? `✓ ${st.label}` : st.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
         </View>
       </ScrollView>
     </SafeAreaView>

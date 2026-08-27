@@ -87,3 +87,11 @@ export async function uploadDocument(id: string, payload: {
 }): Promise<any> {
   return apiPost<any>(`/api/public/driver/loads/${id}/documents`, payload);
 }
+
+export async function checkInStop(
+  loadId: string,
+  stopIndex: number,
+  event: 'arrived' | 'departed'
+): Promise<any> {
+  return apiPost<any>(`/api/public/driver/loads/${loadId}/stops/${stopIndex}/check-in`, { event });
+}
