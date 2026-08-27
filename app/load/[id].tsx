@@ -44,7 +44,8 @@ const s = StyleSheet.create({
   btnDone: { backgroundColor: '#1F2937', borderColor: '#10B981', borderWidth: 1 },
   btnText: { color: '#0B0F14', fontWeight: '700', fontSize: 14 },
   btnDoneText: { color: '#10B981', fontWeight: '600', fontSize: 14 },
-  warn: { color: '#EAB308', fontSize: 12, marginBottom: 12 },
+  warn: { color: '#EAB308', fontSize: 12, marginBottom: 12, lineHeight: 18 },
+  note: { color: '#6B7280', fontSize: 12, marginBottom: 12, lineHeight: 18 },
   err: { color: '#EF4444', fontSize: 13 },
 });
 
@@ -164,12 +165,29 @@ export default function LoadDetail() {
                 </TouchableOpacity>
               </View>
             ) : null}
-            <Row label="POD on file" value={load?.podOnFile ? 'Yes' : 'No'} />
+            <Row label="Billing" value={load?.selfBill ? 'Self bill' : null} />
+            <Row
+              label="POD on file"
+              value={load?.podOnFile ? 'Yes' : load?.podRequired === false ? 'No (not required)' : 'No'}
+            />
           </View>
 
           <Text style={s.section}>CHECK IN</Text>
-          {!load?.podOnFile && (
-            <Text style={s.warn}>POD not uploaded — "Mark Delivered" will be blocked.</Text>
+          {load?.podRequired && !load?.podOnFile && (
+            <Text style={s.warn}>
+              POD not uploaded — "Mark Delivered" will be blocked.
+              {Array.isArray(load?.requiredDocs) && load.requiredDocs.length > 0
+                ? ` Required: ${load.requiredDocs.join(', ').toUpperCase()}.`
+                : ''}
+            </Text>
+          )}
+          {load?.podRequired === false && (
+            <Text style={s.note}>
+              Self-bill load — no POD needed to close it.
+              {Array.isArray(load?.recommendedDocs) && load.recommendedDocs.length > 0
+                ? ` Recommended: ${load.recommendedDocs.join(', ').toUpperCase()}.`
+                : ''}
+            </Text>
           )}
           {FLOW.map((st) => {
             const done = doneMap[st.key];
