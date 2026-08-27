@@ -1,0 +1,71 @@
+{
+  "expo": {
+    "name": "ARK Driver",
+    "slug": "arkdriver-app",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0F14"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTabletMode": false,
+      "bundleIdentifier": "com.arkcarriers.driver",
+      "deploymentTarget": "15.0",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B0F14"
+      },
+      "package": "com.arkcarriers.driver",
+      "minSdkVersion": 21,
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "driver",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow ARK Driver to access your location"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow ARK Driver to access your camera for BOL/POD photos"
+        }
+      ]
+    ],
+    "infoPlist": {
+      "NSLocationWhenInUseUsageDescription": "Location needed for load pickup/delivery confirmation",
+      "NSCameraUsageDescription": "Camera needed to photograph BOL and proof of delivery"
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "eaa9fa2f-34f2-4f72-bbd0-34e750d75824"
+      }
+    }
+  }
+}
