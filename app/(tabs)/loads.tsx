@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLoads } from '@/lib/api';
 import type { Load } from '@/types';
@@ -42,6 +43,7 @@ function StatusBadge({ status }: { status?: string }) {
 }
 
 export default function LoadsScreen() {
+  const router = useRouter();
   const { data: loads, isLoading, error } = useQuery({ queryKey: ['loads'], queryFn: () => fetchLoads() });
 
   return (
@@ -62,7 +64,7 @@ export default function LoadsScreen() {
             keyExtractor={(item: Load) => item.id}
             contentContainerStyle={styles.list}
             renderItem={({ item }: { item: Load }) => (
-              <TouchableOpacity style={styles.card} activeOpacity={0.7}>
+              <TouchableOpacity style={styles.card} activeOpacity={0.7} onPress={() => router.push(`/load/${item.id}`)}>
                 <View style={styles.topRow}>
                   <Text style={styles.loadId}>{item.id}</Text>
                   <StatusBadge status={item.status} />

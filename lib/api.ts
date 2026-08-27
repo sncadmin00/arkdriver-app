@@ -10,6 +10,27 @@ export const queryClient = new QueryClient({
   },
 });
 
+
+export class ApiError extends Error {
+  status: number;
+  code?: string;
+  constructor(message: string, status: number, code?: string) {
+    super(message);
+    this.status = status;
+    this.code = code;
+  }
+}
+
+async function toApiError(res: Response): Promise<ApiError> {
+  const text = await res.text();
+  try {
+    const body = JSON.parse(text);
+    return new ApiError(body.error ?? text, res.status, body.code);
+  } catch {
+    return new ApiError(text.slice(0, 200) || `Request failed (${res.status})`, res.status);
+  }
+}
+
 async function authHeaders() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error('Not authenticated');
@@ -21,10 +42,7 @@ async function authHeaders() {
 
 async function apiGet<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, { headers: await authHeaders() });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`${res.status}: ${body.slice(0, 120)}`);
-  }
+  if (!res.ok) throw await toApiError(res);
   return res.json();
 }
 
@@ -34,10 +52,7 @@ async function apiPost<T>(path: string, body?: any): Promise<T> {
     headers: await authHeaders(),
     body: body ? JSON.stringify(body) : undefined,
   });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`${res.status}: ${text.slice(0, 120)}`);
-  }
+  if (!res.ok) throw await toApiError(res);
   return res.json();
 }
 
@@ -52,4 +67,23 @@ export async function fetchLoads(scope?: string): Promise<Load[]> {
   const res = await apiGet<{ loads?: Load[] } | Load[]>(`/api/public/driver/loads${q}`);
   if (Array.isArray(res)) return res;
   return res.loads ?? [];
+}
+
+export async function fetchLoadDetail(id: string): Promise<any> {
+  return apiGet<any>(`/api/public/driver/loads/${id}`);
+}
+
+export async function checkInLoad(id: string, status: string): Promise<any> {
+  return apiPost<any>(`/api/public/driver/loads/${id}/check-in`, { status });
+}
+
+export async function uploadDocument(id: string, payload: {
+  docKey: string;
+  fileName: string;
+  mimeType: string;
+  contentBase64: string;
+  signatureName?: string;
+  notes?: string;
+}): Promise<any> {
+  return apiPost<any>(`/api/public/driver/loads/${id}/documents`, payload);
 }
