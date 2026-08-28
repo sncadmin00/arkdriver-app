@@ -134,7 +134,9 @@
     "signOutBody": "You will need to log in again.",
     "language": "LANGUAGE",
     "expenses": "Expenses",
-    "expensesSub": "Your own fuel, parking, meals and receipts"
+    "expensesSub": "Your own fuel, parking, meals and receipts",
+    "inspection": "Inspection",
+    "inspectionSub": "Pre-trip checklist and defect reports"
   },
   "pay": {
     "title": "Pay",
@@ -223,5 +225,39 @@
     "cat_equipment": "Equipment",
     "cat_tolls": "Tolls",
     "cat_other": "Other"
+  },
+  "inspection": {
+    "title": "Inspection",
+    "new": "New inspection",
+    "history": "History",
+    "preTrip": "Pre-trip",
+    "postTrip": "Post-trip",
+    "truck": "Truck unit",
+    "trailer": "Trailer",
+    "odometer": "Odometer",
+    "catVehicle": "VEHICLE",
+    "catTrailer": "TRAILER",
+    "catEmergency": "EMERGENCY EQUIPMENT",
+    "ok": "OK",
+    "defect": "Defect",
+    "noteHint": "Describe the defect",
+    "addPhoto": "Add photo",
+    "photos": "{{count}} photo(s)",
+    "submit": "Submit inspection",
+    "submitting": "Submitting...",
+    "odometerRequired": "Enter the odometer reading",
+    "notesRequired": "Describe each defect before submitting",
+    "doneTitle": "Inspection submitted",
+    "doneClean": "No defects reported",
+    "doneDefects": "Defect report delivered to dispatch",
+    "sealed": "Sealed {{time}}",
+    "record": "Record {{hash}}",
+    "noHistory": "No inspections yet.",
+    "defectCount": "{{count}} defect(s)",
+    "clean": "No defects",
+    "reviewNew": "Awaiting review",
+    "reviewReviewed": "Reviewed by office",
+    "notifiedAt": "Dispatch notified {{time}}",
+    "why": "A reported defect is your record. If a violation follows, this shows you flagged it."
   }
 }

@@ -134,7 +134,9 @@
     "signOutBody": "Qaytadan kirish talab qilinadi.",
     "language": "TIL",
     "expenses": "Xarajatlar",
-    "expensesSub": "Shaxsiy yoqilg'i, parkovka, ovqat va cheklar"
+    "expensesSub": "Shaxsiy yoqilg'i, parkovka, ovqat va cheklar",
+    "inspection": "Ko'rik",
+    "inspectionSub": "Ko'rik ro'yxati va nuqson hisobotlari"
   },
   "pay": {
     "title": "To'lov",
@@ -223,5 +225,39 @@
     "cat_equipment": "Jihoz",
     "cat_tolls": "Yo'l to'lovi",
     "cat_other": "Boshqa"
+  },
+  "inspection": {
+    "title": "Ko'rik",
+    "new": "Yangi ko'rik",
+    "history": "Tarix",
+    "preTrip": "Reysdan oldin",
+    "postTrip": "Reysdan keyin",
+    "truck": "Trak uniti",
+    "trailer": "Treyler",
+    "odometer": "Odometr",
+    "catVehicle": "TRAK",
+    "catTrailer": "TREYLER",
+    "catEmergency": "FAVQULODDA JIHOZ",
+    "ok": "Yaxshi",
+    "defect": "Nuqson",
+    "noteHint": "Nuqsonni tavsiflang",
+    "addPhoto": "Surat qo'shish",
+    "photos": "surat: {{count}}",
+    "submit": "Ko'rikni yuborish",
+    "submitting": "Yuborilmoqda...",
+    "odometerRequired": "Odometr ko'rsatkichini kiriting",
+    "notesRequired": "Yuborishdan oldin har bir nuqsonni tavsiflang",
+    "doneTitle": "Ko'rik yuborildi",
+    "doneClean": "Nuqson aniqlanmadi",
+    "doneDefects": "Nuqson hisoboti dispecherga yuborildi",
+    "sealed": "Qayd etildi {{time}}",
+    "record": "Yozuv {{hash}}",
+    "noHistory": "Hozircha ko'rik yo'q.",
+    "defectCount": "nuqson: {{count}}",
+    "clean": "Nuqsonsiz",
+    "reviewNew": "Ko'rib chiqilmoqda",
+    "reviewReviewed": "Ofis ko'rib chiqdi",
+    "notifiedAt": "Dispecher xabardor qilindi {{time}}",
+    "why": "Xabar qilingan nuqson — sizning dalilingiz. Keyin violation bo'lsa, bu yozuv siz oldindan aytganingizni tasdiqlaydi."
   }
 }

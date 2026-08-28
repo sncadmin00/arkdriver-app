@@ -206,3 +206,15 @@ export async function fetchTaxDocumentUrl(year: string | number) {
 export async function createBankLink() {
   return apiPost<{ url: string }>('/api/public/driver/profile/bank-link', {});
 }
+
+export async function fetchInspectionTemplate() {
+  return apiGet<any>('/api/public/driver/inspection/template');
+}
+
+export async function submitInspection(payload: any) {
+  return apiPost<any>('/api/public/driver/inspection', payload);
+}
+
+export async function fetchInspections(limit = 20) {
+  return apiGet<any>(`/api/public/driver/inspection?limit=${limit}`);
+}
