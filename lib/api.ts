@@ -128,3 +128,17 @@ export async function fetchAnnouncements() {
 export async function setOffStatus(readyAt: string | null) {
   return apiPost<any>('/api/public/driver/status/set-off', { readyAt });
 }
+
+export async function fetchCompliance() {
+  return apiGet<any>('/api/public/driver/compliance');
+}
+
+export async function fetchTruckDocuments() {
+  return apiGet<any>('/api/public/driver/truck-documents');
+}
+
+export async function fetchDocumentUrl(documentId: string) {
+  return apiGet<{ url: string; fileName?: string; mimeType?: string }>(
+    `/api/public/driver/compliance/documents/${documentId}/url`
+  );
+}

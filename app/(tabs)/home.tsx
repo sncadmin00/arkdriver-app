@@ -25,7 +25,6 @@ export default function HomeScreen() {
   const { data: profile, error, isLoading } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
   const { data: loads } = useQuery({ queryKey: ['loads'], queryFn: fetchLoads });
 
-  console.log('LOADS RESPONSE:', JSON.stringify(loads, null, 2));
 
   const driver = profile?.driver;
   const truck = profile?.truck;
