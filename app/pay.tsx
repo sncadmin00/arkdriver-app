@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { fetchSettlement, fetchDebts, fetchAccounting, mondayOf, shiftWeek } from '@/lib/api';
+import { fetchSettlement, fetchDebts, fetchAccounting, fetchFuel, fetchTolls, mondayOf, shiftWeek } from '@/lib/api';
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1F2937' },
@@ -38,6 +38,7 @@ const s = StyleSheet.create({
   loadRef: { color: '#E5E7EB', fontSize: 14, fontWeight: '600' },
   loadMiles: { color: '#6B7280', fontSize: 12, marginTop: 2 },
   empty: { color: '#6B7280', fontSize: 13 },
+  strike: { color: '#6B7280', fontSize: 12, textDecorationLine: 'line-through', marginTop: 2 },
   err: { color: '#EF4444', fontSize: 13 },
 });
 
@@ -57,6 +58,70 @@ function fmtWeek(iso) {
   return `${f(d)} – ${f(end)}`;
 }
 
+
+function TxnSection({ title, data, showGallons }) {
+  const rows = data?.transactions ?? data?.items ?? [];
+  const t = data?.totals;
+  if (!rows.length) return null;
+  const rolled = data?.itemized === false;
+  return (
+    <>
+      <Text style={s.section}>{title} · {t?.count ?? rows.length}</Text>
+      <View style={s.card}>
+        {rolled ? (
+          <Text style={[s.empty, { marginBottom: 10 }]}>Imported as a single summary line.</Text>
+        ) : null}
+        {rows.map((r, i) => (
+          <View key={r.id ?? i} style={{ paddingVertical: 8, borderBottomColor: '#374151', borderBottomWidth: i === rows.length - 1 ? 0 : 1 }}>
+            <View style={s.row}>
+              <View style={{ flex: 1, paddingRight: 12 }}>
+                <Text style={s.loadRef}>{r.location ?? r.description ?? '—'}</Text>
+                <Text style={s.loadMiles}>
+                  {r.date ? new Date(r.date).toLocaleDateString() : ''}
+                  {showGallons && r.gallons ? ` · ${r.gallons} gal` : ''}
+                  {showGallons && r.pricePerGallon ? ` @ ${money(r.pricePerGallon)}` : ''}
+                  {r.unit ? ` · unit ${r.unit}` : ''}
+                </Text>
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={[s.value, s.neg]}>-{money(r.net)}</Text>
+                {r.discount ? (
+                  <Text style={s.strike}>{money(r.gross)}</Text>
+                ) : null}
+              </View>
+            </View>
+          </View>
+        ))}
+        {t ? (
+          <>
+            <View style={s.divider} />
+            {t.gallons ? (
+              <View style={s.row}>
+                <Text style={s.label}>Gallons</Text>
+                <Text style={s.value}>{t.gallons}</Text>
+              </View>
+            ) : null}
+            <View style={s.row}>
+              <Text style={s.label}>Gross</Text>
+              <Text style={s.value}>{money(t.gross)}</Text>
+            </View>
+            {t.discount ? (
+              <View style={s.row}>
+                <Text style={s.label}>Discount</Text>
+                <Text style={[s.value, s.pos]}>-{money(t.discount)}</Text>
+              </View>
+            ) : null}
+            <View style={s.row}>
+              <Text style={s.total}>Charged</Text>
+              <Text style={[s.total, s.neg]}>-{money(t.net)}</Text>
+            </View>
+          </>
+        ) : null}
+      </View>
+    </>
+  );
+}
+
 export default function PayScreen() {
   const router = useRouter();
   const thisWeek = mondayOf(new Date());
@@ -66,6 +131,8 @@ export default function PayScreen() {
   const st = useQuery({ queryKey: ['settlement', week], queryFn: () => fetchSettlement(week) });
   const dt = useQuery({ queryKey: ['debts', week], queryFn: () => fetchDebts(week) });
   const acc = useQuery({ queryKey: ['accounting'], queryFn: fetchAccounting });
+  const fuel = useQuery({ queryKey: ['fuel', week], queryFn: () => fetchFuel(week) });
+  const tolls = useQuery({ queryKey: ['tolls', week], queryFn: () => fetchTolls(week) });
 
   const settlement = st.data?.settlement;
   const debts = dt.data?.debts ?? [];
@@ -105,7 +172,7 @@ export default function PayScreen() {
         style={s.container}
         contentContainerStyle={s.body}
         refreshControl={
-          <RefreshControl refreshing={st.isFetching} tintColor="#F59E0B" onRefresh={() => { st.refetch(); dt.refetch(); acc.refetch(); }} />
+          <RefreshControl refreshing={st.isFetching} tintColor="#F59E0B" onRefresh={() => { st.refetch(); dt.refetch(); acc.refetch(); fuel.refetch(); tolls.refetch(); }} />
         }
       >
         {st.isLoading && <ActivityIndicator color="#F59E0B" style={{ marginTop: 30 }} />}
@@ -244,6 +311,9 @@ export default function PayScreen() {
             </View>
           </>
         )}
+
+        <TxnSection title="FUEL" data={fuel.data} showGallons />
+        <TxnSection title="TOLLS" data={tolls.data} />
 
         {debts.length > 0 && (
           <>

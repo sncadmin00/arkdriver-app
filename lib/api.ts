@@ -169,3 +169,13 @@ export function shiftWeek(iso: string, weeks: number) {
   d.setUTCDate(d.getUTCDate() + weeks * 7);
   return d.toISOString().slice(0, 10);
 }
+
+export async function fetchFuel(week) {
+  const q = week ? `?week=${week}` : '';
+  return apiGet(`/api/public/driver/fuel${q}`);
+}
+
+export async function fetchTolls(week) {
+  const q = week ? `?week=${week}` : '';
+  return apiGet(`/api/public/driver/tolls${q}`);
+}
