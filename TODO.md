@@ -32,3 +32,10 @@
   `POST /api/public/driver-services/link` with `x-bot-secret`.
 - App work once bots are updated: Services surface (tab placement TBD — 6 tabs vs
   folding More into Compliance) + a card on Home under the active load.
+
+## Verify when real data lands
+- Fuel / toll sections on the Pay screen are written but never rendered with real
+  data — no statement has been imported yet. The transaction wrapper key is a
+  guess (`transactions` / `items`); confirm against the first real import.
+- Per-load pay on the load detail screen only shows when the load's `reference`
+  matches a settlement week. Untested with a matching load.
