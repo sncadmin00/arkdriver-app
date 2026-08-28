@@ -80,7 +80,13 @@
     "nextStop": "Keyingi to'xtash",
     "noCoords": "Bu yuk uchun koordinatalar yo'q.",
     "overview": "umumiy",
-    "next": "KEYINGI · {{kind}}"
+    "next": "KEYINGI · {{kind}}",
+    "truckRoute": "Trak marshruti",
+    "roadRoute": "Yo'l marshruti",
+    "tolls": "Yo'l to'lovi ≈ {{amount}}",
+    "routeMiles": "marshrut {{miles}} mil",
+    "warnCritical": "Marshrutda cheklov bor",
+    "warnings": "MARSHRUT OGOHLANTIRISHLARI"
   },
   "chat": {
     "title": "Dispecher",
@@ -137,7 +143,8 @@
     "expensesSub": "Shaxsiy yoqilg'i, parkovka, ovqat va cheklar",
     "inspection": "Ko'rik",
     "inspectionSub": "Ko'rik ro'yxati va nuqson hisobotlari",
-    "report": "Xabar berish"
+    "report": "Xabar berish",
+    "truckmap": "Trak xaritasi"
   },
   "pay": {
     "title": "To'lov",
@@ -290,5 +297,23 @@
     "unconfirmed": "Ofisda",
     "reviewed": "Ofis rasmiylashtirdi",
     "urgentNote": "Jabrlanganlar bo'lsa — avval dispecherga qo'ng'iroq qiling."
+  },
+  "truckmap": {
+    "title": "Trak xaritasi",
+    "search": "Qayerga?",
+    "searching": "Qidirilmoqda...",
+    "noResults": "Hech narsa topilmadi",
+    "saved": "SAQLANGAN JOYLAR",
+    "noSaved": "Saqlangan joylar yo'q.",
+    "modeTruck": "Treyler bilan",
+    "modeBobtail": "Bobtail",
+    "go": "Marshrut",
+    "routing": "Qurilmoqda...",
+    "savePlace": "Joyni saqlash",
+    "placeLabel": "Nomi",
+    "saveHint": "Uy, baza, doimiy to'xtash joyi",
+    "distance": "{{miles}} mil",
+    "noOrigin": "Joylashuv aniqlanmadi. Geolokatsiyani yoqing.",
+    "clear": "Yangi manzil"
   }
 }

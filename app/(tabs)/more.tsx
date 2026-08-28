@@ -168,6 +168,9 @@ export default function MoreScreen() {
               <Text style={s.itemTitle}>{t('more.expenses')}</Text>
               <Text style={s.itemSub}>{t('more.expensesSub')}</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={s.item} onPress={() => router.push('/truckmap')}>
+              <Text style={s.itemTitle}>{t('more.truckmap')}</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={[s.item, s.itemLast]} onPress={() => router.push('/inspection')}>
               <Text style={s.itemTitle}>{t('more.inspection')}</Text>
               <Text style={s.itemSub}>{t('more.inspectionSub')}</Text>

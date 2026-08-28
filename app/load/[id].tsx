@@ -104,6 +104,12 @@ export default function LoadDetail() {
 
   async function launch(app) {
     setNavApps(null);
+
+    // ARK's own map is this app — open the screen instead of a deep link
+    if (app.key === 'ark' || String(app.deepLink ?? '').startsWith('ark://')) {
+      return router.push(`/load/map?id=${id}`);
+    }
+
     if (app.deepLink) {
       const ok = await Linking.canOpenURL(app.deepLink).catch(() => false);
       if (ok) {

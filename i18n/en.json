@@ -80,7 +80,13 @@
     "nextStop": "Next stop",
     "noCoords": "No stop coordinates for this load.",
     "overview": "overview",
-    "next": "NEXT · {{kind}}"
+    "next": "NEXT · {{kind}}",
+    "truckRoute": "Truck route",
+    "roadRoute": "Road route",
+    "tolls": "Est. tolls {{amount}}",
+    "routeMiles": "route {{miles}} mi",
+    "warnCritical": "Restriction on this route",
+    "warnings": "ROUTE WARNINGS"
   },
   "chat": {
     "title": "Dispatch",
@@ -137,7 +143,8 @@
     "expensesSub": "Your own fuel, parking, meals and receipts",
     "inspection": "Inspection",
     "inspectionSub": "Pre-trip checklist and defect reports",
-    "report": "Report"
+    "report": "Report",
+    "truckmap": "Truck map"
   },
   "pay": {
     "title": "Pay",
@@ -290,5 +297,23 @@
     "unconfirmed": "With the office",
     "reviewed": "Filed by office",
     "urgentNote": "Call dispatch first if anyone is hurt."
+  },
+  "truckmap": {
+    "title": "Truck map",
+    "search": "Where to?",
+    "searching": "Searching...",
+    "noResults": "Nothing found",
+    "saved": "SAVED PLACES",
+    "noSaved": "No saved places yet.",
+    "modeTruck": "With trailer",
+    "modeBobtail": "Bobtail",
+    "go": "Route",
+    "routing": "Routing...",
+    "savePlace": "Save this place",
+    "placeLabel": "Name it",
+    "saveHint": "Home, the yard, a regular stop",
+    "distance": "{{miles}} mi",
+    "noOrigin": "Can't find your position. Turn on location and try again.",
+    "clear": "New address"
   }
 }

@@ -25,7 +25,10 @@ const s = StyleSheet.create({
   footHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   footLabel: { color: '#6B7280', fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
   footAddr: { color: '#E5E7EB', fontSize: 14, lineHeight: 20 },
-  miles: { color: '#F59E0B', fontSize: 12, fontWeight: '700' },
+  miles: { color: '#F59E0B', fontSize: 13, fontWeight: '700' },
+  provider: { color: '#6B7280', fontSize: 10, marginTop: 2 },
+  warnBar: { backgroundColor: '#EF444418', borderTopColor: '#EF4444', borderBottomColor: '#EF4444', borderTopWidth: 1, borderBottomWidth: 1, paddingHorizontal: 20, paddingVertical: 10 },
+  warnTitle: { color: '#EF4444', fontSize: 13, fontWeight: '700' },
   stopRow: { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 9, borderBottomColor: '#374151', borderBottomWidth: 1 },
   dot: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', marginRight: 12, marginTop: 2 },
   dotText: { color: '#FFFFFF', fontSize: 11, fontWeight: '800' },
@@ -78,6 +81,10 @@ export default function TripMap() {
   const located = stops.filter((x) => typeof x.lat === 'number' && typeof x.lng === 'number');
   const next = located.find((x) => x.current) ?? located.find((x) => !x.complete);
   const view = mode ?? 'trip';
+  const route = load?.route ?? {};
+  const truckAware = route.provider === 'here';
+  const warnings = route.warnings ?? [];
+  const critical = warnings.filter((w) => w.severity === 'critical');
 
   const routed = (() => {
     const enc = load?.route?.polyline;
@@ -153,6 +160,12 @@ export default function TripMap() {
         </TouchableOpacity>
       </View>
 
+      {critical.length > 0 ? (
+        <View style={s.warnBar}>
+          <Text style={s.warnTitle}>⚠ {critical[0].title ?? t('map.warnCritical')}</Text>
+        </View>
+      ) : null}
+
       <MapView
         ref={map}
         style={s.map}
@@ -185,9 +198,24 @@ export default function TripMap() {
           <Text style={s.footLabel}>
             {view === 'trip' ? t('load.allStops') : next ? t('map.next', { kind: String(next.kind ?? '').toUpperCase() }) : t('common.done')}
           </Text>
-          {load?.miles ? (
-            <Text style={s.miles}>{load.miles} mi{routed ? '' : ` · ${t('map.overview')}`}</Text>
-          ) : null}
+          <View style={{ alignItems: 'flex-end' }}>
+            {load?.miles ? <Text style={s.miles}>{load.miles} mi</Text> : null}
+            <Text style={s.provider}>
+              {routed
+                ? truckAware
+                  ? t('map.truckRoute')
+                  : t('map.roadRoute')
+                : t('map.overview')}
+              {route.miles && route.miles !== load?.miles
+                ? ` · ${t('map.routeMiles', { miles: route.miles })}`
+                : ''}
+            </Text>
+            {route.estimatedTollsUsd ? (
+              <Text style={s.provider}>
+                {t('map.tolls', { amount: `$${route.estimatedTollsUsd.toFixed(2)}` })}
+              </Text>
+            ) : null}
+          </View>
         </View>
 
         {view === 'trip' ? (

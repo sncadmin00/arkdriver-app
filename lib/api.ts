@@ -228,3 +228,25 @@ export async function fetchIncidents(limit = 20, kind?: string) {
   if (kind) q.set('kind', kind);
   return apiGet<any>(`/api/public/driver/incidents?${q}`);
 }
+
+export async function mapRoute(payload: {
+  destination: any;
+  origin?: any;
+  mode: 'truck' | 'bobtail';
+}) {
+  return apiPost<any>('/api/public/driver/map/route', payload);
+}
+
+export async function mapSuggest(q: string, coords?: { lat: number; lng: number }) {
+  const p = new URLSearchParams({ q });
+  if (coords) { p.set('lat', String(coords.lat)); p.set('lng', String(coords.lng)); }
+  return apiGet<any>(`/api/public/driver/map/suggest?${p}`);
+}
+
+export async function fetchPlaces() {
+  return apiGet<any>('/api/public/driver/map/places');
+}
+
+export async function savePlace(payload: { label: string; address: string; mode?: string; lat?: number; lng?: number }) {
+  return apiPost<any>('/api/public/driver/map/places', payload);
+}
