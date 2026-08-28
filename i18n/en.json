@@ -77,7 +77,8 @@
     "notTruck": "Not a truck route",
     "notTruckBody": "{{app}} routes for cars. It doesn't know bridge heights, weight limits or truck restrictions. Use a truck navigator when you can.",
     "openAnyway": "Open anyway",
-    "carBadge": "CAR"
+    "carBadge": "CAR",
+    "tollsLabel": "Est. tolls"
   },
   "map": {
     "wholeTrip": "Whole trip",
@@ -102,7 +103,9 @@
     "notTollFree": "This lane cannot be run toll-free",
     "compare": "Compare routes",
     "hideCompare": "Hide",
-    "minutes": "{{count}} min"
+    "minutes": "{{count}} min",
+    "informational": "Informational only — billed miles and pay stay as dispatched.",
+    "tollsAmount": "Est. tolls {{amount}}"
   },
   "chat": {
     "title": "Dispatch",

@@ -71,8 +71,9 @@ export async function fetchLoads(scope?: string): Promise<Load[]> {
   return res.loads ?? [];
 }
 
-export async function fetchLoadDetail(id: string, alternatives?: boolean): Promise<any> {
-  return apiGet<any>(`/api/public/driver/loads/${id}${alternatives ? '?alternatives=1' : ''}`);
+export async function fetchLoadDetail(id: string, scope?: 'leg' | 'trip'): Promise<any> {
+  const q = scope ? `?alternatives=1&scope=${scope}` : '';
+  return apiGet<any>(`/api/public/driver/loads/${id}${q}`);
 }
 
 export async function checkInLoad(id: string, status: string): Promise<any> {

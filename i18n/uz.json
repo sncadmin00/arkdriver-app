@@ -77,7 +77,8 @@
     "notTruck": "Trak marshruti emas",
     "notTruckBody": "{{app}} yengil avtomobil uchun marshrut quradi. Ko'prik balandligi, og'irlik cheklovlari va trak taqiqlarini bilmaydi. Iloji bo'lsa trak navigatoridan foydalaning.",
     "openAnyway": "Baribir ochish",
-    "carBadge": "YENGIL"
+    "carBadge": "YENGIL",
+    "tollsLabel": "Yo'l to'lovi ≈"
   },
   "map": {
     "wholeTrip": "Butun reys",
@@ -102,7 +103,9 @@
     "notTollFree": "Bu yo'nalishda to'lovsiz yurib bo'lmaydi",
     "compare": "Marshrutlarni solishtirish",
     "hideCompare": "Yashirish",
-    "minutes": "{{count}} daq"
+    "minutes": "{{count}} daq",
+    "informational": "Faqat ma'lumot uchun — to'lanadigan mil va to'lov o'zgarmaydi.",
+    "tollsAmount": "Yo'l to'lovi ≈ {{amount}}"
   },
   "chat": {
     "title": "Dispecher",

@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import polyline from '@mapbox/polyline';
 import { fetchLoadDetail } from '@/lib/api';
+import RouteOptions from '@/components/RouteOptions';
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1F2937' },
@@ -26,6 +27,8 @@ const s = StyleSheet.create({
   footLabel: { color: '#6B7280', fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
   footAddr: { color: '#E5E7EB', fontSize: 14, lineHeight: 20 },
   miles: { color: '#F59E0B', fontSize: 13, fontWeight: '700' },
+  compare: { color: '#F59E0B', fontSize: 13, fontWeight: '600', paddingVertical: 8 },
+  info: { color: '#6B7280', fontSize: 11, lineHeight: 16, marginTop: 8 },
   provider: { color: '#6B7280', fontSize: 10, marginTop: 2 },
   warnBar: { backgroundColor: '#EF444418', borderTopColor: '#EF4444', borderBottomColor: '#EF4444', borderTopWidth: 1, borderBottomWidth: 1, paddingHorizontal: 20, paddingVertical: 10 },
   warnTitle: { color: '#EF4444', fontSize: 13, fontWeight: '700' },
@@ -69,10 +72,13 @@ export default function TripMap() {
   const { t } = useTranslation();
   const map = useRef(null);
   const [mode, setMode] = useState(null);
+  const [compare, setCompare] = useState(false);
+  const [picked, setPicked] = useState('fastest');
 
+  const scope = (mode ?? 'trip') === 'next' ? 'leg' : 'trip';
   const { data, isLoading, error } = useQuery({
-    queryKey: ['load', id],
-    queryFn: () => fetchLoadDetail(id),
+    queryKey: ['load', id, compare ? scope : 'plain'],
+    queryFn: () => fetchLoadDetail(id, compare ? scope : undefined),
     enabled: !!id,
   });
 
@@ -86,8 +92,11 @@ export default function TripMap() {
   const warnings = route.warnings ?? [];
   const critical = warnings.filter((w) => w.severity === 'critical');
 
+  const opts = data?.routeOptions ?? load?.routeOptions ?? [];
+  const activeOpt = opts.find((o) => (o.kind ?? o.key) === picked);
+
   const routed = (() => {
-    const enc = load?.route?.polyline;
+    const enc = activeOpt?.polyline ?? load?.route?.polyline;
     if (!enc) return null;
     try {
       return polyline.decode(enc).map(([latitude, longitude]) => ({ latitude, longitude }));
@@ -210,15 +219,30 @@ export default function TripMap() {
                 ? ` · ${t('map.routeMiles', { miles: route.miles })}`
                 : ''}
             </Text>
-            {route.estimatedTollsUsd ? (
+            {(activeOpt?.estimatedTollsUsd ?? route.estimatedTollsUsd) ? (
               <Text style={s.provider}>
-                {t('map.tolls', { amount: `$${route.estimatedTollsUsd.toFixed(2)}` })}
+                {t('map.tollsAmount', {
+                  amount: `$${(activeOpt?.estimatedTollsUsd ?? route.estimatedTollsUsd).toFixed(2)}`,
+                })}
               </Text>
             ) : null}
           </View>
         </View>
 
-        {view === 'trip' ? (
+        <TouchableOpacity onPress={() => setCompare((v) => !v)}>
+          <Text style={s.compare}>
+            {compare ? t('map.hideCompare') : t('map.compare')}
+          </Text>
+        </TouchableOpacity>
+
+        {compare ? (
+          <>
+            <RouteOptions options={opts} selected={picked} onSelect={setPicked} />
+            {opts.length > 1 ? <Text style={s.info}>{t('map.informational')}</Text> : null}
+          </>
+        ) : null}
+
+        {view === 'trip' && !compare ? (
           <ScrollView style={{ maxHeight: 170 }} showsVerticalScrollIndicator={false}>
             {stops.map((stop, i) => {
               const has = typeof stop.lat === 'number' && typeof stop.lng === 'number';

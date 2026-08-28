@@ -341,6 +341,12 @@ export default function LoadDetail() {
           <Text style={s.section}>{t('load.details')}</Text>
           <View style={s.card}>
             <Row label={t("load.milesLabel")} value={load?.miles ? `${load.miles} mi` : null} />
+            {load?.route?.estimatedTollsUsd ? (
+              <View style={s.row}>
+                <Text style={s.label}>{t('load.tollsLabel')}</Text>
+                <Text style={s.value}>${load.route.estimatedTollsUsd.toFixed(2)}</Text>
+              </View>
+            ) : null}
             {payLine ? (
               <View style={s.row}>
                 <Text style={s.label}>{t('load.payEstimate')}</Text>
