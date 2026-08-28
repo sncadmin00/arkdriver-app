@@ -1,52 +1,57 @@
 # ARK Driver — open items
 
 ## Blocked by Apple (membership migrating to organization)
-- [ ] **Document scanner instead of plain camera** — `react-native-document-scanner-plugin`.
-      Drivers photograph PODs badly (dark, angled, unreadable) → delays factoring payment.
-      Native module, needs a development build. Only `capture()` in `app/load/upload.tsx` changes;
-      upload logic and payload stay identical (still JPEG).
-- [ ] EAS builds / TestFlight
+- [ ] Document scanner instead of plain camera — `react-native-document-scanner-plugin`.
+      Drivers photograph PODs badly → delays factoring payment. Native module, needs a
+      dev build. Only `capture()` in `app/load/upload.tsx` changes; payload stays JPEG.
+- [ ] Push notifications — backend ready (`push-tokens`), needs dev build.
+- [ ] Background GPS during active loads.
+- [ ] EAS builds / TestFlight / App Store.
 
-## Ready to build
-- [ ] Compliance tab
-- [ ] Accounting tab
+## Waiting on backend
+- [ ] Maintenance alerts — oil change / inspection due by mileage. Truck data exists
+      in the TMS, no driver endpoint yet.
 
-## Blocked / waiting
-- Push notifications — backend ready, needs dev build (Apple)
-- Compliance tab — no endpoints yet
-- Accounting tab — bonus API still being built
+## Waiting on Rusty
+- [ ] Telegram bots must accept the `/start` payload code and call
+      `POST /api/public/driver-services/link` with `x-bot-secret`. Then the Services
+      surface can ship (per-driver `subscribed` state already live in `/services`).
+- [ ] PTI bonus is decided office-side but the app says nothing about it. Drivers
+      won't be motivated by an incentive they don't know exists.
+
+## Not verified with real data
+- [ ] Fuel / toll sections on Pay — written, never rendered with a real import.
+      Transaction wrapper key is a guess (`transactions` / `items`).
+- [ ] Per-load pay on load detail — only shows when `reference` matches a settlement week.
+- [ ] Direct deposit page — link now points at production payroll.
+- [ ] 1099 list — empty until an accountant files a form.
+
+## Deliberately not built
+- Accept / Decline load — loads are dispatched, dispatcher pulls them back if needed.
+- In-app e-signature for the annual review packet — the signed web link already
+  produces the legally correct PDF.
+- Second app for drivers at other companies — Homefood already works in Telegram;
+  build the product when there's demand, not before.
+
+## The real next step
+- [ ] **One live load with a real driver.** Everything below was built against
+      contracts and tested with `d1135`. No actual driver has opened this app.
+      Possible today over Expo Go.
 
 ## Done
-- Auth, Home, Loads list
-- Load detail: stops, instructions, customer contact
-- Per-stop check-in (arrived/departed) with doc gates
+- Auth, Home, Loads list + history
+- Load detail: stops, instructions, customer contact, per-load pay
+- Per-stop check-in (arrived/departed) with document gates
 - `podRequired` — self-bill loads close without POD
-- Document upload with `stopIndex`
-- TMS-side: merged PDF packet for factoring
+- Document upload with `stopIndex`; TMS builds the merged PDF packet for factoring
+- Trip map: road route polyline, stop markers, whole-trip / next-stop toggle
+- Navigation launcher with truck-app priority and store fallbacks
 - Chat: realtime, optimistic send, load tagging
+- Compliance: DQ slots, truck folder, in-app viewer, share (truck docs only)
 - More: profile, duty toggle, SOS, services, announcements
-
-## Telegram services (backend ready, app deferred)
-- Per-driver `subscribed` state + self-linking `connectDeepLink` are live in `/services`.
-- Still needed on the bot side: accept the `/start` payload code and call
-  `POST /api/public/driver-services/link` with `x-bot-secret`.
-- App work once bots are updated: Services surface (tab placement TBD — 6 tabs vs
-  folding More into Compliance) + a card on Home under the active load.
-
-## Verify when real data lands
-- Fuel / toll sections on the Pay screen are written but never rendered with real
-  data — no statement has been imported yet. The transaction wrapper key is a
-  guess (`transactions` / `items`); confirm against the first real import.
-- Per-load pay on the load detail screen only shows when the load's `reference`
-  matches a settlement week. Untested with a matching load.
-
-## Dropped from spec (decided, not deferred)
-- **Accept / Decline load** — not needed. Loads are dispatched to a driver and
-  that's it. If there's a problem the dispatcher pulls the load back in the TMS.
-  No Available Loads tab.
-
-## Missing from the app (not in Lovable's audit)
-- Load history screen — `?scope=history` is live, no UI. d1135 has 4 finished loads.
-- Navigation button — `/navigation` endpoint exists (Trucker Path priority), never wired up.
-- Localisation RU/UZ — every string is English today.
-- Background GPS during active loads.
+- Pay: weekly settlement, RPM, deductions, bonuses, debts, YTD, 1099 viewer,
+  payment history, deduction dispute, direct deposit link
+- Personal expense tracker (on-device, CSV export)
+- Pre-trip inspection: checklist, defect photos, evidence hash, history
+- Incident reports: accident / DOT inspection / citation, offline queue
+- EN / RU / UZ with server-side `Accept-Language`
