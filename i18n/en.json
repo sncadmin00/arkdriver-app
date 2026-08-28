@@ -73,7 +73,11 @@
     "selfBill": "Self bill",
     "customer": "Customer",
     "phone": "Phone",
-    "payEstimate": "Pay (estimate)"
+    "payEstimate": "Pay (estimate)",
+    "notTruck": "Not a truck route",
+    "notTruckBody": "{{app}} routes for cars. It doesn't know bridge heights, weight limits or truck restrictions. Use a truck navigator when you can.",
+    "openAnyway": "Open anyway",
+    "carBadge": "CAR"
   },
   "map": {
     "wholeTrip": "Whole trip",
@@ -83,10 +87,22 @@
     "next": "NEXT · {{kind}}",
     "truckRoute": "Truck route",
     "roadRoute": "Road route",
-    "tolls": "Est. tolls {{amount}}",
+    "tolls": "Tolls",
     "routeMiles": "route {{miles}} mi",
     "warnCritical": "Restriction on this route",
-    "warnings": "ROUTE WARNINGS"
+    "warnings": "ROUTE WARNINGS",
+    "options": "ROUTE OPTIONS",
+    "fastest": "Fastest",
+    "noToll": "Fewest tolls",
+    "cheapest": "Cheapest",
+    "fuel": "Fuel",
+    "total": "Total",
+    "extraMiles": "+{{miles}} mi",
+    "sameAs": "Same as {{option}}",
+    "notTollFree": "This lane cannot be run toll-free",
+    "compare": "Compare routes",
+    "hideCompare": "Hide",
+    "minutes": "{{count}} min"
   },
   "chat": {
     "title": "Dispatch",

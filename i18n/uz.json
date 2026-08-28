@@ -73,7 +73,11 @@
     "selfBill": "Self bill",
     "customer": "Buyurtmachi",
     "phone": "Telefon",
-    "payEstimate": "To'lov (taxminiy)"
+    "payEstimate": "To'lov (taxminiy)",
+    "notTruck": "Trak marshruti emas",
+    "notTruckBody": "{{app}} yengil avtomobil uchun marshrut quradi. Ko'prik balandligi, og'irlik cheklovlari va trak taqiqlarini bilmaydi. Iloji bo'lsa trak navigatoridan foydalaning.",
+    "openAnyway": "Baribir ochish",
+    "carBadge": "YENGIL"
   },
   "map": {
     "wholeTrip": "Butun reys",
@@ -83,10 +87,22 @@
     "next": "KEYINGI · {{kind}}",
     "truckRoute": "Trak marshruti",
     "roadRoute": "Yo'l marshruti",
-    "tolls": "Yo'l to'lovi ≈ {{amount}}",
+    "tolls": "Yo'l to'lovi",
     "routeMiles": "marshrut {{miles}} mil",
     "warnCritical": "Marshrutda cheklov bor",
-    "warnings": "MARSHRUT OGOHLANTIRISHLARI"
+    "warnings": "MARSHRUT OGOHLANTIRISHLARI",
+    "options": "MARSHRUT VARIANTLARI",
+    "fastest": "Tezkor",
+    "noToll": "Kam to'lovli",
+    "cheapest": "Arzon",
+    "fuel": "Yoqilg'i",
+    "total": "Jami",
+    "extraMiles": "+{{miles}} mil",
+    "sameAs": "«{{option}}» bilan bir xil",
+    "notTollFree": "Bu yo'nalishda to'lovsiz yurib bo'lmaydi",
+    "compare": "Marshrutlarni solishtirish",
+    "hideCompare": "Yashirish",
+    "minutes": "{{count}} daq"
   },
   "chat": {
     "title": "Dispecher",

@@ -59,6 +59,7 @@ const s = StyleSheet.create({
   sheetItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 15, borderBottomColor: '#374151', borderBottomWidth: 1 },
   sheetName: { color: '#FFFFFF', fontSize: 16, flex: 1 },
   sheetTag: { color: '#10B981', fontSize: 9, fontWeight: '700', backgroundColor: '#10B98120', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  sheetTagCar: { color: '#EAB308', backgroundColor: '#EAB30820' },
   sheetCancel: { paddingVertical: 15, alignItems: 'center', marginTop: 6 },
   sheetCancelText: { color: '#F59E0B', fontSize: 16, fontWeight: '600' },
   closed: { color: '#10B981', fontSize: 14, fontWeight: '600', textAlign: 'center', paddingVertical: 20 },
@@ -102,8 +103,39 @@ export default function LoadDetail() {
   const [navApps, setNavApps] = useState(null);
   const [navBusy, setNavBusy] = useState(false);
 
+  async function open(app) {
+    if (app.deepLink) {
+      const ok = await Linking.canOpenURL(app.deepLink).catch(() => false);
+      if (ok) { try { return await Linking.openURL(app.deepLink); } catch {} }
+    }
+    if (app.fallbackKind === 'store') {
+      const store = app.storeLinks?.ios ?? app.fallback;
+      return Alert.alert(
+        t('load.notInstalled', { app: app.name }),
+        t('load.installPrompt', { app: app.name }),
+        [
+          { text: t('load.notNow'), style: 'cancel' },
+          { text: t('load.install'), onPress: () => store && Linking.openURL(store) },
+        ]
+      );
+    }
+    if (app.fallback) return Linking.openURL(app.fallback);
+    Alert.alert('Unavailable', app.name);
+  }
+
   async function launch(app) {
     setNavApps(null);
+
+    if (!app.truckAware) {
+      return Alert.alert(
+        t('load.notTruck'),
+        t('load.notTruckBody', { app: app.name }),
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('load.openAnyway'), onPress: () => open(app) },
+        ]
+      );
+    }
 
     // ARK's own map is this app — open the screen instead of a deep link
     if (app.key === 'ark' || String(app.deepLink ?? '').startsWith('ark://')) {
@@ -341,7 +373,9 @@ export default function LoadDetail() {
             {(navApps ?? []).map((app) => (
               <TouchableOpacity key={app.key} style={s.sheetItem} onPress={() => launch(app)}>
                 <Text style={s.sheetName}>{app.name}</Text>
-                {app.truckAware ? <Text style={s.sheetTag}>{t('load.truckBadge')}</Text> : null}
+                <Text style={[s.sheetTag, !app.truckAware && s.sheetTagCar]}>
+                  {app.truckAware ? t('load.truckBadge') : t('load.carBadge')}
+                </Text>
               </TouchableOpacity>
             ))}
             <TouchableOpacity style={s.sheetCancel} onPress={() => setNavApps(null)}>

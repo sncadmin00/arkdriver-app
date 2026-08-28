@@ -9,6 +9,7 @@ import polyline from '@mapbox/polyline';
 import * as Location from 'expo-location';
 import { Linking, Modal } from 'react-native';
 import { mapRoute, mapSuggest, fetchPlaces, savePlace } from '@/lib/api';
+import RouteOptions from '@/components/RouteOptions';
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1F2937' },
@@ -49,6 +50,7 @@ const s = StyleSheet.create({
   sheetItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 15, borderBottomColor: '#374151', borderBottomWidth: 1 },
   sheetName: { color: '#FFFFFF', fontSize: 16, flex: 1 },
   sheetTag: { color: '#10B981', fontSize: 9, fontWeight: '700', backgroundColor: '#10B98120', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  sheetTagCar: { color: '#EAB308', backgroundColor: '#EAB30820' },
   sheetCancel: { paddingVertical: 15, alignItems: 'center', marginTop: 6 },
 });
 
@@ -89,6 +91,8 @@ export default function TruckMap() {
   const [result, setResult] = useState(null);
   const [here, setHere] = useState(null);
   const [navApps, setNavApps] = useState(null);
+  const [picked, setPicked] = useState('fastest');
+  const [showOptions, setShowOptions] = useState(false);
 
   const places = useQuery({ queryKey: ['places'], queryFn: fetchPlaces });
   const saved = places.data?.places ?? places.data ?? [];
@@ -133,6 +137,7 @@ export default function TruckMap() {
         ...(here ? { origin: here } : {}),
         mode: modeRef.current,
       });
+      setPicked('fastest');
       const line = decode(res?.route?.polyline);
       setResult({ ...res, line, label });
       if (line?.length) setTimeout(() => map.current?.animateToRegion(fit(line), 600), 100);
@@ -180,7 +185,10 @@ export default function TruckMap() {
     );
   }
 
-  const r = result?.route;
+  const opts = result?.routeOptions ?? [];
+  const active = opts.find((o) => (o.kind ?? o.key ?? o.type) === picked) ?? result?.route;
+  const line = active?.polyline ? decode(active.polyline) : line;
+  const r = active ?? result?.route;
   const warnings = r?.warnings ?? [];
 
   return (
@@ -220,8 +228,8 @@ export default function TruckMap() {
           ref={map}
           style={s.map}
           initialRegion={
-            result?.line?.length
-              ? fit(result.line)
+            line?.length
+              ? fit(line)
               : here
               ? { latitude: here.lat, longitude: here.lng, latitudeDelta: 0.4, longitudeDelta: 0.4 }
               : { latitude: 39.95, longitude: -75.16, latitudeDelta: 3, longitudeDelta: 3 }
@@ -229,10 +237,10 @@ export default function TruckMap() {
           showsUserLocation
           showsMyLocationButton
         >
-          {result?.line?.length ? (
+          {line?.length ? (
             <>
-              <Polyline coordinates={result.line} strokeColor="#F59E0B" strokeWidth={4} />
-              <Marker coordinate={result.line[result.line.length - 1]}>
+              <Polyline coordinates={line} strokeColor="#F59E0B" strokeWidth={4} />
+              <Marker coordinate={line[line.length - 1]}>
                 <View style={s.pin} />
               </Marker>
             </>
@@ -276,7 +284,7 @@ export default function TruckMap() {
         ) : null}
       </View>
 
-      {result?.line?.length ? (
+      {line?.length ? (
         <View style={s.footer}>
           <View style={s.fTop}>
             <Text style={s.fAddr} numberOfLines={2}>{result.label}</Text>
@@ -288,6 +296,18 @@ export default function TruckMap() {
               </Text>
             </View>
           </View>
+
+          {opts.length > 1 ? (
+            <TouchableOpacity onPress={() => setShowOptions((v) => !v)}>
+              <Text style={[s.btnText, { marginTop: 12 }]}>
+                {showOptions ? t('map.hideCompare') : t('map.compare')}
+              </Text>
+            </TouchableOpacity>
+          ) : null}
+
+          {showOptions ? (
+            <RouteOptions options={opts} selected={picked} onSelect={setPicked} />
+          ) : null}
 
           {warnings.map((w, i) => (
             <Text key={i} style={[s.warn, w.severity === 'critical' && s.warnCrit]}>
@@ -321,15 +341,30 @@ export default function TruckMap() {
                 style={s.sheetItem}
                 onPress={async () => {
                   setNavApps(null);
-                  if (app.deepLink) {
-                    const ok = await Linking.canOpenURL(app.deepLink).catch(() => false);
-                    if (ok) return Linking.openURL(app.deepLink);
+                  const go = async () => {
+                    if (app.deepLink) {
+                      const ok = await Linking.canOpenURL(app.deepLink).catch(() => false);
+                      if (ok) return Linking.openURL(app.deepLink);
+                    }
+                    if (app.fallback) Linking.openURL(app.fallback);
+                  };
+                  if (!app.truckAware) {
+                    return Alert.alert(
+                      t('load.notTruck'),
+                      t('load.notTruckBody', { app: app.name }),
+                      [
+                        { text: t('common.cancel'), style: 'cancel' },
+                        { text: t('load.openAnyway'), onPress: go },
+                      ]
+                    );
                   }
-                  if (app.fallback) Linking.openURL(app.fallback);
+                  go();
                 }}
               >
                 <Text style={s.sheetName}>{app.name}</Text>
-                {app.truckAware ? <Text style={s.sheetTag}>{t('load.truckBadge')}</Text> : null}
+                <Text style={[s.sheetTag, !app.truckAware && s.sheetTagCar]}>
+                  {app.truckAware ? t('load.truckBadge') : t('load.carBadge')}
+                </Text>
               </TouchableOpacity>
             ))}
             <TouchableOpacity style={s.sheetCancel} onPress={() => setNavApps(null)}>
