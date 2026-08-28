@@ -39,3 +39,14 @@
   guess (`transactions` / `items`); confirm against the first real import.
 - Per-load pay on the load detail screen only shows when the load's `reference`
   matches a settlement week. Untested with a matching load.
+
+## Dropped from spec (decided, not deferred)
+- **Accept / Decline load** — not needed. Loads are dispatched to a driver and
+  that's it. If there's a problem the dispatcher pulls the load back in the TMS.
+  No Available Loads tab.
+
+## Missing from the app (not in Lovable's audit)
+- Load history screen — `?scope=history` is live, no UI. d1135 has 4 finished loads.
+- Navigation button — `/navigation` endpoint exists (Trucker Path priority), never wired up.
+- Localisation RU/UZ — every string is English today.
+- Background GPS during active loads.
