@@ -136,7 +136,8 @@
     "expenses": "Expenses",
     "expensesSub": "Your own fuel, parking, meals and receipts",
     "inspection": "Inspection",
-    "inspectionSub": "Pre-trip checklist and defect reports"
+    "inspectionSub": "Pre-trip checklist and defect reports",
+    "report": "Report"
   },
   "pay": {
     "title": "Pay",
@@ -259,5 +260,35 @@
     "reviewReviewed": "Reviewed by office",
     "notifiedAt": "Dispatch notified {{time}}",
     "why": "A reported defect is your record. If a violation follows, this shows you flagged it."
+  },
+  "incident": {
+    "title": "Report",
+    "accident": "Accident",
+    "dot": "DOT inspection",
+    "citation": "Traffic ticket",
+    "accidentSub": "Collision or damage to truck, trailer or cargo",
+    "dotSub": "Photograph the CVSA report",
+    "citationSub": "Photograph the citation",
+    "photos": "PHOTOS",
+    "addPhoto": "Add photo",
+    "note": "NOTE (OPTIONAL)",
+    "notePlaceholder": "Anything the office should know",
+    "noteHint": "Keep it brief — safety will call you and take the details.",
+    "location": "Location attached automatically",
+    "locating": "Getting location...",
+    "noLocation": "Location unavailable — the report will still send.",
+    "submit": "Send report",
+    "sending": "Sending...",
+    "photoRequired": "Add at least one photo",
+    "sent": "Report sent",
+    "sentBody": "Reference {{ref}}. Dispatch has been notified.",
+    "queued": "Saved — will send",
+    "queuedBody": "No connection. The report is saved and will send automatically.",
+    "pending": "{{count}} report(s) waiting to send",
+    "history": "My reports",
+    "noHistory": "No reports yet.",
+    "unconfirmed": "With the office",
+    "reviewed": "Filed by office",
+    "urgentNote": "Call dispatch first if anyone is hurt."
   }
 }

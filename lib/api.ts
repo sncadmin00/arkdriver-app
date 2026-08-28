@@ -218,3 +218,13 @@ export async function submitInspection(payload: any) {
 export async function fetchInspections(limit = 20) {
   return apiGet<any>(`/api/public/driver/inspection?limit=${limit}`);
 }
+
+export async function submitIncident(payload: any) {
+  return apiPost<any>('/api/public/driver/incidents', payload);
+}
+
+export async function fetchIncidents(limit = 20, kind?: string) {
+  const q = new URLSearchParams({ limit: String(limit) });
+  if (kind) q.set('kind', kind);
+  return apiGet<any>(`/api/public/driver/incidents?${q}`);
+}

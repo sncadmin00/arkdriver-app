@@ -136,7 +136,8 @@
     "expenses": "Xarajatlar",
     "expensesSub": "Shaxsiy yoqilg'i, parkovka, ovqat va cheklar",
     "inspection": "Ko'rik",
-    "inspectionSub": "Ko'rik ro'yxati va nuqson hisobotlari"
+    "inspectionSub": "Ko'rik ro'yxati va nuqson hisobotlari",
+    "report": "Xabar berish"
   },
   "pay": {
     "title": "To'lov",
@@ -259,5 +260,35 @@
     "reviewReviewed": "Ofis ko'rib chiqdi",
     "notifiedAt": "Dispecher xabardor qilindi {{time}}",
     "why": "Xabar qilingan nuqson — sizning dalilingiz. Keyin violation bo'lsa, bu yozuv siz oldindan aytganingizni tasdiqlaydi."
+  },
+  "incident": {
+    "title": "Xabar berish",
+    "accident": "Avariya",
+    "dot": "DOT ko'rigi",
+    "citation": "Jarima",
+    "accidentSub": "To'qnashuv yoki trak, treyler, yuk shikasti",
+    "dotSub": "CVSA hisobotini suratga oling",
+    "citationSub": "Jarimani suratga oling",
+    "photos": "SURATLAR",
+    "addPhoto": "Surat qo'shish",
+    "note": "IZOH (IXTIYORIY)",
+    "notePlaceholder": "Ofis bilishi kerak bo'lgan narsa",
+    "noteHint": "Qisqa yozing — xodim qo'ng'iroq qilib tafsilotlarni oladi.",
+    "location": "Koordinatalar avtomatik biriktiriladi",
+    "locating": "Koordinatalar aniqlanmoqda...",
+    "noLocation": "Koordinatalar mavjud emas — hisobot baribir yuboriladi.",
+    "submit": "Yuborish",
+    "sending": "Yuborilmoqda...",
+    "photoRequired": "Kamida bitta surat qo'shing",
+    "sent": "Hisobot yuborildi",
+    "sentBody": "Raqam {{ref}}. Dispecher xabardor qilindi.",
+    "queued": "Saqlandi — yuboriladi",
+    "queuedBody": "Aloqa yo'q. Hisobot saqlandi va avtomatik yuboriladi.",
+    "pending": "Yuborilishini kutmoqda: {{count}}",
+    "history": "Mening hisobotlarim",
+    "noHistory": "Hozircha hisobot yo'q.",
+    "unconfirmed": "Ofisda",
+    "reviewed": "Ofis rasmiylashtirdi",
+    "urgentNote": "Jabrlanganlar bo'lsa — avval dispecherga qo'ng'iroq qiling."
   }
 }

@@ -27,6 +27,8 @@ const s = StyleSheet.create({
   itemTitle: { color: '#E5E7EB', fontSize: 15, fontWeight: '500' },
   itemSub: { color: '#6B7280', fontSize: 12, marginTop: 3, lineHeight: 17 },
   soon: { color: '#6B7280', fontSize: 10, fontWeight: '700', marginTop: 4 },
+  report: { borderColor: '#DC2626', borderWidth: 1, borderRadius: 12, paddingVertical: 15, alignItems: 'center', marginBottom: 10 },
+  reportText: { color: '#EF4444', fontSize: 15, fontWeight: '600' },
   sos: { backgroundColor: '#DC2626', borderRadius: 12, paddingVertical: 17, alignItems: 'center', marginBottom: 20 },
   sosText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   sosSub: { color: '#FCA5A5', fontSize: 12, marginTop: 3 },
@@ -175,6 +177,9 @@ export default function MoreScreen() {
           {emergency ? (
             <>
               <Text style={s.section}>{t('more.emergency')}</Text>
+              <TouchableOpacity style={s.report} onPress={() => router.push('/report')}>
+                <Text style={s.reportText}>{t('more.report')}</Text>
+              </TouchableOpacity>
               <TouchableOpacity style={s.sos} onPress={callSupport}>
                 <Text style={s.sosText}>{t('more.callDispatch')}</Text>
                 <Text style={s.sosSub}>{emergency}</Text>
