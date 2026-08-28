@@ -96,3 +96,23 @@ export async function checkInStop(
 ): Promise<any> {
   return apiPost<any>(`/api/public/driver/loads/${loadId}/stops/${stopIndex}/check-in`, { event });
 }
+
+export async function fetchChatMessages(params?: { loadRef?: string; before?: string; limit?: number }) {
+  const q = new URLSearchParams();
+  q.set('limit', String(params?.limit ?? 50));
+  if (params?.loadRef) q.set('loadRef', params.loadRef);
+  if (params?.before) q.set('before', params.before);
+  return apiGet<{ threadId: string; messages: any[] }>(`/api/public/driver/chat/messages?${q}`);
+}
+
+export async function sendChatMessage(payload: {
+  body: string;
+  loadRef?: string;
+  clientKey: string;
+}) {
+  return apiPost<any>('/api/public/driver/chat/messages', { kind: 'text', ...payload });
+}
+
+export async function markChatRead(upTo?: string) {
+  return apiPost<any>('/api/public/driver/chat/read', upTo ? { upTo } : {});
+}
