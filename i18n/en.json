@@ -183,7 +183,16 @@
     "bankSet": "Set up",
     "bankChange": "Change",
     "bankUpdated": "Updated {{date}}",
-    "bankOpening": "Opening secure page..."
+    "bankOpening": "Opening secure page...",
+    "liveWarning": "This writes to the live payroll system. Continue?",
+    "continue": "Continue",
+    "disputeTitle": "Question this deduction?",
+    "disputeBody": "This opens a message to dispatch about {{label}}.",
+    "dispute": "Ask dispatch",
+    "disputeMessage": "Question about the {{label}} deduction of {{amount}} for the week of {{week}}.",
+    "payments": "PAYMENT HISTORY",
+    "noPayments": "No payments recorded yet.",
+    "weekOf": "Week of {{week}}"
   },
   "expenses": {
     "title": "Expenses",

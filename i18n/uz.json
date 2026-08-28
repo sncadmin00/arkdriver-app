@@ -183,7 +183,16 @@
     "bankSet": "Kiritish",
     "bankChange": "O'zgartirish",
     "bankUpdated": "Yangilandi {{date}}",
-    "bankOpening": "Xavfsiz sahifa ochilmoqda..."
+    "bankOpening": "Xavfsiz sahifa ochilmoqda...",
+    "liveWarning": "Ma'lumot jonli to'lov tizimiga yoziladi. Davom etilsinmi?",
+    "continue": "Davom etish",
+    "disputeTitle": "Ushlab qolish bo'yicha savol?",
+    "disputeBody": "«{{label}}» bo'yicha dispecherga xabar ochiladi.",
+    "dispute": "Dispecherdan so'rash",
+    "disputeMessage": "{{week}} haftasidagi «{{label}}» ushlab qolish ({{amount}}) bo'yicha savol.",
+    "payments": "TO'LOVLAR TARIXI",
+    "noPayments": "Hozircha to'lov bo'lmagan.",
+    "weekOf": "{{week}} haftasi"
   },
   "expenses": {
     "title": "Xarajatlar",

@@ -43,6 +43,7 @@ const s = StyleSheet.create({
   empty: { color: '#6B7280', fontSize: 13 },
   strike: { color: '#6B7280', fontSize: 12, textDecorationLine: 'line-through', marginTop: 2 },
   rpm: { color: '#F59E0B', fontSize: 12, fontWeight: '600', marginTop: 3 },
+  chev: { color: '#6B7280', fontSize: 18, marginLeft: 8 },
   bankBtn: { borderColor: '#F59E0B', borderWidth: 1, borderRadius: 8, paddingVertical: 11, alignItems: 'center', marginTop: 14 },
   bankBtnText: { color: '#F59E0B', fontWeight: '600', fontSize: 14 },
   mBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#1F2937', paddingTop: 56, paddingBottom: 14, paddingHorizontal: 20 },
@@ -161,6 +162,30 @@ export default function PayScreen() {
     } catch (e) {
       Alert.alert(t('common.error'), e.message);
     }
+  }
+
+  function dispute(d) {
+    Alert.alert(
+      t('pay.disputeTitle'),
+      t('pay.disputeBody', { label: d.label }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('pay.dispute'),
+          onPress: () =>
+            router.push({
+              pathname: '/(tabs)/chat',
+              params: {
+                draft: t('pay.disputeMessage', {
+                  label: d.label,
+                  amount: money(d.amount),
+                  week,
+                }),
+              },
+            }),
+        },
+      ]
+    );
   }
 
   async function openBank() {
@@ -313,10 +338,13 @@ export default function PayScreen() {
             <Text style={s.section}>{t('pay.deductions')}</Text>
             <View style={s.card}>
               {(settlement.deductions ?? []).map((d, i) => (
-                <View key={i} style={s.row}>
+                <TouchableOpacity key={i} style={s.row} onPress={() => dispute(d)}>
                   <Text style={s.label}>{d.label}</Text>
-                  <Text style={[s.value, s.neg]}>-{money(d.amount)}</Text>
-                </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={[s.value, s.neg]}>-{money(d.amount)}</Text>
+                    <Text style={s.chev}>›</Text>
+                  </View>
+                </TouchableOpacity>
               ))}
               <View style={s.divider} />
               <View style={s.row}>
@@ -385,6 +413,33 @@ export default function PayScreen() {
             </View>
           </>
         ) : null}
+
+        <Text style={s.section}>{t('pay.payments')}</Text>
+        <View style={s.card}>
+          {!(acc.data?.payments ?? []).length ? (
+            <Text style={s.empty}>{t('pay.noPayments')}</Text>
+          ) : (
+            (acc.data?.payments ?? []).map((p, i, arr) => (
+              <TouchableOpacity
+                key={p.id ?? i}
+                style={[s.row, i === arr.length - 1 && { borderBottomWidth: 0 }]}
+                onPress={() => setWeek(p.week_of)}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={s.loadRef}>{t('pay.weekOf', { week: p.week_of })}</Text>
+                  <Text style={s.loadMiles}>
+                    {p.status === 'paid' && p.paid_at
+                      ? t('pay.paidOn', { date: new Date(p.paid_at).toLocaleDateString() })
+                      : p.status}
+                  </Text>
+                </View>
+                <Text style={[s.value, p.status === 'paid' && s.pos]}>
+                  {money((p.amount_cents ?? 0) / 100)}
+                </Text>
+              </TouchableOpacity>
+            ))
+          )}
+        </View>
 
         <Text style={s.section}>{t('pay.tax')}</Text>
         <View style={s.card}>

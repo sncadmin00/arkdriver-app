@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchChatMessages, sendChatMessage, markChatRead, fetchLoads } from '@/lib/api';
 import supabase from '@/lib/supabase';
@@ -48,7 +49,8 @@ function clock(iso?: string) {
 export default function ChatScreen() {
   const qc = useQueryClient();
   const { t } = useTranslation();
-  const [text, setText] = useState('');
+  const { draft } = useLocalSearchParams();
+  const [text, setText] = useState(typeof draft === 'string' ? draft : '');
   const [loadRef, setLoadRef] = useState<string | undefined>();
   const scroller = useRef<ScrollView>(null);
 
