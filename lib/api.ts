@@ -142,3 +142,30 @@ export async function fetchDocumentUrl(documentId: string) {
     `/api/public/driver/compliance/documents/${documentId}/url`
   );
 }
+
+export async function fetchAccounting() {
+  return apiGet<{ adjustments: any[]; payments: any[] }>('/api/public/driver/accounting');
+}
+
+export async function fetchSettlement(week?: string) {
+  const q = week ? `?week=${week}` : '';
+  return apiGet<{ settlement: any }>(`/api/public/driver/settlement${q}`);
+}
+
+export async function fetchDebts(week?: string) {
+  const q = week ? `?week=${week}` : '';
+  return apiGet<any>(`/api/public/driver/debts${q}`);
+}
+
+export function mondayOf(d: Date) {
+  const x = new Date(d);
+  const day = (x.getDay() + 6) % 7;
+  x.setDate(x.getDate() - day);
+  return x.toISOString().slice(0, 10);
+}
+
+export function shiftWeek(iso: string, weeks: number) {
+  const d = new Date(iso + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() + weeks * 7);
+  return d.toISOString().slice(0, 10);
+}

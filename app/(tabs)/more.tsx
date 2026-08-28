@@ -152,6 +152,12 @@ export default function MoreScreen() {
             </TouchableOpacity>
           </View>
 
+          <Text style={s.section}>PAY</Text>
+          <TouchableOpacity style={[s.card, { marginBottom: 20 }]} onPress={() => router.push('/pay')}>
+            <Text style={s.itemTitle}>Settlements & pay</Text>
+            <Text style={s.itemSub}>Weekly loads, deductions, bonuses and balances</Text>
+          </TouchableOpacity>
+
           {emergency ? (
             <>
               <Text style={s.section}>EMERGENCY</Text>
