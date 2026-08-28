@@ -8,11 +8,13 @@
 - [ ] EAS builds / TestFlight
 
 ## Ready to build
-- [ ] Chat with dispatcher (endpoints live)
 - [ ] Compliance tab
 - [ ] Accounting tab
-- [ ] Push notifications
-- [ ] More tab (profile, announcements, SOS)
+
+## Blocked / waiting
+- Push notifications — backend ready, needs dev build (Apple)
+- Compliance tab — no endpoints yet
+- Accounting tab — bonus API still being built
 
 ## Done
 - Auth, Home, Loads list
@@ -21,3 +23,5 @@
 - `podRequired` — self-bill loads close without POD
 - Document upload with `stopIndex`
 - TMS-side: merged PDF packet for factoring
+- Chat: realtime, optimistic send, load tagging
+- More: profile, duty toggle, SOS, services, announcements
