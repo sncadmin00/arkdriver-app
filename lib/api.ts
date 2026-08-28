@@ -1,5 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
 import supabase from './supabase';
+import i18n from '@/i18n';
 import type { Load, DriverProfile } from '@/types';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'https://arktms.runonark.com';
@@ -37,6 +38,7 @@ async function authHeaders() {
   return {
     Authorization: `Bearer ${session.access_token}`,
     'Content-Type': 'application/json',
+    'Accept-Language': i18n.language || 'en',
   };
 }
 
@@ -182,4 +184,8 @@ export async function fetchTolls(week) {
 
 export async function fetchNavigation(loadId) {
   return apiGet(`/api/public/driver/loads/${loadId}/navigation`);
+}
+
+export async function setDriverLanguage(language: string) {
+  return apiPost<any>('/api/public/driver/profile/language', { language });
 }

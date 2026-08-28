@@ -6,6 +6,7 @@ import { fetchProfile, fetchServices, fetchAnnouncements, setOffStatus } from '@
 import supabase from '@/lib/supabase';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES, setLanguage } from '@/i18n';
+import { setDriverLanguage } from '@/lib/api';
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1F2937' },
@@ -221,7 +222,11 @@ export default function MoreScreen() {
                 <TouchableOpacity
                   key={lang.code}
                   style={[s.item, i === LANGUAGES.length - 1 && s.itemLast]}
-                  onPress={() => setLanguage(lang.code)}
+                  onPress={async () => {
+                    await setLanguage(lang.code);
+                    setDriverLanguage(lang.code).catch(() => {});
+                    qc.invalidateQueries();
+                  }}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Text style={[s.itemTitle, on && { color: '#F59E0B', fontWeight: '700' }]}>
