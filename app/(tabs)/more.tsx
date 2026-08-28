@@ -157,10 +157,16 @@ export default function MoreScreen() {
           </View>
 
           <Text style={s.section}>{t('more.pay')}</Text>
-          <TouchableOpacity style={[s.card, { marginBottom: 20 }]} onPress={() => router.push('/pay')}>
-            <Text style={s.itemTitle}>{t('more.payTitle')}</Text>
-            <Text style={s.itemSub}>{t('more.paySub')}</Text>
-          </TouchableOpacity>
+          <View style={[s.card, { marginBottom: 20 }]}>
+            <TouchableOpacity style={s.item} onPress={() => router.push('/pay')}>
+              <Text style={s.itemTitle}>{t('more.payTitle')}</Text>
+              <Text style={s.itemSub}>{t('more.paySub')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[s.item, s.itemLast]} onPress={() => router.push('/expenses')}>
+              <Text style={s.itemTitle}>{t('more.expenses')}</Text>
+              <Text style={s.itemSub}>{t('more.expensesSub')}</Text>
+            </TouchableOpacity>
+          </View>
 
           {emergency ? (
             <>

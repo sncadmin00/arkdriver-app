@@ -18,6 +18,8 @@
     "expo-localization": "~17.0.9",
     "expo-router": "~6.0.24",
     "expo-secure-store": "~15.0.8",
+    "expo-sharing": "~14.0.8",
+    "expo-sqlite": "~16.0.10",
     "expo-status-bar": "~3.0.9",
     "i18next": "^26.4.0",
     "react": "19.1.0",

@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { fetchSettlement, fetchDebts, fetchAccounting, fetchFuel, fetchTolls, mondayOf, shiftWeek } from '@/lib/api';
+import { View as RNView, Modal, Linking } from 'react-native';
+import { WebView } from 'react-native-webview';
+import { fetchSettlement, fetchDebts, fetchAccounting, fetchFuel, fetchTolls, fetchYtd, fetchTaxDocuments, fetchTaxDocumentUrl, fetchProfile, createBankLink, mondayOf, shiftWeek } from '@/lib/api';
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1F2937' },
@@ -40,6 +42,12 @@ const s = StyleSheet.create({
   loadMiles: { color: '#6B7280', fontSize: 12, marginTop: 2 },
   empty: { color: '#6B7280', fontSize: 13 },
   strike: { color: '#6B7280', fontSize: 12, textDecorationLine: 'line-through', marginTop: 2 },
+  rpm: { color: '#F59E0B', fontSize: 12, fontWeight: '600', marginTop: 3 },
+  bankBtn: { borderColor: '#F59E0B', borderWidth: 1, borderRadius: 8, paddingVertical: 11, alignItems: 'center', marginTop: 14 },
+  bankBtnText: { color: '#F59E0B', fontWeight: '600', fontSize: 14 },
+  mBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#1F2937', paddingTop: 56, paddingBottom: 14, paddingHorizontal: 20 },
+  mTitle: { color: '#FFFFFF', fontSize: 17, fontWeight: '700' },
+  mAction: { color: '#F59E0B', fontSize: 16, fontWeight: '600' },
   err: { color: '#EF4444', fontSize: 13 },
 });
 
@@ -136,6 +144,34 @@ export default function PayScreen() {
   const acc = useQuery({ queryKey: ['accounting'], queryFn: fetchAccounting });
   const fuel = useQuery({ queryKey: ['fuel', week], queryFn: () => fetchFuel(week) });
   const tolls = useQuery({ queryKey: ['tolls', week], queryFn: () => fetchTolls(week) });
+  const ytd = useQuery({ queryKey: ['ytd'], queryFn: () => fetchYtd() });
+  const tax = useQuery({ queryKey: ['tax-documents'], queryFn: fetchTaxDocuments });
+  const prof = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
+
+  const [viewer, setViewer] = useState(null);
+
+  const y = ytd.data?.ytd ?? ytd.data;
+  const taxYears = tax.data?.years ?? tax.data?.documents ?? tax.data ?? [];
+  const bank = prof.data?.bank;
+
+  async function openTax(year) {
+    try {
+      const res = await fetchTaxDocumentUrl(year);
+      if (res?.url) setViewer(res.url);
+    } catch (e) {
+      Alert.alert(t('common.error'), e.message);
+    }
+  }
+
+  async function openBank() {
+    try {
+      const res = await createBankLink();
+      console.log('BANK LINK:', JSON.stringify(res, null, 2));
+      if (res?.url) Linking.openURL(res.url);
+    } catch (e) {
+      Alert.alert(t('common.error'), e.message);
+    }
+  }
 
   const settlement = st.data?.settlement;
   const debts = dt.data?.debts ?? [];
@@ -217,7 +253,12 @@ export default function PayScreen() {
                   <View style={s.divider} />
                   <View style={s.row}>
                     <Text style={s.total}>{t('pay.grossMiles', { miles: settlement.miles })}</Text>
-                    <Text style={s.total}>{money(settlement.gross)}</Text>
+                    <View style={{ alignItems: 'flex-end' }}>
+                      <Text style={s.total}>{money(settlement.gross)}</Text>
+                      {settlement.miles > 0 ? (
+                        <Text style={s.rpm}>{money(settlement.gross / settlement.miles)}/mi</Text>
+                      ) : null}
+                    </View>
                   </View>
                 </>
               )}
@@ -315,6 +356,85 @@ export default function PayScreen() {
           </>
         )}
 
+        {y ? (
+          <>
+            <Text style={s.section}>{t('pay.ytd')}</Text>
+            <View style={s.card}>
+              <Text style={s.heroLabel}>{t('pay.ytdNet')}</Text>
+              <Text style={[s.heroAmount, { fontSize: 30 }]}>{money(y.net)}</Text>
+              <View style={s.divider} />
+              <View style={s.row}>
+                <Text style={s.label}>{t('pay.ytdGross')}</Text>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={s.value}>{money(y.gross)}</Text>
+                  {y.rpm ? <Text style={s.rpm}>{t('pay.rpmAvg', { rate: money(y.rpm) })}</Text> : null}
+                </View>
+              </View>
+              <View style={s.row}>
+                <Text style={s.label}>{t('pay.ytdDeductions')}</Text>
+                <Text style={[s.value, s.neg]}>-{money(y.deductions)}</Text>
+              </View>
+              <View style={s.row}>
+                <Text style={s.label}>{t('pay.ytdMiles')}</Text>
+                <Text style={s.value}>{y.miles?.toLocaleString()}</Text>
+              </View>
+              <View style={s.row}>
+                <Text style={s.label}>{t('pay.ytdLoads')}</Text>
+                <Text style={s.value}>{y.loads}</Text>
+              </View>
+            </View>
+          </>
+        ) : null}
+
+        <Text style={s.section}>{t('pay.tax')}</Text>
+        <View style={s.card}>
+          {!taxYears?.length ? (
+            <Text style={s.empty}>{t('pay.taxNone')}</Text>
+          ) : (
+            taxYears.map((doc, i) => {
+              const yr = doc.year ?? doc;
+              const filed = doc.filed ?? doc.available ?? false;
+              return (
+                <View key={yr} style={s.row}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.loadRef}>{yr}</Text>
+                    {doc.total ? <Text style={s.loadMiles}>{money(doc.total)}</Text> : null}
+                  </View>
+                  {filed ? (
+                    <TouchableOpacity onPress={() => openTax(yr)}>
+                      <Text style={[s.value, { color: '#F59E0B' }]}>{t('pay.taxView')}</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <Text style={s.empty}>{t('pay.taxPending')}</Text>
+                  )}
+                </View>
+              );
+            })
+          )}
+        </View>
+
+        <Text style={s.section}>{t('pay.bank')}</Text>
+        <View style={s.card}>
+          {bank ? (
+            <>
+              <View style={s.row}>
+                <Text style={s.label}>{bank.bankName ?? '—'}</Text>
+                <Text style={s.value}>••••{bank.bankLast4}</Text>
+              </View>
+              {bank.updatedAt ? (
+                <Text style={s.loadMiles}>
+                  {t('pay.bankUpdated', { date: new Date(bank.updatedAt).toLocaleDateString() })}
+                </Text>
+              ) : null}
+            </>
+          ) : (
+            <Text style={s.empty}>{t('pay.bankNone')}</Text>
+          )}
+          <TouchableOpacity style={s.bankBtn} onPress={openBank}>
+            <Text style={s.bankBtnText}>{bank ? t('pay.bankChange') : t('pay.bankSet')}</Text>
+          </TouchableOpacity>
+        </View>
+
         <TxnSection title={t('pay.fuel')} data={fuel.data} showGallons />
         <TxnSection title={t('pay.tolls')} data={tolls.data} />
 
@@ -340,6 +460,18 @@ export default function PayScreen() {
           </>
         )}
       </ScrollView>
+
+      <Modal visible={!!viewer} animationType="slide" onRequestClose={() => setViewer(null)}>
+        <View style={{ flex: 1, backgroundColor: '#0B0F14' }}>
+          <View style={s.mBar}>
+            <Text style={s.mTitle}>1099</Text>
+            <TouchableOpacity onPress={() => setViewer(null)}>
+              <Text style={s.mAction}>{t('common.done')}</Text>
+            </TouchableOpacity>
+          </View>
+          {viewer ? <WebView source={{ uri: viewer }} style={{ flex: 1, backgroundColor: '#FFF' }} startInLoadingState /> : null}
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

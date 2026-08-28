@@ -189,3 +189,20 @@ export async function fetchNavigation(loadId) {
 export async function setDriverLanguage(language: string) {
   return apiPost<any>('/api/public/driver/profile/language', { language });
 }
+
+export async function fetchYtd(year?: number) {
+  const q = year ? `?year=${year}` : '';
+  return apiGet<any>(`/api/public/driver/ytd${q}`);
+}
+
+export async function fetchTaxDocuments() {
+  return apiGet<any>('/api/public/driver/tax-documents');
+}
+
+export async function fetchTaxDocumentUrl(year: string | number) {
+  return apiGet<{ url: string }>(`/api/public/driver/tax-documents/${year}/url`);
+}
+
+export async function createBankLink() {
+  return apiPost<{ url: string }>('/api/public/driver/profile/bank-link', {});
+}
