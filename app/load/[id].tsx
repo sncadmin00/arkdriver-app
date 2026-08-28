@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIn
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchLoadDetail, checkInStop, ApiError } from '@/lib/api';
+import { fetchLoadDetail, checkInStop, fetchSettlement, mondayOf, ApiError } from '@/lib/api';
 
 const STATUS_COLORS: Record<string, string> = {
   booked: '#3B82F6', dispatched: '#8B5CF6', at_pickup: '#EAB308',
@@ -71,6 +71,14 @@ export default function LoadDetail() {
   });
 
   const load = data?.load ?? data;
+
+  const { data: settle } = useQuery({
+    queryKey: ['settlement', mondayOf(new Date())],
+    queryFn: () => fetchSettlement(mondayOf(new Date())),
+  });
+  const payLine = (settle?.settlement?.loads ?? []).find(
+    (l: any) => l.reference && l.reference === load?.reference
+  );
   const stops: any[] = data?.stops ?? load?.stops ?? [];
   const idxOf = (stop: any, i: number) => stop.index ?? i;
   const current = stops.find((st: any) => st.current) ?? stops.find((st: any) => !st.complete);
@@ -226,6 +234,14 @@ export default function LoadDetail() {
           <Text style={s.section}>DETAILS</Text>
           <View style={s.card}>
             <Row label="Miles" value={load?.miles ? `${load.miles} mi` : null} />
+            {payLine ? (
+              <View style={s.row}>
+                <Text style={s.label}>Pay (estimate)</Text>
+                <Text style={[s.value, { color: '#EAB308' }]}>
+                  ${payLine.pay?.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </Text>
+              </View>
+            ) : null}
             <Row label="Equipment" value={load?.equipmentType?.replace('_', ' ')} />
             <Row label="Commodity" value={load?.commodity} />
             <Row label="Weight" value={load?.weightLbs ? `${load.weightLbs} lbs` : null} />
