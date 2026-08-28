@@ -174,7 +174,7 @@ export default function PayScreen() {
           text: t('pay.dispute'),
           onPress: () =>
             router.push({
-              pathname: '/(tabs)/chat',
+              pathname: '/chat',
               params: {
                 draft: t('pay.disputeMessage', {
                   label: d.label,

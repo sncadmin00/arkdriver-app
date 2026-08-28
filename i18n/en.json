@@ -21,7 +21,9 @@
     "loads": "Loads",
     "chat": "Chat",
     "compliance": "Compliance",
-    "more": "More"
+    "more": "More",
+    "map": "Map",
+    "pay": "Pay"
   },
   "home": {
     "welcome": "Welcome",
@@ -29,7 +31,30 @@
     "truck": "Assigned Truck",
     "unit": "Unit {{unit}}",
     "activeLoads": "Active Loads",
-    "viewLoads": "View Loads"
+    "viewLoads": "View Loads",
+    "account": "Account",
+    "personal": "PERSONAL",
+    "work": "WORK",
+    "money": "MONEY",
+    "activeLoad": "ACTIVE LOAD",
+    "noLoad": "No active load",
+    "noLoadSub": "Dispatch will assign one.",
+    "thisWeek": "THIS WEEK",
+    "attention": "NEEDS ATTENTION",
+    "openChat": "Message dispatch",
+    "openLoad": "Open load",
+    "emergency": "EMERGENCY",
+    "reportIncident": "Report an incident",
+    "services": "ON THE ROAD",
+    "announcements": "ANNOUNCEMENTS",
+    "inspectionDue": "No inspection recorded today",
+    "docsAttention": "{{count}} document(s) need attention",
+    "pti": "PRE-TRIP INSPECTION",
+    "ptiDone": "Done today",
+    "ptiDo": "Do inspection",
+    "upcoming": "UPCOMING",
+    "moreLoads": "{{count}} more",
+    "weekMeta": "{{count}} loads · {{miles}} mi"
   },
   "loads": {
     "title": "Loads",
@@ -334,5 +359,15 @@
     "distance": "{{miles}} mi",
     "noOrigin": "Can't find your position. Turn on location and try again.",
     "clear": "New address"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Nothing new.",
+    "docs": "DOCUMENTS",
+    "announcements": "ANNOUNCEMENTS",
+    "expiring": "Expires in {{count}} days",
+    "expired": "Expired",
+    "missing": "Missing",
+    "viewDocs": "Open compliance"
   }
 }

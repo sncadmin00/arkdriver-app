@@ -21,7 +21,9 @@
     "loads": "Yuklar",
     "chat": "Chat",
     "compliance": "Hujjatlar",
-    "more": "Yana"
+    "more": "Yana",
+    "map": "Xarita",
+    "pay": "To'lov"
   },
   "home": {
     "welcome": "Xush kelibsiz",
@@ -29,7 +31,30 @@
     "truck": "Biriktirilgan trak",
     "unit": "Unit {{unit}}",
     "activeLoads": "Faol yuklar",
-    "viewLoads": "Yuklarni ko'rish"
+    "viewLoads": "Yuklarni ko'rish",
+    "account": "Akkaunt",
+    "personal": "SHAXSIY",
+    "work": "ISH",
+    "money": "PUL",
+    "activeLoad": "FAOL YUK",
+    "noLoad": "Faol yuk yo'q",
+    "noLoadSub": "Dispecher tayinlaydi.",
+    "thisWeek": "SHU HAFTA",
+    "attention": "E'TIBOR TALAB QILADI",
+    "openChat": "Dispecherga yozish",
+    "openLoad": "Yukni ochish",
+    "emergency": "SHOSHILINCH",
+    "reportIncident": "Hodisa haqida xabar berish",
+    "services": "YO'LDA",
+    "announcements": "E'LONLAR",
+    "inspectionDue": "Bugun ko'rik qilinmagan",
+    "docsAttention": "E'tibor talab qiladigan hujjatlar: {{count}}",
+    "pti": "REYSDAN OLDIN KO'RIK",
+    "ptiDone": "Bugun qilingan",
+    "ptiDo": "Ko'rikni o'tkazish",
+    "upcoming": "KEYINGI",
+    "moreLoads": "yana {{count}}",
+    "weekMeta": "{{count}} yuk · {{miles}} mil"
   },
   "loads": {
     "title": "Yuklar",
@@ -334,5 +359,15 @@
     "distance": "{{miles}} mil",
     "noOrigin": "Joylashuv aniqlanmadi. Geolokatsiyani yoqing.",
     "clear": "Yangi manzil"
+  },
+  "notifications": {
+    "title": "Bildirishnomalar",
+    "empty": "Yangilik yo'q.",
+    "docs": "HUJJATLAR",
+    "announcements": "E'LONLAR",
+    "expiring": "{{count}} kundan keyin tugaydi",
+    "expired": "Muddati o'tgan",
+    "missing": "Yo'q",
+    "viewDocs": "Hujjatlarni ochish"
   }
 }

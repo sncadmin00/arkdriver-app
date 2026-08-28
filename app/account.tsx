@@ -12,6 +12,7 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1F2937' },
   container: { flex: 1, backgroundColor: '#0B0F14' },
   header: { backgroundColor: '#1F2937', paddingHorizontal: 20, paddingBottom: 18 },
+  back: { color: '#F59E0B', fontSize: 15, marginBottom: 10 },
   title: { fontSize: 24, fontWeight: 'bold', color: '#FFFFFF' },
   body: { padding: 20, paddingBottom: 50 },
   section: { color: '#6B7280', fontSize: 11, fontWeight: '700', marginBottom: 10, letterSpacing: 0.6, marginTop: 8 },
@@ -109,7 +110,10 @@ export default function MoreScreen() {
     <SafeAreaView style={s.safe} edges={['top']}>
       <ScrollView style={s.container}>
         <View style={s.header}>
-          <Text style={s.title}>More</Text>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Text style={s.back}>← {t('common.back')}</Text>
+          </TouchableOpacity>
+          <Text style={s.title}>{t('home.account')}</Text>
         </View>
 
         <View style={s.body}>
@@ -158,19 +162,14 @@ export default function MoreScreen() {
             </TouchableOpacity>
           </View>
 
-          <Text style={s.section}>{t('more.pay')}</Text>
+          <Text style={s.section}>{t('home.work')}</Text>
           <View style={[s.card, { marginBottom: 20 }]}>
-            <TouchableOpacity style={s.item} onPress={() => router.push('/pay')}>
-              <Text style={s.itemTitle}>{t('more.payTitle')}</Text>
-              <Text style={s.itemSub}>{t('more.paySub')}</Text>
-            </TouchableOpacity>
+
             <TouchableOpacity style={s.item} onPress={() => router.push('/expenses')}>
               <Text style={s.itemTitle}>{t('more.expenses')}</Text>
               <Text style={s.itemSub}>{t('more.expensesSub')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={s.item} onPress={() => router.push('/truckmap')}>
-              <Text style={s.itemTitle}>{t('more.truckmap')}</Text>
-            </TouchableOpacity>
+
             <TouchableOpacity style={[s.item, s.itemLast]} onPress={() => router.push('/inspection')}>
               <Text style={s.itemTitle}>{t('more.inspection')}</Text>
               <Text style={s.itemSub}>{t('more.inspectionSub')}</Text>
