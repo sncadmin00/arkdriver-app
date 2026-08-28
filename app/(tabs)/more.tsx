@@ -4,6 +4,8 @@ import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchProfile, fetchServices, fetchAnnouncements, setOffStatus } from '@/lib/api';
 import supabase from '@/lib/supabase';
+import { useTranslation } from 'react-i18next';
+import { LANGUAGES, setLanguage } from '@/i18n';
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1F2937' },
@@ -44,6 +46,7 @@ const s = StyleSheet.create({
 export default function MoreScreen() {
   const router = useRouter();
   const qc = useQueryClient();
+  const { t, i18n } = useTranslation();
 
   const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
   const { data: services } = useQuery({ queryKey: ['services'], queryFn: fetchServices });
@@ -67,9 +70,9 @@ export default function MoreScreen() {
   function callSupport() {
     if (!emergency) return;
     const digits = String(emergency).replace(/[^\d+]/g, '');
-    Alert.alert('Emergency call', `Call ${emergency}?`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Call', style: 'destructive', onPress: () => Linking.openURL(`tel:${digits}`) },
+    Alert.alert(t('more.callDispatch'), t('more.callConfirm', { phone: emergency }), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('more.call'), style: 'destructive', onPress: () => Linking.openURL(`tel:${digits}`) },
     ]);
   }
 
@@ -85,10 +88,10 @@ export default function MoreScreen() {
   }
 
   function signOut() {
-    Alert.alert('Sign out', 'You will need to log in again.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('more.signOut'), t('more.signOutBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Sign out',
+        text: t('more.signOut'),
         style: 'destructive',
         onPress: async () => {
           await supabase.auth.signOut();
@@ -107,39 +110,39 @@ export default function MoreScreen() {
         </View>
 
         <View style={s.body}>
-          <Text style={s.section}>PROFILE</Text>
+          <Text style={s.section}>{t('more.profile')}</Text>
           <View style={s.card}>
             <Text style={s.name}>{driver?.driverName ?? '—'}</Text>
             <Text style={s.sub}>{driver?.email}</Text>
             <View style={s.divider} />
             <View style={s.row}>
-              <Text style={s.label}>Driver ID</Text>
+              <Text style={s.label}>{t('more.driverId')}</Text>
               <Text style={s.value}>{driver?.driverRef ?? '—'}</Text>
             </View>
             <View style={s.row}>
-              <Text style={s.label}>Truck</Text>
+              <Text style={s.label}>{t('more.truck')}</Text>
               <Text style={s.value}>{truck?.unit ? `Unit ${truck.unit}` : '—'}</Text>
             </View>
             {truck?.vin ? (
               <View style={s.row}>
-                <Text style={s.label}>VIN</Text>
+                <Text style={s.label}>{t('more.vin')}</Text>
                 <Text style={s.value}>{truck.vin}</Text>
               </View>
             ) : null}
             <View style={s.row}>
-              <Text style={s.label}>Status</Text>
+              <Text style={s.label}>{t('more.status')}</Text>
               <Text style={[s.value, { color: isOff ? '#9CA3AF' : '#10B981' }]}>
                 {driver?.status ?? '—'}
               </Text>
             </View>
           </View>
 
-          <Text style={s.section}>AVAILABILITY</Text>
+          <Text style={s.section}>{t('more.availability')}</Text>
           <View style={s.card}>
             <Text style={s.itemSub}>
               {isOff
-                ? 'You are off duty. Dispatch will not assign new loads.'
-                : 'You are available for dispatch.'}
+                ? t('more.offDuty')
+                : t('more.onDuty')}
             </Text>
             <TouchableOpacity
               style={[s.toggle, isOff ? s.toggleOn : s.toggleOff, { marginTop: 14 }]}
@@ -147,22 +150,22 @@ export default function MoreScreen() {
               onPress={() => toggleOff.mutate()}
             >
               <Text style={isOff ? s.toggleOnText : s.toggleOffText}>
-                {toggleOff.isPending ? '...' : isOff ? 'Go back on duty' : 'Go off duty'}
+                {toggleOff.isPending ? '...' : isOff ? t('more.goOn') : t('more.goOff')}
               </Text>
             </TouchableOpacity>
           </View>
 
-          <Text style={s.section}>PAY</Text>
+          <Text style={s.section}>{t('more.pay')}</Text>
           <TouchableOpacity style={[s.card, { marginBottom: 20 }]} onPress={() => router.push('/pay')}>
-            <Text style={s.itemTitle}>Settlements & pay</Text>
-            <Text style={s.itemSub}>Weekly loads, deductions, bonuses and balances</Text>
+            <Text style={s.itemTitle}>{t('more.payTitle')}</Text>
+            <Text style={s.itemSub}>{t('more.paySub')}</Text>
           </TouchableOpacity>
 
           {emergency ? (
             <>
-              <Text style={s.section}>EMERGENCY</Text>
+              <Text style={s.section}>{t('more.emergency')}</Text>
               <TouchableOpacity style={s.sos} onPress={callSupport}>
-                <Text style={s.sosText}>Call dispatch</Text>
+                <Text style={s.sosText}>{t('more.callDispatch')}</Text>
                 <Text style={s.sosSub}>{emergency}</Text>
               </TouchableOpacity>
             </>
@@ -170,7 +173,7 @@ export default function MoreScreen() {
 
           {svc.length > 0 && (
             <>
-              <Text style={s.section}>SERVICES</Text>
+              <Text style={s.section}>{t('more.services')}</Text>
               <View style={s.card}>
                 {svc.map((item: any, i: number) => {
                   const soon = item.status && item.status !== 'live';
@@ -183,7 +186,7 @@ export default function MoreScreen() {
                     >
                       <Text style={[s.itemTitle, soon && { color: '#6B7280' }]}>{item.name}</Text>
                       {item.description ? <Text style={s.itemSub}>{item.description}</Text> : null}
-                      {soon ? <Text style={s.soon}>COMING SOON</Text> : null}
+                      {soon ? <Text style={s.soon}>{t('more.comingSoon')}</Text> : null}
                     </TouchableOpacity>
                   );
                 })}
@@ -191,10 +194,10 @@ export default function MoreScreen() {
             </>
           )}
 
-          <Text style={s.section}>ANNOUNCEMENTS</Text>
+          <Text style={s.section}>{t('more.announcements')}</Text>
           <View style={s.card}>
             {anns.length === 0 ? (
-              <Text style={s.empty}>Nothing new.</Text>
+              <Text style={s.empty}>{t('more.nothingNew')}</Text>
             ) : (
               anns.map((a: any, i: number) => (
                 <View key={a.id ?? i} style={[s.ann, i === anns.length - 1 && s.itemLast]}>
@@ -210,8 +213,29 @@ export default function MoreScreen() {
             )}
           </View>
 
+          <Text style={s.section}>{t('more.language')}</Text>
+          <View style={s.card}>
+            {LANGUAGES.map((lang, i) => {
+              const on = i18n.language === lang.code;
+              return (
+                <TouchableOpacity
+                  key={lang.code}
+                  style={[s.item, i === LANGUAGES.length - 1 && s.itemLast]}
+                  onPress={() => setLanguage(lang.code)}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Text style={[s.itemTitle, on && { color: '#F59E0B', fontWeight: '700' }]}>
+                      {lang.label}
+                    </Text>
+                    {on ? <Text style={{ color: '#F59E0B', fontSize: 16 }}>✓</Text> : null}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
           <TouchableOpacity style={s.out} onPress={signOut}>
-            <Text style={s.outText}>Sign out</Text>
+            <Text style={s.outText}>{t('more.signOut')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

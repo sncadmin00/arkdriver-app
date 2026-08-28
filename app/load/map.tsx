@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import MapView, { Marker, Polyline } from 'react-native-maps';
@@ -62,6 +63,7 @@ function clean(a) {
 export default function TripMap() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const { t } = useTranslation();
   const map = useRef(null);
   const [mode, setMode] = useState(null);
 
@@ -119,12 +121,12 @@ export default function TripMap() {
     return (
       <SafeAreaView style={s.safe} edges={['top']}>
         <View style={s.bar}>
-          <TouchableOpacity onPress={() => router.back()}><Text style={s.back}>← Back</Text></TouchableOpacity>
+          <TouchableOpacity onPress={() => router.back()}><Text style={s.back}>← {t('common.back')}</Text></TouchableOpacity>
           <Text style={s.title}>{id}</Text>
           <View style={{ width: 50 }} />
         </View>
         <View style={s.center}>
-          <Text style={s.err}>{error ? error.message : 'No stop coordinates for this load.'}</Text>
+          <Text style={s.err}>{error ? error.message : t('map.noCoords')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -133,21 +135,21 @@ export default function TripMap() {
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <View style={s.bar}>
-        <TouchableOpacity onPress={() => router.back()}><Text style={s.back}>← Back</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => router.back()}><Text style={s.back}>← {t('common.back')}</Text></TouchableOpacity>
         <Text style={s.title}>{id}</Text>
         <View style={{ width: 50 }} />
       </View>
 
       <View style={s.toggle}>
         <TouchableOpacity style={[s.tab, view === 'trip' && s.tabOn]} onPress={() => setMode('trip')}>
-          <Text style={[s.tabText, view === 'trip' && s.tabOnText]}>Whole trip</Text>
+          <Text style={[s.tabText, view === 'trip' && s.tabOnText]}>{t('map.wholeTrip')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[s.tab, view === 'next' && s.tabOn, !next && { opacity: 0.4 }]}
           disabled={!next}
           onPress={() => setMode('next')}
         >
-          <Text style={[s.tabText, view === 'next' && s.tabOnText]}>Next stop</Text>
+          <Text style={[s.tabText, view === 'next' && s.tabOnText]}>{t('map.nextStop')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -181,10 +183,10 @@ export default function TripMap() {
       <View style={s.footer}>
         <View style={s.footHead}>
           <Text style={s.footLabel}>
-            {view === 'trip' ? 'ALL STOPS' : next ? `NEXT · ${String(next.kind ?? '').toUpperCase()}` : 'DONE'}
+            {view === 'trip' ? t('load.allStops') : next ? t('map.next', { kind: String(next.kind ?? '').toUpperCase() }) : t('common.done')}
           </Text>
           {load?.miles ? (
-            <Text style={s.miles}>{load.miles} mi{routed ? '' : ' · overview'}</Text>
+            <Text style={s.miles}>{load.miles} mi{routed ? '' : ` · ${t('map.overview')}`}</Text>
           ) : null}
         </View>
 
@@ -213,7 +215,7 @@ export default function TripMap() {
             {next.date ? <Text style={[s.stopKind, { marginTop: 6 }]}>{next.date} {next.time ?? ''}</Text> : null}
           </>
         ) : (
-          <Text style={s.footAddr}>All stops complete.</Text>
+          <Text style={s.footAddr}>{t('load.allComplete')}</Text>
         )}
       </View>
     </SafeAreaView>

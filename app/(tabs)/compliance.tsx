@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { WebView } from 'react-native-webview';
 import { Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchCompliance, fetchTruckDocuments, fetchDocumentUrl } from '@/lib/api';
 
@@ -61,6 +62,7 @@ function Pill({ state, label }: { state: string; label?: string }) {
 }
 
 function Slot({ slot, shareable }: { slot: any; shareable?: boolean }) {
+  const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [viewer, setViewer] = useState<string | null>(null);
 
@@ -85,7 +87,7 @@ function Slot({ slot, shareable }: { slot: any; shareable?: boolean }) {
       const res = await fetchDocumentUrl(slot.documentId);
       if (!res?.url) return Alert.alert('Unavailable', 'No file link returned.');
       await Share.share({
-        message: `${slot.label}${res.fileName ? ` (${res.fileName})` : ''}\n${res.url}\n\nLink expires in 10 minutes.`,
+        message: `${slot.label}${res.fileName ? ` (${res.fileName})` : ''}\n${res.url}\n\n${t('compliance.shareNote')}`,
       });
     } catch (e: any) {
       Alert.alert('Could not share', e.message);
@@ -108,25 +110,25 @@ function Slot({ slot, shareable }: { slot: any; shareable?: boolean }) {
 
       {slot.expiresAt ? (
         <Text style={s.meta}>
-          Expires {new Date(slot.expiresAt).toLocaleDateString()}
+          {t('compliance.expires', { date: new Date(slot.expiresAt).toLocaleDateString() })}
           {typeof slot.daysUntilExpiry === 'number' && slot.daysUntilExpiry >= 0 ? (
-            <Text style={[s.days, { color: c.color }]}> · {slot.daysUntilExpiry}d left</Text>
+            <Text style={[s.days, { color: c.color }]}> · {t('compliance.daysLeft', { count: slot.daysUntilExpiry })}</Text>
           ) : null}
         </Text>
       ) : null}
 
       {slot.uploadedAt && !slot.expiresAt ? (
-        <Text style={s.meta}>Uploaded {new Date(slot.uploadedAt).toLocaleDateString()}</Text>
+        <Text style={s.meta}>{t('compliance.uploaded', { date: new Date(slot.uploadedAt).toLocaleDateString() })}</Text>
       ) : null}
 
       {slot.documentId ? (
         <View style={s.actions}>
           <TouchableOpacity style={[s.view, { flex: 1 }]} onPress={open} disabled={busy}>
-            {busy ? <ActivityIndicator color="#F59E0B" /> : <Text style={s.viewText}>View</Text>}
+            {busy ? <ActivityIndicator color="#F59E0B" /> : <Text style={s.viewText}>{t('compliance.view')}</Text>}
           </TouchableOpacity>
           {shareable ? (
             <TouchableOpacity style={[s.view, s.share]} onPress={share} disabled={busy}>
-              <Text style={s.viewText}>Share</Text>
+              <Text style={s.viewText}>{t('compliance.share')}</Text>
             </TouchableOpacity>
           ) : null}
         </View>
@@ -159,20 +161,21 @@ function Slot({ slot, shareable }: { slot: any; shareable?: boolean }) {
 }
 
 function Banner({ summary }: { summary: any }) {
+  const { t } = useTranslation();
   const gaps = summary?.gaps ?? 0;
   const soon = summary?.expiringSoon ?? 0;
   if (!gaps && !soon) {
     return (
       <View style={[s.banner, { borderColor: '#10B981', backgroundColor: '#10B98112' }]}>
-        <Text style={[s.bannerText, { color: '#10B981' }]}>All documents in order.</Text>
+        <Text style={[s.bannerText, { color: '#10B981' }]}>{t('compliance.allGood')}</Text>
       </View>
     );
   }
   const bad = gaps > 0;
   const color = bad ? '#EF4444' : '#EAB308';
   const parts = [];
-  if (gaps) parts.push(`${gaps} missing or expired`);
-  if (soon) parts.push(`${soon} expiring soon`);
+  if (gaps) parts.push(t('compliance.gaps', { count: gaps }));
+  if (soon) parts.push(t('compliance.expiring', { count: soon }));
   return (
     <View style={[s.banner, { borderColor: color, backgroundColor: color + '12' }]}>
       <Text style={[s.bannerText, { color }]}>{parts.join(' · ')}</Text>
@@ -182,6 +185,7 @@ function Banner({ summary }: { summary: any }) {
 
 export default function ComplianceScreen() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const [tab, setTab] = useState<'dq' | 'truck'>('dq');
 
   const dq = useQuery({ queryKey: ['compliance'], queryFn: fetchCompliance });
@@ -194,13 +198,13 @@ export default function ComplianceScreen() {
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <View style={s.header}>
-        <Text style={s.title}>Compliance</Text>
+        <Text style={s.title}>{t('compliance.title')}</Text>
         <View style={s.tabs}>
           <TouchableOpacity style={[s.tab, tab === 'dq' && s.tabOn]} onPress={() => setTab('dq')}>
-            <Text style={[s.tabText, tab === 'dq' && s.tabOnText]}>My documents</Text>
+            <Text style={[s.tabText, tab === 'dq' && s.tabOnText]}>{t('compliance.myDocs')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[s.tab, tab === 'truck' && s.tabOn]} onPress={() => setTab('truck')}>
-            <Text style={[s.tabText, tab === 'truck' && s.tabOnText]}>Truck folder</Text>
+            <Text style={[s.tabText, tab === 'truck' && s.tabOnText]}>{t('compliance.truckFolder')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -236,7 +240,7 @@ export default function ComplianceScreen() {
         ))}
 
         <Text style={s.note}>
-          Documents are managed by the office. To update one, send it to dispatch.
+          {t('compliance.managedByOffice')}
         </Text>
       </ScrollView>
     </SafeAreaView>

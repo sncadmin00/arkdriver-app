@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchProfile, fetchLoads } from '@/lib/api';
@@ -22,6 +23,7 @@ const styles = StyleSheet.create({
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { data: profile, error, isLoading } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
   const { data: loads } = useQuery({ queryKey: ['loads'], queryFn: fetchLoads });
 
@@ -34,21 +36,21 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView style={styles.container} bounces={false}>
         <View style={styles.header}>
-          <Text style={styles.title}>{driver?.driverName ?? (isLoading ? 'Loading…' : 'Welcome')}</Text>
-          {driver?.status && <Text style={styles.subtitle}>Status: {driver.status}</Text>}
+          <Text style={styles.title}>{driver?.driverName ?? (isLoading ? t('common.loading') : t('home.welcome'))}</Text>
+          {driver?.status && <Text style={styles.subtitle}>{t('home.status', { status: driver.status })}</Text>}
         </View>
         <View style={styles.content}>
           {error && <Text style={styles.error}>{error.message}</Text>}
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Assigned Truck</Text>
-            <Text style={styles.cardValue}>{truck?.unit ? `Unit ${truck.unit}` : '—'}</Text>
+            <Text style={styles.cardTitle}>{t('home.truck')}</Text>
+            <Text style={styles.cardValue}>{truck?.unit ? t('home.unit', { unit: truck.unit }) : '—'}</Text>
             {truck?.vin && <Text style={styles.cardMeta}>VIN {truck.vin}</Text>}
           </View>
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Active Loads</Text>
+            <Text style={styles.cardTitle}>{t('home.activeLoads')}</Text>
             <Text style={styles.cardValue}>{activeCount}</Text>
             <TouchableOpacity style={styles.button} onPress={() => router.push('/(tabs)/loads')}>
-              <Text style={styles.buttonText}>View Loads</Text>
+              <Text style={styles.buttonText}>{t('home.viewLoads')}</Text>
             </TouchableOpacity>
           </View>
         </View>

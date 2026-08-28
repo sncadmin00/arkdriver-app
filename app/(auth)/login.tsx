@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import supabase from '@/lib/supabase';
+import { useTranslation } from 'react-i18next';
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0B0F14', paddingHorizontal: 24, justifyContent: 'center' },
@@ -14,6 +15,7 @@ const styles = StyleSheet.create({
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,7 +32,7 @@ export default function LoginScreen() {
         router.replace('/(tabs)/home');
       }
     } catch (err) {
-      setError('Login failed');
+      setError(t('auth.failed'));
     } finally {
       setLoading(false);
     }
@@ -38,12 +40,12 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.logoText}>ARK Driver</Text>
-      <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#6B7280" value={email} onChangeText={setEmail} keyboardType="email-address" editable={!loading} />
-      <TextInput style={styles.input} placeholder="Password" placeholderTextColor="#6B7280" value={password} onChangeText={setPassword} secureTextEntry editable={!loading} />
+      <Text style={styles.logoText}>{t('auth.title')}</Text>
+      <TextInput style={styles.input} placeholder={t("auth.email")} placeholderTextColor="#6B7280" value={email} onChangeText={setEmail} keyboardType="email-address" editable={!loading} />
+      <TextInput style={styles.input} placeholder={t("auth.password")} placeholderTextColor="#6B7280" value={password} onChangeText={setPassword} secureTextEntry editable={!loading} />
       {error && <Text style={styles.errorText}>{error}</Text>}
       <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-        {loading ? <ActivityIndicator color="#0B0F14" /> : <Text style={styles.buttonText}>Login</Text>}
+        {loading ? <ActivityIndicator color="#0B0F14" /> : <Text style={styles.buttonText}>{t('auth.login')}</Text>}
       </TouchableOpacity>
     </View>
   );

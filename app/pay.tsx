@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchSettlement, fetchDebts, fetchAccounting, fetchFuel, fetchTolls, mondayOf, shiftWeek } from '@/lib/api';
@@ -60,6 +61,7 @@ function fmtWeek(iso) {
 
 
 function TxnSection({ title, data, showGallons }) {
+  const { t: tr } = useTranslation();
   const rows = data?.transactions ?? data?.items ?? [];
   const t = data?.totals;
   if (!rows.length) return null;
@@ -69,7 +71,7 @@ function TxnSection({ title, data, showGallons }) {
       <Text style={s.section}>{title} · {t?.count ?? rows.length}</Text>
       <View style={s.card}>
         {rolled ? (
-          <Text style={[s.empty, { marginBottom: 10 }]}>Imported as a single summary line.</Text>
+          <Text style={[s.empty, { marginBottom: 10 }]}>{tr('pay.rolledUp')}</Text>
         ) : null}
         {rows.map((r, i) => (
           <View key={r.id ?? i} style={{ paddingVertical: 8, borderBottomColor: '#374151', borderBottomWidth: i === rows.length - 1 ? 0 : 1 }}>
@@ -97,22 +99,22 @@ function TxnSection({ title, data, showGallons }) {
             <View style={s.divider} />
             {t.gallons ? (
               <View style={s.row}>
-                <Text style={s.label}>Gallons</Text>
+                <Text style={s.label}>{tr('pay.gallons')}</Text>
                 <Text style={s.value}>{t.gallons}</Text>
               </View>
             ) : null}
             <View style={s.row}>
-              <Text style={s.label}>Gross</Text>
+              <Text style={s.label}>{t('pay.gross')}</Text>
               <Text style={s.value}>{money(t.gross)}</Text>
             </View>
             {t.discount ? (
               <View style={s.row}>
-                <Text style={s.label}>Discount</Text>
+                <Text style={s.label}>{tr('pay.discount')}</Text>
                 <Text style={[s.value, s.pos]}>-{money(t.discount)}</Text>
               </View>
             ) : null}
             <View style={s.row}>
-              <Text style={s.total}>Charged</Text>
+              <Text style={s.total}>{tr('pay.charged')}</Text>
               <Text style={[s.total, s.neg]}>-{money(t.net)}</Text>
             </View>
           </>
@@ -124,6 +126,7 @@ function TxnSection({ title, data, showGallons }) {
 
 export default function PayScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const thisWeek = mondayOf(new Date());
   const [week, setWeek] = useState(thisWeek);
   const atCurrent = week === thisWeek;
@@ -147,16 +150,16 @@ export default function PayScreen() {
     <SafeAreaView style={s.safe} edges={['top']}>
       <View style={s.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Text style={s.back}>← More</Text>
+          <Text style={s.back}>← {t('more.title')}</Text>
         </TouchableOpacity>
-        <Text style={s.title}>Pay</Text>
+        <Text style={s.title}>{t('pay.title')}</Text>
         <View style={s.nav}>
           <TouchableOpacity style={s.navBtn} onPress={() => setWeek(shiftWeek(week, -1))}>
             <Text style={s.navText}>{'‹'}</Text>
           </TouchableOpacity>
           <View>
             <Text style={s.week}>{fmtWeek(week)}</Text>
-            <Text style={s.weekSub}>{atCurrent ? 'Current week' : week}</Text>
+            <Text style={s.weekSub}>{atCurrent ? t('pay.currentWeek') : week}</Text>
           </View>
           <TouchableOpacity
             style={[s.navBtn, atCurrent && s.navOff]}
@@ -180,26 +183,26 @@ export default function PayScreen() {
 
         {settlement && (
           <View style={[s.hero, paid ? s.heroPaid : s.heroEst]}>
-            <Text style={s.heroLabel}>{paid ? 'PAID' : 'ESTIMATE — NOT FINALISED'}</Text>
+            <Text style={s.heroLabel}>{paid ? t('pay.paid') : t('pay.estimate')}</Text>
             <Text style={[s.heroAmount, paid ? s.heroPaidAmount : s.heroEstAmount]}>
               {money(settlement.payable)}
             </Text>
             <Text style={[s.heroNote, { color: paid ? '#10B981' : '#EAB308' }]}>
               {paid
                 ? payment?.paid_at
-                  ? `Paid ${new Date(payment.paid_at).toLocaleDateString()}`
-                  : 'This week is final.'
-                : 'Loads, miles and fixed deductions are set. Adjustments and debt charges can still change before payout.'}
+                  ? t('pay.paidOn', { date: new Date(payment.paid_at).toLocaleDateString() })
+                  : t('pay.final')
+                : t('pay.estimateNote')}
             </Text>
           </View>
         )}
 
         {settlement && (
           <>
-            <Text style={s.section}>LOADS · {settlement.loadCount ?? 0}</Text>
+            <Text style={s.section}>{t('pay.loads', { count: settlement.loadCount ?? 0 })}</Text>
             <View style={s.card}>
               {(settlement.loads ?? []).length === 0 ? (
-                <Text style={s.empty}>No loads this week.</Text>
+                <Text style={s.empty}>{t('pay.noLoads')}</Text>
               ) : (
                 <>
                   {settlement.loads.map((l, i) => (
@@ -213,7 +216,7 @@ export default function PayScreen() {
                   ))}
                   <View style={s.divider} />
                   <View style={s.row}>
-                    <Text style={s.total}>Gross · {settlement.miles} mi</Text>
+                    <Text style={s.total}>{t('pay.grossMiles', { miles: settlement.miles })}</Text>
                     <Text style={s.total}>{money(settlement.gross)}</Text>
                   </View>
                 </>
@@ -224,7 +227,7 @@ export default function PayScreen() {
 
         {bonuses.length > 0 && (
           <>
-            <Text style={s.section}>BONUSES</Text>
+            <Text style={s.section}>{t('pay.bonuses')}</Text>
             <View style={s.card}>
               {bonuses.map((b) => (
                 <View key={b.id} style={s.row}>
@@ -238,7 +241,7 @@ export default function PayScreen() {
 
         {fines.length > 0 && (
           <>
-            <Text style={s.section}>FINES</Text>
+            <Text style={s.section}>{t('pay.fines')}</Text>
             <View style={s.card}>
               {fines.map((f) => (
                 <View key={f.id} style={s.row}>
@@ -252,7 +255,7 @@ export default function PayScreen() {
 
         {settlement && (settlement.additions ?? []).length > 0 && (
           <>
-            <Text style={s.section}>ADDITIONS</Text>
+            <Text style={s.section}>{t('pay.additions')}</Text>
             <View style={s.card}>
               {settlement.additions.map((a, i) => (
                 <View key={i} style={s.row}>
@@ -266,7 +269,7 @@ export default function PayScreen() {
 
         {settlement && (
           <>
-            <Text style={s.section}>DEDUCTIONS</Text>
+            <Text style={s.section}>{t('pay.deductions')}</Text>
             <View style={s.card}>
               {(settlement.deductions ?? []).map((d, i) => (
                 <View key={i} style={s.row}>
@@ -276,48 +279,48 @@ export default function PayScreen() {
               ))}
               <View style={s.divider} />
               <View style={s.row}>
-                <Text style={s.total}>Total</Text>
+                <Text style={s.total}>{t('pay.total')}</Text>
                 <Text style={[s.total, s.neg]}>-{money(settlement.deductionTotal)}</Text>
               </View>
             </View>
 
-            <Text style={s.section}>SUMMARY</Text>
+            <Text style={s.section}>{t('pay.summary')}</Text>
             <View style={s.card}>
               <View style={s.row}>
-                <Text style={s.label}>Gross</Text>
+                <Text style={s.label}>{t('pay.gross')}</Text>
                 <Text style={s.value}>{money(settlement.gross)}</Text>
               </View>
               {settlement.additionTotal ? (
                 <View style={s.row}>
-                  <Text style={s.label}>Additions</Text>
+                  <Text style={s.label}>{t('pay.additions')}</Text>
                   <Text style={[s.value, s.pos]}>+{money(settlement.additionTotal)}</Text>
                 </View>
               ) : null}
               <View style={s.row}>
-                <Text style={s.label}>Deductions</Text>
+                <Text style={s.label}>{t('pay.deductions')}</Text>
                 <Text style={[s.value, s.neg]}>-{money(settlement.deductionTotal)}</Text>
               </View>
               {settlement.carryIn ? (
                 <View style={s.row}>
-                  <Text style={s.label}>Carried in</Text>
+                  <Text style={s.label}>{t('pay.carriedIn')}</Text>
                   <Text style={[s.value, settlement.carryIn < 0 && s.neg]}>{money(settlement.carryIn)}</Text>
                 </View>
               ) : null}
               <View style={s.divider} />
               <View style={s.row}>
-                <Text style={s.total}>{paid ? 'Paid' : 'Estimated net'}</Text>
+                <Text style={s.total}>{paid ? t('pay.paid') : t('pay.estimatedNet')}</Text>
                 <Text style={[s.total, paid ? s.pos : { color: '#EAB308' }]}>{money(settlement.payable)}</Text>
               </View>
             </View>
           </>
         )}
 
-        <TxnSection title="FUEL" data={fuel.data} showGallons />
-        <TxnSection title="TOLLS" data={tolls.data} />
+        <TxnSection title={t('pay.fuel')} data={fuel.data} showGallons />
+        <TxnSection title={t('pay.tolls')} data={tolls.data} />
 
         {debts.length > 0 && (
           <>
-            <Text style={s.section}>BALANCES</Text>
+            <Text style={s.section}>{t('pay.balances')}</Text>
             <View style={s.card}>
               {debts.map((d) => {
                 const owes = d.direction === 'driver_owes';
@@ -328,7 +331,7 @@ export default function PayScreen() {
                       <Text style={[s.value, owes ? s.neg : s.pos]}>{money(d.balance)}</Text>
                     </View>
                     <Text style={s.loadMiles}>
-                      {owes ? 'You owe' : 'Company owes'} · {money(d.weeklyAmount)}/week
+                      {owes ? t('pay.youOwe') : t('pay.companyOwes')} · {money(d.weeklyAmount)}/week
                     </Text>
                   </View>
                 );

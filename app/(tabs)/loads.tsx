@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -50,6 +51,7 @@ function StatusBadge({ status }: { status?: string }) {
 
 export default function LoadsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [scope, setScope] = useState('active');
   const { data: loads, isLoading, error } = useQuery({
     queryKey: ['loads', scope],
@@ -60,19 +62,19 @@ export default function LoadsScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Loads</Text>
+          <Text style={styles.title}>{t('loads.title')}</Text>
           <View style={styles.tabs}>
             <TouchableOpacity
               style={[styles.tab, scope === 'active' && styles.tabOn]}
               onPress={() => setScope('active')}
             >
-              <Text style={[styles.tabText, scope === 'active' && styles.tabOnText]}>Active</Text>
+              <Text style={[styles.tabText, scope === 'active' && styles.tabOnText]}>{t('loads.active')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.tab, scope === 'history' && styles.tabOn]}
               onPress={() => setScope('history')}
             >
-              <Text style={[styles.tabText, scope === 'history' && styles.tabOnText]}>History</Text>
+              <Text style={[styles.tabText, scope === 'history' && styles.tabOnText]}>{t('loads.history')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -81,7 +83,7 @@ export default function LoadsScreen() {
         ) : error ? (
           <Text style={[styles.empty, { color: '#EF4444' }]}>{error.message}</Text>
         ) : !loads?.length ? (
-          <Text style={styles.empty}>{scope === 'history' ? 'No finished loads' : 'No active loads'}</Text>
+          <Text style={styles.empty}>{scope === 'history' ? t('loads.noHistory') : t('loads.noActive')}</Text>
         ) : (
           <FlatList
             data={loads}
@@ -95,17 +97,17 @@ export default function LoadsScreen() {
                 </View>
                 {item.reference && <Text style={styles.ref}>{item.reference}</Text>}
                 <View style={styles.leg}>
-                  <Text style={styles.legLabel}>PICKUP</Text>
+                  <Text style={styles.legLabel}>{t('loads.pickup')}</Text>
                   <Text style={styles.legText}>{item.origin}</Text>
                   {item.pickupAt && <Text style={styles.legTime}>{item.pickupAt} · {item.pickupTime}</Text>}
                 </View>
                 <View style={styles.leg}>
-                  <Text style={styles.legLabel}>DELIVERY</Text>
+                  <Text style={styles.legLabel}>{t('loads.delivery')}</Text>
                   <Text style={styles.legText}>{item.destination}</Text>
                   {item.deliverAt && <Text style={styles.legTime}>{item.deliverAt} · {item.deliverTime}</Text>}
                 </View>
                 <View style={styles.footer}>
-                  <Text style={styles.miles}>{item.miles} mi</Text>
+                  <Text style={styles.miles}>{t('loads.miles', { count: item.miles })}</Text>
                 </View>
               </TouchableOpacity>
             )}

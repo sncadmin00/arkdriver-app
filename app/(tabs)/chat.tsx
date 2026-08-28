@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchChatMessages, sendChatMessage, markChatRead, fetchLoads } from '@/lib/api';
 import supabase from '@/lib/supabase';
@@ -46,6 +47,7 @@ function clock(iso?: string) {
 
 export default function ChatScreen() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const [text, setText] = useState('');
   const [loadRef, setLoadRef] = useState<string | undefined>();
   const scroller = useRef<ScrollView>(null);
@@ -99,10 +101,10 @@ export default function ChatScreen() {
         keyboardVerticalOffset={88}
       >
         <View style={s.header}>
-          <Text style={s.title}>Dispatch</Text>
+          <Text style={s.title}>{t('chat.title')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.chips}>
             <TouchableOpacity style={[s.chip, !loadRef && s.chipOn]} onPress={() => setLoadRef(undefined)}>
-              <Text style={[s.chipText, !loadRef && s.chipOnText]}>All</Text>
+              <Text style={[s.chipText, !loadRef && s.chipOnText]}>{t('chat.all')}</Text>
             </TouchableOpacity>
             {(loads ?? []).map((l: any) => (
               <TouchableOpacity
@@ -125,7 +127,7 @@ export default function ChatScreen() {
           {isLoading && <ActivityIndicator color="#F59E0B" style={{ marginTop: 40 }} />}
           {error && <Text style={s.err}>{(error as Error).message}</Text>}
           {!isLoading && !messages.length && (
-            <Text style={s.empty}>No messages yet</Text>
+            <Text style={s.empty}>{t('chat.empty')}</Text>
           )}
 
           {messages.map((m: any) => {
@@ -135,10 +137,10 @@ export default function ChatScreen() {
             const mine = m.sender === 'driver';
             return (
               <View key={m.id} style={[s.row, mine ? s.mine : s.theirs]}>
-                {!mine && <Text style={s.sender}>{m.sender_name ?? 'Dispatch'}</Text>}
+                {!mine && <Text style={s.sender}>{m.sender_name ?? t('chat.dispatch')}</Text>}
                 <View style={[s.bubble, mine ? s.bMine : s.bTheirs]}>
                   <Text style={mine ? s.tMine : s.tTheirs}>
-                    {m.deleted_at ? 'Message deleted' : m.body}
+                    {m.deleted_at ? t('chat.deleted') : m.body}
                   </Text>
                 </View>
                 <View style={[s.meta, mine && { justifyContent: 'flex-end' }]}>
@@ -157,14 +159,14 @@ export default function ChatScreen() {
         <View style={s.bar}>
           <TextInput
             style={s.input}
-            placeholder={loadRef ? `About ${loadRef}...` : 'Message dispatch...'}
+            placeholder={loadRef ? t('chat.placeholderLoad', { load: loadRef }) : t('chat.placeholder')}
             placeholderTextColor="#6B7280"
             value={text}
             onChangeText={setText}
             multiline
           />
           <TouchableOpacity style={[s.send, !ready && s.sendOff]} disabled={!ready} onPress={() => send.mutate()}>
-            <Text style={s.sendText}>{send.isPending ? '...' : 'Send'}</Text>
+            <Text style={s.sendText}>{send.isPending ? '...' : t('chat.send')}</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

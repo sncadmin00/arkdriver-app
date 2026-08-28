@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Linking, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchLoadDetail, checkInStop, fetchSettlement, fetchNavigation, mondayOf, ApiError } from '@/lib/api';
@@ -77,6 +78,7 @@ export default function LoadDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const qc = useQueryClient();
+  const { t } = useTranslation();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['load', id],
@@ -111,11 +113,11 @@ export default function LoadDetail() {
     if (app.fallbackKind === 'store') {
       const store = app.storeLinks?.ios ?? app.fallback;
       return Alert.alert(
-        `${app.name} not installed`,
-        `Install ${app.name} to navigate with truck-safe routing?`,
+        t('load.notInstalled', { app: app.name }),
+        t('load.installPrompt', { app: app.name }),
         [
-          { text: 'Not now', style: 'cancel' },
-          { text: 'Install', onPress: () => store && Linking.openURL(store) },
+          { text: t('load.notNow'), style: 'cancel' },
+          { text: t('load.install'), onPress: () => store && Linking.openURL(store) },
         ]
       );
     }
@@ -144,7 +146,7 @@ export default function LoadDetail() {
     onSuccess: (res: any) => {
       qc.invalidateQueries({ queryKey: ['load', id] });
       qc.invalidateQueries({ queryKey: ['loads'] });
-      if (res?.closed) Alert.alert('Load closed', 'Final stop departed — this load is now delivered.');
+      if (res?.closed) Alert.alert(t('load.loadClosed'), t('load.loadClosedBody'));
     },
     onError: (e: Error) => {
       const code = e instanceof ApiError ? e.code : undefined;
@@ -168,7 +170,7 @@ export default function LoadDetail() {
       <ScrollView style={s.container}>
         <View style={s.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Text style={s.back}>← Loads</Text>
+            <Text style={s.back}>← {t('loads.title')}</Text>
           </TouchableOpacity>
           <View style={s.titleRow}>
             <Text style={s.title}>{id}</Text>
@@ -187,7 +189,7 @@ export default function LoadDetail() {
 
           {current ? (
             <>
-              <Text style={s.section}>CURRENT STOP · {idxOf(current, 0) + 1} OF {stops.length}</Text>
+              <Text style={s.section}>{t('load.currentStop', { index: idxOf(current, 0) + 1, total: stops.length })}</Text>
               <View style={[s.card, s.active]}>
                 <Text style={s.kind}>{String(current.kind ?? '').toUpperCase()}</Text>
                 <Text style={s.addr}>{current.address}</Text>
@@ -198,11 +200,11 @@ export default function LoadDetail() {
 
                 {blocked && (
                   <Text style={s.missing}>
-                    Upload before departing: {missing.join(', ').toUpperCase()}
+                    {t('load.uploadDocs', { docs: missing.join(', ').toUpperCase() })}
                   </Text>
                 )}
                 {current.arrivedAt && !missing.length && current.podRequired === false && (
-                  <Text style={s.note}>No paperwork required at this stop.</Text>
+                  <Text style={s.note}>{t('load.noPaperwork')}</Text>
                 )}
 
                 <View style={s.navRow}>
@@ -210,10 +212,10 @@ export default function LoadDetail() {
                     style={[s.nav, { flex: 1 }]}
                     onPress={() => router.push(`/load/map?id=${id}`)}
                   >
-                    <Text style={s.navText}>Map</Text>
+                    <Text style={s.navText}>{t('load.map')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[s.nav, s.navGo, { flex: 1 }]} onPress={navigate} disabled={navBusy}>
-                    {navBusy ? <ActivityIndicator color="#0B0F14" /> : <Text style={s.navGoText}>Navigate</Text>}
+                    {navBusy ? <ActivityIndicator color="#0B0F14" /> : <Text style={s.navGoText}>{t('load.navigate')}</Text>}
                   </TouchableOpacity>
                 </View>
 
@@ -231,7 +233,7 @@ export default function LoadDetail() {
                           })}
                         >
                           <Text style={s.uploadText}>
-                            Upload {doc.toUpperCase()}{req ? '' : ' (optional)'}
+                            {req ? t('load.upload', { doc: doc.toUpperCase() }) : t('load.uploadOptional', { doc: doc.toUpperCase() })}
                           </Text>
                         </TouchableOpacity>
                       );
@@ -245,7 +247,7 @@ export default function LoadDetail() {
                     disabled={checkIn.isPending}
                     onPress={() => checkIn.mutate({ index: idxOf(current, 0), event: 'arrived' })}
                   >
-                    <Text style={s.btnText}>{checkIn.isPending ? '…' : 'Arrived'}</Text>
+                    <Text style={s.btnText}>{checkIn.isPending ? '…' : t('load.arrived')}</Text>
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity
@@ -254,19 +256,19 @@ export default function LoadDetail() {
                     onPress={() => checkIn.mutate({ index: idxOf(current, 0), event: 'departed' })}
                   >
                     <Text style={blocked ? s.btnOffText : s.btnText}>
-                      {checkIn.isPending ? '…' : blocked ? 'Departed (docs missing)' : 'Departed'}
+                      {checkIn.isPending ? '…' : blocked ? t('load.departedBlocked') : t('load.departed')}
                     </Text>
                   </TouchableOpacity>
                 )}
               </View>
             </>
           ) : stops.length > 0 ? (
-            <Text style={s.closed}>✓ All stops complete</Text>
+            <Text style={s.closed}>✓ {t('load.allComplete')}</Text>
           ) : null}
 
           {stops.length > 0 && (
             <>
-              <Text style={s.section}>ALL STOPS</Text>
+              <Text style={s.section}>{t('load.allStops')}</Text>
               <View style={s.card}>
                 {stops.map((stop: any, i: number) => {
                   const color = stop.complete ? '#10B981' : stop.current ? '#F59E0B' : '#374151';
@@ -291,32 +293,32 @@ export default function LoadDetail() {
 
           {load?.driverInstructions ? (
             <>
-              <Text style={s.section}>DRIVER INSTRUCTIONS</Text>
+              <Text style={s.section}>{t('load.instructions')}</Text>
               <View style={s.card}>
                 <Text style={s.instructions}>{load.driverInstructions}</Text>
               </View>
             </>
           ) : null}
 
-          <Text style={s.section}>DETAILS</Text>
+          <Text style={s.section}>{t('load.details')}</Text>
           <View style={s.card}>
-            <Row label="Miles" value={load?.miles ? `${load.miles} mi` : null} />
+            <Row label={t("load.milesLabel")} value={load?.miles ? `${load.miles} mi` : null} />
             {payLine ? (
               <View style={s.row}>
-                <Text style={s.label}>Pay (estimate)</Text>
+                <Text style={s.label}>{t('load.payEstimate')}</Text>
                 <Text style={[s.value, { color: '#EAB308' }]}>
                   ${payLine.pay?.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </Text>
               </View>
             ) : null}
-            <Row label="Equipment" value={load?.equipmentType?.replace('_', ' ')} />
-            <Row label="Commodity" value={load?.commodity} />
-            <Row label="Weight" value={load?.weightLbs ? `${load.weightLbs} lbs` : null} />
-            <Row label="Billing" value={load?.selfBill ? 'Self bill' : null} />
-            <Row label="Customer" value={load?.customer?.name} />
+            <Row label={t("load.equipment")} value={load?.equipmentType?.replace('_', ' ')} />
+            <Row label={t("load.commodity")} value={load?.commodity} />
+            <Row label={t("load.weight")} value={load?.weightLbs ? `${load.weightLbs} lbs` : null} />
+            <Row label={t("load.billing")} value={load?.selfBill ? t('load.selfBill') : null} />
+            <Row label={t("load.customer")} value={load?.customer?.name} />
             {load?.customer?.phone ? (
               <View style={s.row}>
-                <Text style={s.label}>Phone</Text>
+                <Text style={s.label}>{t('load.phone')}</Text>
                 <TouchableOpacity onPress={() => Linking.openURL(`tel:${String(load.customer.phone).replace(/[^\d+]/g, '')}`)}>
                   <Text style={s.link}>{load.customer.phone}</Text>
                 </TouchableOpacity>
@@ -329,15 +331,15 @@ export default function LoadDetail() {
       <Modal visible={!!navApps} transparent animationType="fade" onRequestClose={() => setNavApps(null)}>
         <View style={s.sheetWrap}>
           <View style={s.sheet}>
-            <Text style={s.sheetTitle}>Open in</Text>
+            <Text style={s.sheetTitle}>{t('load.openIn')}</Text>
             {(navApps ?? []).map((app) => (
               <TouchableOpacity key={app.key} style={s.sheetItem} onPress={() => launch(app)}>
                 <Text style={s.sheetName}>{app.name}</Text>
-                {app.truckAware ? <Text style={s.sheetTag}>TRUCK</Text> : null}
+                {app.truckAware ? <Text style={s.sheetTag}>{t('load.truckBadge')}</Text> : null}
               </TouchableOpacity>
             ))}
             <TouchableOpacity style={s.sheetCancel} onPress={() => setNavApps(null)}>
-              <Text style={s.sheetCancelText}>Cancel</Text>
+              <Text style={s.sheetCancelText}>{t('common.cancel')}</Text>
             </TouchableOpacity>
           </View>
         </View>

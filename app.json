@@ -23,7 +23,8 @@
       "package": "com.arkcarriers.driver"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-localization"
     ]
   }
 }
