@@ -179,3 +179,7 @@ export async function fetchTolls(week) {
   const q = week ? `?week=${week}` : '';
   return apiGet(`/api/public/driver/tolls${q}`);
 }
+
+export async function fetchNavigation(loadId) {
+  return apiGet(`/api/public/driver/loads/${loadId}/navigation`);
+}

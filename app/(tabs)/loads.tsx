@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLoads } from '@/lib/api';
@@ -31,6 +32,11 @@ const styles = StyleSheet.create({
   footer: { borderTopColor: '#374151', borderTopWidth: 1, marginTop: 6, paddingTop: 10 },
   miles: { color: '#F59E0B', fontWeight: '600', fontSize: 13 },
   empty: { color: '#6B7280', textAlign: 'center', marginTop: 40 },
+  tabs: { flexDirection: 'row', marginTop: 14 },
+  tab: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 14, marginRight: 8, backgroundColor: '#374151' },
+  tabOn: { backgroundColor: '#F59E0B' },
+  tabText: { color: '#9CA3AF', fontSize: 13, fontWeight: '600' },
+  tabOnText: { color: '#0B0F14' },
 });
 
 function StatusBadge({ status }: { status?: string }) {
@@ -44,20 +50,38 @@ function StatusBadge({ status }: { status?: string }) {
 
 export default function LoadsScreen() {
   const router = useRouter();
-  const { data: loads, isLoading, error } = useQuery({ queryKey: ['loads'], queryFn: () => fetchLoads() });
+  const [scope, setScope] = useState('active');
+  const { data: loads, isLoading, error } = useQuery({
+    queryKey: ['loads', scope],
+    queryFn: () => fetchLoads(scope === 'history' ? 'history' : undefined),
+  });
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Loads</Text>
+          <View style={styles.tabs}>
+            <TouchableOpacity
+              style={[styles.tab, scope === 'active' && styles.tabOn]}
+              onPress={() => setScope('active')}
+            >
+              <Text style={[styles.tabText, scope === 'active' && styles.tabOnText]}>Active</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, scope === 'history' && styles.tabOn]}
+              onPress={() => setScope('history')}
+            >
+              <Text style={[styles.tabText, scope === 'history' && styles.tabOnText]}>History</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         {isLoading ? (
           <Text style={styles.empty}>Loading…</Text>
         ) : error ? (
           <Text style={[styles.empty, { color: '#EF4444' }]}>{error.message}</Text>
         ) : !loads?.length ? (
-          <Text style={styles.empty}>No active loads</Text>
+          <Text style={styles.empty}>{scope === 'history' ? 'No finished loads' : 'No active loads'}</Text>
         ) : (
           <FlatList
             data={loads}

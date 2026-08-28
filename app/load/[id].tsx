@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Linking } from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Linking, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchLoadDetail, checkInStop, fetchSettlement, mondayOf, ApiError } from '@/lib/api';
+import { fetchLoadDetail, checkInStop, fetchSettlement, fetchNavigation, mondayOf, ApiError } from '@/lib/api';
 
 const STATUS_COLORS: Record<string, string> = {
   booked: '#3B82F6', dispatched: '#8B5CF6', at_pickup: '#EAB308',
@@ -46,6 +47,19 @@ const s = StyleSheet.create({
   upload: { borderColor: '#F59E0B', borderWidth: 1, borderRadius: 8, paddingVertical: 12, alignItems: 'center', marginBottom: 8 },
   uploadText: { color: '#F59E0B', fontWeight: '600', fontSize: 14 },
   err: { color: '#EF4444', fontSize: 13 },
+  navRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
+  nav: { backgroundColor: '#374151', borderRadius: 8, paddingVertical: 13, alignItems: 'center' },
+  navGo: { backgroundColor: '#F59E0B' },
+  navGoText: { color: '#0B0F14', fontWeight: '700', fontSize: 15 },
+  navText: { color: '#F59E0B', fontWeight: '700', fontSize: 15 },
+  sheetWrap: { flex: 1, backgroundColor: '#000000AA', justifyContent: 'flex-end' },
+  sheet: { backgroundColor: '#1F2937', borderTopLeftRadius: 18, borderTopRightRadius: 18, padding: 20, paddingBottom: 36 },
+  sheetTitle: { color: '#6B7280', fontSize: 11, fontWeight: '700', letterSpacing: 0.6, marginBottom: 8 },
+  sheetItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 15, borderBottomColor: '#374151', borderBottomWidth: 1 },
+  sheetName: { color: '#FFFFFF', fontSize: 16, flex: 1 },
+  sheetTag: { color: '#10B981', fontSize: 9, fontWeight: '700', backgroundColor: '#10B98120', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  sheetCancel: { paddingVertical: 15, alignItems: 'center', marginTop: 6 },
+  sheetCancelText: { color: '#F59E0B', fontSize: 16, fontWeight: '600' },
   closed: { color: '#10B981', fontSize: 14, fontWeight: '600', textAlign: 'center', paddingVertical: 20 },
 });
 
@@ -82,6 +96,47 @@ export default function LoadDetail() {
   const stops: any[] = data?.stops ?? load?.stops ?? [];
   const idxOf = (stop: any, i: number) => stop.index ?? i;
   const current = stops.find((st: any) => st.current) ?? stops.find((st: any) => !st.complete);
+
+  const [navApps, setNavApps] = useState(null);
+  const [navBusy, setNavBusy] = useState(false);
+
+  async function launch(app) {
+    setNavApps(null);
+    if (app.deepLink) {
+      const ok = await Linking.canOpenURL(app.deepLink).catch(() => false);
+      if (ok) {
+        try { return await Linking.openURL(app.deepLink); } catch {}
+      }
+    }
+    if (app.fallbackKind === 'store') {
+      const store = app.storeLinks?.ios ?? app.fallback;
+      return Alert.alert(
+        `${app.name} not installed`,
+        `Install ${app.name} to navigate with truck-safe routing?`,
+        [
+          { text: 'Not now', style: 'cancel' },
+          { text: 'Install', onPress: () => store && Linking.openURL(store) },
+        ]
+      );
+    }
+    if (app.fallback) return Linking.openURL(app.fallback);
+    Alert.alert('Unavailable', `${app.name} could not be opened.`);
+  }
+
+  async function navigate() {
+    setNavBusy(true);
+    try {
+      const res = await fetchNavigation(id);
+      console.log('NAV RESPONSE:', JSON.stringify(res?.target?.apps, null, 2));
+      const apps = res?.target?.apps ?? [];
+      if (!apps.length) return Alert.alert('Unavailable', 'No navigation options for this stop.');
+      setNavApps(apps);
+    } catch (e) {
+      Alert.alert('Could not load navigation', e.message);
+    } finally {
+      setNavBusy(false);
+    }
+  }
 
   const checkIn = useMutation({
     mutationFn: ({ index, event }: { index: number; event: 'arrived' | 'departed' }) =>
@@ -149,6 +204,18 @@ export default function LoadDetail() {
                 {current.arrivedAt && !missing.length && current.podRequired === false && (
                   <Text style={s.note}>No paperwork required at this stop.</Text>
                 )}
+
+                <View style={s.navRow}>
+                  <TouchableOpacity
+                    style={[s.nav, { flex: 1 }]}
+                    onPress={() => router.push(`/load/map?id=${id}`)}
+                  >
+                    <Text style={s.navText}>Map</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[s.nav, s.navGo, { flex: 1 }]} onPress={navigate} disabled={navBusy}>
+                    {navBusy ? <ActivityIndicator color="#0B0F14" /> : <Text style={s.navGoText}>Navigate</Text>}
+                  </TouchableOpacity>
+                </View>
 
                 {current.arrivedAt && (missing.length > 0 || (current.recommendedDocs ?? []).length > 0) && (
                   <View style={{ marginTop: 14 }}>
@@ -258,6 +325,23 @@ export default function LoadDetail() {
           </View>
         </View>
       </ScrollView>
+
+      <Modal visible={!!navApps} transparent animationType="fade" onRequestClose={() => setNavApps(null)}>
+        <View style={s.sheetWrap}>
+          <View style={s.sheet}>
+            <Text style={s.sheetTitle}>Open in</Text>
+            {(navApps ?? []).map((app) => (
+              <TouchableOpacity key={app.key} style={s.sheetItem} onPress={() => launch(app)}>
+                <Text style={s.sheetName}>{app.name}</Text>
+                {app.truckAware ? <Text style={s.sheetTag}>TRUCK</Text> : null}
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity style={s.sheetCancel} onPress={() => setNavApps(null)}>
+              <Text style={s.sheetCancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

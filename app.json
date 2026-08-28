@@ -7,11 +7,23 @@
     "userInterfaceStyle": "dark",
     "scheme": "driver",
     "ios": {
-      "bundleIdentifier": "com.arkcarriers.driver"
+      "bundleIdentifier": "com.arkcarriers.driver",
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": [
+          "truckerpath",
+          "com.sygic.truck",
+          "hammer",
+          "comgooglemaps",
+          "maps",
+          "waze"
+        ]
+      }
     },
     "android": {
       "package": "com.arkcarriers.driver"
     },
-    "plugins": ["expo-router"]
+    "plugins": [
+      "expo-router"
+    ]
   }
 }
