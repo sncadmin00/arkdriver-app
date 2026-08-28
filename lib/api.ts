@@ -116,3 +116,15 @@ export async function sendChatMessage(payload: {
 export async function markChatRead(upTo?: string) {
   return apiPost<any>('/api/public/driver/chat/read', upTo ? { upTo } : {});
 }
+
+export async function fetchServices() {
+  return apiGet<any>('/api/public/driver/services');
+}
+
+export async function fetchAnnouncements() {
+  return apiGet<any>('/api/public/driver/announcements');
+}
+
+export async function setOffStatus(readyAt: string | null) {
+  return apiPost<any>('/api/public/driver/status/set-off', { readyAt });
+}
