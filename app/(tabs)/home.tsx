@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Header from '@/components/Header';
 import {
-  fetchProfile, fetchLoads, fetchLoadDetail, fetchSettlement,
+  fetchProfile, fetchLoads, fetchSettlement,
   fetchServices, fetchAnnouncements, fetchInspections, mondayOf,
 } from '@/lib/api';
 
@@ -79,17 +79,7 @@ export default function HomeScreen() {
   const emergency = profile.data?.support?.emergencyPhone;
   const comp = profile.data?.compliance;
 
-  const allLoads = loads.data ?? [];
-  const active = allLoads[0];
-  const upcoming = allLoads.slice(1);
-  const detail = useQuery({
-    queryKey: ['load', active?.id, 'plain'],
-    queryFn: () => fetchLoadDetail(active.id),
-    enabled: !!active?.id,
-  });
-
-  const stops = detail.data?.stops ?? [];
-  const current = stops.find((x) => x.current) ?? stops.find((x) => !x.complete);
+  const activeLoads = loads.data ?? [];
 
   const st = settlement.data?.settlement;
   const rpm = st?.miles > 0 ? st.gross / st.miles : null;
@@ -144,42 +134,37 @@ export default function HomeScreen() {
         }
       >
         <Text style={[s.section, { marginTop: 0 }]}>{t('home.activeLoad')}</Text>
-        {active ? (
-          <View style={[s.card, s.cardActive]}>
-            <View style={s.loadTop}>
-              <Text style={s.loadId}>{active.id}</Text>
-              {active.status ? (
-                <View style={[s.badge, { backgroundColor: STATUS_COLORS[active.status] ?? '#4B5563' }]}>
-                  <Text style={s.badgeText}>{String(active.status).replace('_', ' ').toUpperCase()}</Text>
-                </View>
-              ) : null}
-            </View>
-
-            {current ? (
-              <>
-                <Text style={s.kind}>{String(current.kind ?? '').toUpperCase()}</Text>
-                <Text style={s.addr}>{String(current.address ?? '').split('\n').join(', ')}</Text>
-                {current.date ? <Text style={s.when}>{current.date} {current.time ?? ''}</Text> : null}
-                {current.arrivedAt ? (
-                  <Text style={s.arrived}>✓ {new Date(current.arrivedAt).toLocaleTimeString()}</Text>
+        {activeLoads.length ? (
+          activeLoads.map((load) => (
+            <View key={load.id} style={[s.card, s.cardActive, { marginBottom: 12 }]}>
+              <View style={s.loadTop}>
+                <Text style={s.loadId}>{load.id}</Text>
+                {load.status ? (
+                  <View style={[s.badge, { backgroundColor: STATUS_COLORS[load.status] ?? '#4B5563' }]}>
+                    <Text style={s.badgeText}>{String(load.status).replace('_', ' ').toUpperCase()}</Text>
+                  </View>
                 ) : null}
-              </>
-            ) : (
-              <Text style={s.addr}>{String(active.destination ?? '').split('\n').join(', ')}</Text>
-            )}
+              </View>
 
-            <View style={s.btnRow}>
-              <TouchableOpacity style={s.btn} onPress={() => router.push(`/load/${active.id}`)}>
-                <Text style={s.btnText}>{t('home.openLoad')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[s.btn, s.btnGhost]}
-                onPress={() => router.push({ pathname: '/chat', params: { loadRef: active.id } })}
-              >
-                <Text style={s.btnGhostText}>{t('tabs.chat')}</Text>
-              </TouchableOpacity>
+              <Text style={s.kind}>{t('loads.delivery')}</Text>
+              <Text style={s.addr}>{String(load.destination ?? '').split('\n').join(', ')}</Text>
+              {load.deliverAt ? (
+                <Text style={s.when}>{load.deliverAt} {load.deliverTime ?? ''}</Text>
+              ) : null}
+
+              <View style={s.btnRow}>
+                <TouchableOpacity style={s.btn} onPress={() => router.push(`/load/${load.id}`)}>
+                  <Text style={s.btnText}>{t('home.openLoad')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[s.btn, s.btnGhost]}
+                  onPress={() => router.push({ pathname: '/chat', params: { loadRef: load.id } })}
+                >
+                  <Text style={s.btnGhostText}>{t('tabs.chat')}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          ))
         ) : (
           <View style={s.card}>
             <Text style={s.empty}>{t('home.noLoad')}</Text>
@@ -207,38 +192,6 @@ export default function HomeScreen() {
                 {rpm ? <Text style={s.payRpm}>${rpm.toFixed(2)}/mi</Text> : null}
               </View>
             </TouchableOpacity>
-          </>
-        ) : null}
-
-        {upcoming.length ? (
-          <>
-            <Text style={s.section}>{t('home.upcoming')}</Text>
-            <View style={s.card}>
-              {upcoming.map((l, i) => (
-                <TouchableOpacity
-                  key={l.id}
-                  style={[s.svc, i === upcoming.length - 1 && s.svcLast]}
-                  onPress={() => router.push(`/load/${l.id}`)}
-                >
-                  <View style={s.payRow}>
-                    <View style={{ flex: 1, paddingRight: 12 }}>
-                      <Text style={s.svcName}>{l.id}</Text>
-                      <Text style={s.svcSub} numberOfLines={1}>
-                        {String(l.destination ?? '').split('\n').join(', ')}
-                      </Text>
-                    </View>
-                    <View style={{ alignItems: 'flex-end' }}>
-                      {l.status ? (
-                        <View style={[s.badge, { backgroundColor: STATUS_COLORS[l.status] ?? '#4B5563' }]}>
-                          <Text style={s.badgeText}>{String(l.status).replace('_', ' ').toUpperCase()}</Text>
-                        </View>
-                      ) : null}
-                      {l.pickupAt ? <Text style={s.svcSub}>{l.pickupAt}</Text> : null}
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
           </>
         ) : null}
 
