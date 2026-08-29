@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { fetchProfile } from '@/lib/api';
+import { fetchProfile, fetchLoads, fetchLoadDetail } from '@/lib/api';
 import Logo from './Logo';
 
 const s = StyleSheet.create({
@@ -45,6 +45,38 @@ export default function Header({ title, subtitle }) {
   }, []);
   const router = useRouter();
   const { data } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
+  const { data: loads } = useQuery({ queryKey: ['loads', 'active'], queryFn: () => fetchLoads() });
+  const activeId = loads?.[0]?.id;
+  const { data: detail } = useQuery({
+    queryKey: ['load', activeId, 'plain'],
+    queryFn: () => fetchLoadDetail(activeId),
+    enabled: !!activeId,
+  });
+
+  const stops = detail?.stops ?? [];
+  const next = stops.find((x) => x.current) ?? stops.find((x) => !x.complete);
+  const tz = next?.timezone;
+
+  const zoneLabel = (() => {
+    if (!tz) return null;
+    try {
+      return new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'short' })
+        .formatToParts(now).find((p) => p.type === 'timeZoneName')?.value ?? null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const clockText = (() => {
+    try {
+      return now.toLocaleTimeString([], {
+        hour: '2-digit', minute: '2-digit',
+        ...(tz ? { timeZone: tz } : {}),
+      });
+    } catch {
+      return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+  })();
   const driver = data?.driver;
   const comp = data?.compliance;
   const unread = (comp?.gaps ?? 0) + (comp?.expiringSoon ?? 0) > 0;
@@ -59,10 +91,12 @@ export default function Header({ title, subtitle }) {
 
       <View style={s.middle}>
         <Text style={s.clock}>
-          {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {clockText}{zoneLabel ? ` ${zoneLabel}` : ''}
         </Text>
         <Text style={s.date}>
-          {now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
+          {tz
+            ? String(next?.address ?? '').split('\n').slice(-1)[0].split(',')[0]
+            : now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
         </Text>
       </View>
       <View style={s.right}>

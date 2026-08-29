@@ -23,6 +23,8 @@ const s = StyleSheet.create({
   badgeText: { color: '#FFFFFF', fontSize: 10, fontWeight: '700' },
   kind: { color: '#6B7280', fontSize: 10, fontWeight: '700', letterSpacing: 0.4 },
   addr: { color: '#FFFFFF', fontSize: 15, lineHeight: 21, marginTop: 5 },
+  lane: { color: '#FFFFFF', fontSize: 16, fontWeight: '600', lineHeight: 23 },
+  arrow: { color: '#F59E0B', fontWeight: '700' },
   when: { color: '#9CA3AF', fontSize: 12, marginTop: 6 },
   arrived: { color: '#10B981', fontSize: 11, marginTop: 4 },
   btnRow: { flexDirection: 'row', gap: 10, marginTop: 16 },
@@ -70,6 +72,16 @@ const STATUS_COLORS = {
   booked: '#3B82F6', dispatched: '#8B5CF6', at_pickup: '#EAB308',
   in_transit: '#F59E0B', at_delivery: '#EAB308', delivered: '#10B981',
 };
+
+// "MDT5\n200 Goodman Dr\nLEWISBERRY, PA 17339" -> "Lewisberry, PA"
+function cityState(addr) {
+  const lines = String(addr ?? '').split('\n').map((x) => x.trim()).filter(Boolean);
+  const last = lines[lines.length - 1] ?? '';
+  const m = last.match(/^(.+?),\s*([A-Za-z]{2})\b/);
+  if (!m) return last;
+  const city = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
+  return `${city}, ${m[2].toUpperCase()}`;
+}
 
 const money = (n) =>
   typeof n === 'number' ? `$${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '—';
@@ -238,11 +250,14 @@ export default function HomeScreen() {
                 ) : null}
               </View>
 
-              <Text style={s.kind}>{t('loads.delivery')}</Text>
-              <Text style={s.addr}>{String(load.destination ?? '').split('\n').join(', ')}</Text>
-              {load.deliverAt ? (
-                <Text style={s.when}>{load.deliverAt} {load.deliverTime ?? ''}</Text>
-              ) : null}
+              <Text style={s.lane}>
+                {cityState(load.origin)}
+                <Text style={s.arrow}>  →  </Text>
+                {cityState(load.destination)}
+              </Text>
+              <Text style={s.when}>
+                {[load.pickupAt, load.deliverAt].filter(Boolean).join('  →  ')}
+              </Text>
 
               <View style={s.btnRow}>
                 <TouchableOpacity style={s.btn} onPress={() => router.push(`/load/${load.id}`)}>
