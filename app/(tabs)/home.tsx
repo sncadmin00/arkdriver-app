@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Header from '@/components/Header';
+import Countdown from '@/components/Countdown';
 import {
   fetchProfile, fetchLoads, fetchSettlement, setOffStatus,
   fetchServices, fetchAnnouncements, fetchInspections, mondayOf,
@@ -64,8 +65,10 @@ const s = StyleSheet.create({
   sos: { backgroundColor: '#DC2626', borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 10 },
   sosText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   sosSub: { color: '#FCA5A5', fontSize: 12, marginTop: 3 },
-  report: { borderColor: '#DC2626', borderWidth: 1, borderRadius: 12, paddingVertical: 15, alignItems: 'center', marginTop: 10 },
-  reportText: { color: '#EF4444', fontSize: 15, fontWeight: '600' },
+  report: { backgroundColor: '#DC2626', borderRadius: 12, paddingVertical: 17, alignItems: 'center', marginTop: 10 },
+  reportText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
+  callGhost: { borderColor: '#4B5563', borderWidth: 1, borderRadius: 12, paddingVertical: 13, alignItems: 'center', marginTop: 10 },
+  callGhostText: { color: '#9CA3AF', fontSize: 14, fontWeight: '500' },
 });
 
 const STATUS_COLORS = {
@@ -258,6 +261,18 @@ export default function HomeScreen() {
               <Text style={s.when}>
                 {[load.pickupAt, load.deliverAt].filter(Boolean).join('  →  ')}
               </Text>
+              {(() => {
+                // Before the truck rolls, the next appointment is the pickup.
+                const beforeTransit = ['booked', 'dispatched', 'at_pickup'].includes(load.status);
+                return (
+                  <Countdown
+                    date={beforeTransit ? load.pickupAt : load.deliverAt}
+                    time={beforeTransit ? load.pickupTime : load.deliverTime}
+                    timezone={beforeTransit ? load.pickupTimezone : load.deliverTimezone}
+                    kind={beforeTransit ? 'pickup' : 'delivery'}
+                  />
+                );
+              })()}
 
               <View style={s.btnRow}>
                 <TouchableOpacity style={s.btn} onPress={() => router.push(`/load/${load.id}`)}>
@@ -366,15 +381,15 @@ export default function HomeScreen() {
         ) : null}
 
         <Text style={s.section}>{t('home.emergency')}</Text>
-        {emergency ? (
-          <TouchableOpacity style={s.sos} onPress={callSupport}>
-            <Text style={s.sosText}>{t('more.callDispatch')}</Text>
-            <Text style={s.sosSub}>{emergency}</Text>
-          </TouchableOpacity>
-        ) : null}
         <TouchableOpacity style={s.report} onPress={() => router.push('/report')}>
           <Text style={s.reportText}>{t('home.reportIncident')}</Text>
         </TouchableOpacity>
+
+        {emergency ? (
+          <TouchableOpacity style={s.callGhost} onPress={callSupport}>
+            <Text style={s.callGhostText}>{t('more.callDispatch')} · {emergency}</Text>
+          </TouchableOpacity>
+        ) : null}
       </ScrollView>
 
       <Modal visible={askOff} transparent animationType="fade" onRequestClose={() => setAskOff(false)}>

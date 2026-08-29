@@ -294,7 +294,7 @@ export default function TruckMap() {
               <Text style={s.fMiles}>{t('truckmap.distance', { miles: r?.miles })}</Text>
               <Text style={s.fMeta}>
                 {r?.provider === 'here' ? t('map.truckRoute') : t('map.roadRoute')}
-                {r?.estimatedTollsUsd ? ` · $${r.estimatedTollsUsd.toFixed(2)}` : ''}
+                {r?.provider === 'here' ? ` · $${Number(r.estimatedTollsUsd ?? 0).toFixed(2)}` : ''}
               </Text>
             </View>
           </View>

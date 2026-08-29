@@ -69,7 +69,12 @@
     "hours4": "4 hours",
     "hours8": "8 hours",
     "hours10": "10 hours",
-    "tomorrow": "Tomorrow"
+    "tomorrow": "Tomorrow",
+    "apptIn": "in {{time}}",
+    "apptNow": "due now",
+    "apptLate": "{{time}} late",
+    "pickupShort": "Pickup",
+    "deliveryShort": "Delivery"
   },
   "loads": {
     "title": "Loads",

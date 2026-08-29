@@ -69,7 +69,12 @@
     "hours4": "4 soat",
     "hours8": "8 soat",
     "hours10": "10 soat",
-    "tomorrow": "Ertagacha"
+    "tomorrow": "Ertagacha",
+    "apptIn": "{{time}} dan keyin",
+    "apptNow": "hozir",
+    "apptLate": "{{time}} kechikish",
+    "pickupShort": "Yuklash",
+    "deliveryShort": "Tushirish"
   },
   "loads": {
     "title": "Yuklar",

@@ -6,7 +6,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import polyline from '@mapbox/polyline';
-import { fetchLoadDetail } from '@/lib/api';
+import { Linking, Modal, Alert } from 'react-native';
+import { fetchLoadDetail, fetchNavigation } from '@/lib/api';
 import RouteOptions from '@/components/RouteOptions';
 
 const s = StyleSheet.create({
@@ -28,6 +29,16 @@ const s = StyleSheet.create({
   footAddr: { color: '#E5E7EB', fontSize: 14, lineHeight: 20 },
   miles: { color: '#F59E0B', fontSize: 13, fontWeight: '700' },
   compare: { color: '#F59E0B', fontSize: 13, fontWeight: '600', paddingVertical: 8 },
+  navBtn: { backgroundColor: '#F59E0B', borderRadius: 8, paddingVertical: 13, alignItems: 'center', marginTop: 12 },
+  navBtnText: { color: '#0B0F14', fontWeight: '700', fontSize: 15 },
+  sheetWrap: { flex: 1, backgroundColor: '#000000AA', justifyContent: 'flex-end' },
+  sheetBox: { backgroundColor: '#1F2937', borderTopLeftRadius: 18, borderTopRightRadius: 18, padding: 20, paddingBottom: 36 },
+  sheetTitle: { color: '#6B7280', fontSize: 11, fontWeight: '700', letterSpacing: 0.6, marginBottom: 8 },
+  sheetItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 15, borderBottomColor: '#374151', borderBottomWidth: 1 },
+  sheetName: { color: '#FFFFFF', fontSize: 16, flex: 1 },
+  sheetTag: { color: '#10B981', fontSize: 9, fontWeight: '700', backgroundColor: '#10B98120', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  sheetTagCar: { color: '#EAB308', backgroundColor: '#EAB30820' },
+  sheetCancel: { paddingVertical: 15, alignItems: 'center', marginTop: 6 },
   info: { color: '#6B7280', fontSize: 11, lineHeight: 16, marginTop: 8 },
   provider: { color: '#6B7280', fontSize: 10, marginTop: 2 },
   warnBar: { backgroundColor: '#EF444418', borderTopColor: '#EF4444', borderBottomColor: '#EF4444', borderTopWidth: 1, borderBottomWidth: 1, paddingHorizontal: 20, paddingVertical: 10 },
@@ -73,6 +84,8 @@ export default function TripMap() {
   const map = useRef(null);
   const [mode, setMode] = useState(null);
   const [compare, setCompare] = useState(false);
+  const [navApps, setNavApps] = useState(null);
+  const [navBusy, setNavBusy] = useState(false);
   const [picked, setPicked] = useState('fastest');
 
   const scope = (mode ?? 'trip') === 'next' ? 'leg' : 'trip';
@@ -118,6 +131,54 @@ export default function TripMap() {
     map.current.animateToRegion(target, 500);
   }, [view, located.length]);
 
+  async function navigate() {
+    setNavBusy(true);
+    try {
+      const res = await fetchNavigation(id);
+      const apps = (res?.target?.apps ?? []).filter((a) => !a.internal);
+      if (!apps.length) return Alert.alert(t('common.error'));
+      setNavApps(apps);
+    } catch (e) {
+      Alert.alert(t('common.error'), e.message);
+    } finally {
+      setNavBusy(false);
+    }
+  }
+
+  async function launch(app) {
+    setNavApps(null);
+    const go = async () => {
+      if (app.deepLink) {
+        const ok = await Linking.canOpenURL(app.deepLink).catch(() => false);
+        if (ok) return Linking.openURL(app.deepLink);
+      }
+      if (app.fallbackKind === 'store') {
+        const store = app.storeLinks?.ios ?? app.fallback;
+        return Alert.alert(
+          t('load.notInstalled', { app: app.name }),
+          t('load.installPrompt', { app: app.name }),
+          [
+            { text: t('load.notNow'), style: 'cancel' },
+            { text: t('load.install'), onPress: () => store && Linking.openURL(store) },
+          ]
+        );
+      }
+      if (app.fallback) Linking.openURL(app.fallback);
+    };
+
+    if (!app.truckAware) {
+      return Alert.alert(
+        t('load.notTruck'),
+        t('load.notTruckBody', { app: app.name }),
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('load.openAnyway'), onPress: go },
+        ]
+      );
+    }
+    go();
+  }
+
   function focus(stop) {
     map.current?.animateToRegion(
       { latitude: stop.lat, longitude: stop.lng, latitudeDelta: 0.15, longitudeDelta: 0.15 },
@@ -129,7 +190,25 @@ export default function TripMap() {
     return (
       <SafeAreaView style={s.safe} edges={['top']}>
         <View style={s.center}><ActivityIndicator color="#F59E0B" size="large" /></View>
-      </SafeAreaView>
+        <Modal visible={!!navApps} transparent animationType="fade" onRequestClose={() => setNavApps(null)}>
+        <View style={s.sheetWrap}>
+          <View style={s.sheetBox}>
+            <Text style={s.sheetTitle}>{t('load.openIn')}</Text>
+            {(navApps ?? []).map((app) => (
+              <TouchableOpacity key={app.key} style={s.sheetItem} onPress={() => launch(app)}>
+                <Text style={s.sheetName}>{app.name}</Text>
+                <Text style={[s.sheetTag, !app.truckAware && s.sheetTagCar]}>
+                  {app.truckAware ? t('load.truckBadge') : t('load.carBadge')}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity style={s.sheetCancel} onPress={() => setNavApps(null)}>
+              <Text style={s.navBtnText}>{t('common.cancel')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
     );
   }
 
@@ -144,7 +223,25 @@ export default function TripMap() {
         <View style={s.center}>
           <Text style={s.err}>{error ? error.message : t('map.noCoords')}</Text>
         </View>
-      </SafeAreaView>
+        <Modal visible={!!navApps} transparent animationType="fade" onRequestClose={() => setNavApps(null)}>
+        <View style={s.sheetWrap}>
+          <View style={s.sheetBox}>
+            <Text style={s.sheetTitle}>{t('load.openIn')}</Text>
+            {(navApps ?? []).map((app) => (
+              <TouchableOpacity key={app.key} style={s.sheetItem} onPress={() => launch(app)}>
+                <Text style={s.sheetName}>{app.name}</Text>
+                <Text style={[s.sheetTag, !app.truckAware && s.sheetTagCar]}>
+                  {app.truckAware ? t('load.truckBadge') : t('load.carBadge')}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity style={s.sheetCancel} onPress={() => setNavApps(null)}>
+              <Text style={s.navBtnText}>{t('common.cancel')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
     );
   }
 
@@ -219,15 +316,24 @@ export default function TripMap() {
                 ? ` · ${t('map.routeMiles', { miles: route.miles })}`
                 : ''}
             </Text>
-            {(activeOpt?.estimatedTollsUsd ?? route.estimatedTollsUsd) ? (
-              <Text style={s.provider}>
-                {t('map.tollsAmount', {
-                  amount: `$${(activeOpt?.estimatedTollsUsd ?? route.estimatedTollsUsd).toFixed(2)}`,
-                })}
-              </Text>
-            ) : null}
+            {(() => {
+              // Only show tolls when HERE actually priced them.
+              // On the OSRM fallback there is no toll data at all — $0 would be a lie.
+              const src = activeOpt ?? route;
+              if (src?.provider !== 'here' && route.provider !== 'here') return null;
+              const amount = src?.estimatedTollsUsd ?? 0;
+              return (
+                <Text style={s.provider}>
+                  {t('map.tollsAmount', { amount: `$${Number(amount).toFixed(2)}` })}
+                </Text>
+              );
+            })()}
           </View>
         </View>
+
+        <TouchableOpacity style={s.navBtn} onPress={navigate} disabled={navBusy}>
+          <Text style={s.navBtnText}>{navBusy ? '…' : t('load.navigate')}</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity onPress={() => setCompare((v) => !v)}>
           <Text style={s.compare}>
@@ -270,6 +376,24 @@ export default function TripMap() {
           <Text style={s.footAddr}>{t('load.allComplete')}</Text>
         )}
       </View>
+      <Modal visible={!!navApps} transparent animationType="fade" onRequestClose={() => setNavApps(null)}>
+        <View style={s.sheetWrap}>
+          <View style={s.sheetBox}>
+            <Text style={s.sheetTitle}>{t('load.openIn')}</Text>
+            {(navApps ?? []).map((app) => (
+              <TouchableOpacity key={app.key} style={s.sheetItem} onPress={() => launch(app)}>
+                <Text style={s.sheetName}>{app.name}</Text>
+                <Text style={[s.sheetTag, !app.truckAware && s.sheetTagCar]}>
+                  {app.truckAware ? t('load.truckBadge') : t('load.carBadge')}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity style={s.sheetCancel} onPress={() => setNavApps(null)}>
+              <Text style={s.navBtnText}>{t('common.cancel')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

@@ -23,6 +23,14 @@ const s = StyleSheet.create({
   label: { color: '#9CA3AF', fontSize: 13 },
   value: { color: '#E5E7EB', fontSize: 13, fontWeight: '500' },
   divider: { height: 1, backgroundColor: '#374151', marginVertical: 12 },
+  dutyBtn: { borderColor: '#F59E0B', borderWidth: 1, borderRadius: 8, paddingVertical: 12, alignItems: 'center', marginTop: 14 },
+  dutyBtnOn: { borderColor: '#10B981', backgroundColor: '#10B98115' },
+  dutyText: { color: '#F59E0B', fontWeight: '600', fontSize: 14 },
+  dutyTextOn: { color: '#10B981' },
+  reportLoud: { backgroundColor: '#DC2626', borderRadius: 12, paddingVertical: 17, alignItems: 'center' },
+  reportLoudText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
+  callQuiet: { borderColor: '#4B5563', borderWidth: 1, borderRadius: 12, paddingVertical: 13, alignItems: 'center', marginTop: 10 },
+  callQuietText: { color: '#9CA3AF', fontSize: 14, fontWeight: '500' },
   item: { paddingVertical: 14, borderBottomColor: '#374151', borderBottomWidth: 1 },
   itemLast: { borderBottomWidth: 0 },
   itemTitle: { color: '#E5E7EB', fontSize: 15, fontWeight: '500' },
@@ -33,11 +41,6 @@ const s = StyleSheet.create({
   sos: { backgroundColor: '#DC2626', borderRadius: 12, paddingVertical: 17, alignItems: 'center', marginBottom: 20 },
   sosText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   sosSub: { color: '#FCA5A5', fontSize: 12, marginTop: 3 },
-  toggle: { borderRadius: 8, paddingVertical: 13, alignItems: 'center', borderWidth: 1 },
-  toggleOff: { borderColor: '#F59E0B' },
-  toggleOffText: { color: '#F59E0B', fontWeight: '600', fontSize: 14 },
-  toggleOn: { borderColor: '#10B981', backgroundColor: '#10B98115' },
-  toggleOnText: { color: '#10B981', fontWeight: '600', fontSize: 14 },
   ann: { paddingVertical: 12, borderBottomColor: '#374151', borderBottomWidth: 1 },
   annTitle: { color: '#E5E7EB', fontSize: 14, fontWeight: '600' },
   annBody: { color: '#9CA3AF', fontSize: 13, marginTop: 4, lineHeight: 19 },
@@ -67,11 +70,6 @@ export default function MoreScreen() {
   const svc = list(services);
   const anns = list(announcements);
 
-  const toggleOff = useMutation({
-    mutationFn: () => setOffStatus(isOff ? null : new Date().toISOString()),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
-    onError: (e: Error) => Alert.alert('Could not update status', e.message),
-  });
 
   function callSupport() {
     if (!emergency) return;
@@ -124,10 +122,7 @@ export default function MoreScreen() {
             <Text style={s.name}>{driver?.driverName ?? '—'}</Text>
             <Text style={s.sub}>{driver?.email}</Text>
             <View style={s.divider} />
-            <View style={s.row}>
-              <Text style={s.label}>{t('more.driverId')}</Text>
-              <Text style={s.value}>{driver?.driverRef ?? '—'}</Text>
-            </View>
+
             <View style={s.row}>
               <Text style={s.label}>{t('more.truck')}</Text>
               <Text style={s.value}>{truck?.unit ? `Unit ${truck.unit}` : '—'}</Text>
@@ -144,22 +139,12 @@ export default function MoreScreen() {
                 {driver?.status ?? '—'}
               </Text>
             </View>
-          </View>
-
-          <Text style={s.section}>{t('more.availability')}</Text>
-          <View style={s.card}>
-            <Text style={s.itemSub}>
-              {isOff
-                ? t('more.offDuty')
-                : t('more.onDuty')}
-            </Text>
             <TouchableOpacity
-              style={[s.toggle, isOff ? s.toggleOn : s.toggleOff, { marginTop: 14 }]}
-              disabled={toggleOff.isPending}
-              onPress={() => toggleOff.mutate()}
+              style={[s.dutyBtn, isOff && s.dutyBtnOn]}
+              onPress={() => router.push('/(tabs)/home')}
             >
-              <Text style={isOff ? s.toggleOnText : s.toggleOffText}>
-                {toggleOff.isPending ? '...' : isOff ? t('more.goOn') : t('more.goOff')}
+              <Text style={[s.dutyText, isOff && s.dutyTextOn]}>
+                {isOff ? t('home.backOn') : t('home.setOff')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -181,12 +166,11 @@ export default function MoreScreen() {
           {emergency ? (
             <>
               <Text style={s.section}>{t('more.emergency')}</Text>
-              <TouchableOpacity style={s.report} onPress={() => router.push('/report')}>
-                <Text style={s.reportText}>{t('more.report')}</Text>
+              <TouchableOpacity style={s.reportLoud} onPress={() => router.push('/report')}>
+                <Text style={s.reportLoudText}>{t('home.reportIncident')}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={s.sos} onPress={callSupport}>
-                <Text style={s.sosText}>{t('more.callDispatch')}</Text>
-                <Text style={s.sosSub}>{emergency}</Text>
+              <TouchableOpacity style={s.callQuiet} onPress={callSupport}>
+                <Text style={s.callQuietText}>{t('more.callDispatch')} · {emergency}</Text>
               </TouchableOpacity>
             </>
           ) : null}

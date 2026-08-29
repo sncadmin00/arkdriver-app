@@ -69,7 +69,12 @@
     "hours4": "4 часа",
     "hours8": "8 часов",
     "hours10": "10 часов",
-    "tomorrow": "До завтра"
+    "tomorrow": "До завтра",
+    "apptIn": "через {{time}}",
+    "apptNow": "сейчас",
+    "apptLate": "опоздание {{time}}",
+    "pickupShort": "Загрузка",
+    "deliveryShort": "Выгрузка"
   },
   "loads": {
     "title": "Грузы",

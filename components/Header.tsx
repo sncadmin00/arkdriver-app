@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { fetchProfile, fetchLoads, fetchLoadDetail } from '@/lib/api';
 import Logo from './Logo';
@@ -8,22 +9,9 @@ import Logo from './Logo';
 const s = StyleSheet.create({
   bar: { backgroundColor: '#1F2937', paddingHorizontal: 20, paddingBottom: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   left: { paddingRight: 12 },
-  logoRow: { flexDirection: 'row', alignItems: 'baseline' },
-  logoA: { color: '#FFFFFF', fontSize: 21, fontWeight: '300', letterSpacing: 2 },
-  tri: {
-    width: 0, height: 0, backgroundColor: 'transparent',
-    borderLeftWidth: 3.5, borderRightWidth: 3.5, borderBottomWidth: 7,
-    borderLeftColor: 'transparent', borderRightColor: 'transparent',
-    borderBottomColor: '#F59E0B',
-    position: 'absolute', left: 5.5, bottom: 1,
-  },
-  logo: { color: '#FFFFFF', fontSize: 21, fontWeight: '300', letterSpacing: 2 },
-  logoSub: { color: '#9CA3AF', fontSize: 12, fontWeight: '400', marginLeft: 6, letterSpacing: 0.5 },
   middle: { flex: 1, alignItems: 'center' },
-  clock: { color: '#E5E7EB', fontSize: 15, fontWeight: '600' },
-  date: { color: '#6B7280', fontSize: 11, marginTop: 1 },
-  title: { color: '#FFFFFF', fontSize: 22, fontWeight: 'bold' },
-  sub: { color: '#9CA3AF', fontSize: 12, marginTop: 3 },
+  clock: { color: '#E5E7EB', fontSize: 13, fontWeight: '600' },
+  date: { color: '#6B7280', fontSize: 11, marginTop: 2 },
   right: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   bell: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
   bellText: { fontSize: 20 },
@@ -37,15 +25,19 @@ function initials(name) {
   return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 }
 
-export default function Header({ title, subtitle }) {
+export default function Header() {
+  const router = useRouter();
+  const { t } = useTranslation();
   const [now, setNow] = useState(new Date());
+
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(id);
   }, []);
-  const router = useRouter();
+
   const { data } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
   const { data: loads } = useQuery({ queryKey: ['loads', 'active'], queryFn: () => fetchLoads() });
+
   const activeId = loads?.[0]?.id;
   const { data: detail } = useQuery({
     queryKey: ['load', activeId, 'plain'],
@@ -53,52 +45,70 @@ export default function Header({ title, subtitle }) {
     enabled: !!activeId,
   });
 
+  const driver = data?.driver;
+  const comp = data?.compliance;
+  const chatUnread = data?.chat?.unread ?? 0;
+  const unread = chatUnread > 0 || (comp?.gaps ?? 0) + (comp?.expiringSoon ?? 0) > 0;
+
   const stops = detail?.stops ?? [];
   const next = stops.find((x) => x.current) ?? stops.find((x) => !x.complete);
   const tz = next?.timezone;
 
-  const zoneLabel = (() => {
-    if (!tz) return null;
+  let zoneShort = null;
+  if (tz) {
     try {
-      return new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'short' })
+      zoneShort = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'short' })
         .formatToParts(now).find((p) => p.type === 'timeZoneName')?.value ?? null;
-    } catch {
-      return null;
-    }
-  })();
+    } catch {}
+  }
 
-  const clockText = (() => {
-    try {
-      return now.toLocaleTimeString([], {
-        hour: '2-digit', minute: '2-digit',
-        ...(tz ? { timeZone: tz } : {}),
-      });
-    } catch {
-      return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  // Appointment times are wall-clock in the stop's own zone,
+  // so compare them against "now" as seen in that same zone.
+  let appt = null;
+  if (next?.date) {
+    const timeStr = next.time || '00:00';
+    const target = new Date(`${next.date}T${timeStr}:00`);
+    if (!isNaN(target)) {
+      let nowThere = now;
+      if (tz) {
+        try { nowThere = new Date(now.toLocaleString('en-US', { timeZone: tz })); } catch {}
+      }
+      const diffMin = Math.round((target - nowThere) / 60000);
+      const abs = Math.abs(diffMin);
+      const h = Math.floor(abs / 60);
+      const m = abs % 60;
+      const span = h > 24 ? `${Math.floor(h / 24)}d ${h % 24}h` : h > 0 ? `${h}h ${m}m` : `${m}m`;
+
+      appt = {
+        kind: next.kind === 'pickup' ? t('home.pickupShort') : t('home.deliveryShort'),
+        text: abs < 5 ? t('home.apptNow') : diffMin > 0 ? t('home.apptIn', { time: span }) : t('home.apptLate', { time: span }),
+        late: diffMin < -5,
+        clock: `${timeStr}${zoneShort ? ` ${zoneShort}` : ''}`,
+      };
     }
-  })();
-  const driver = data?.driver;
-  const comp = data?.compliance;
-  const unread = (comp?.gaps ?? 0) + (comp?.expiringSoon ?? 0) > 0;
+  }
 
   return (
     <View style={s.bar}>
       <View style={s.left}>
         <Logo />
-        {title ? <Text style={s.title} numberOfLines={1}>{title}</Text> : null}
-        {subtitle ? <Text style={s.sub} numberOfLines={1}>{subtitle}</Text> : null}
       </View>
 
       <View style={s.middle}>
-        <Text style={s.clock}>
-          {clockText}{zoneLabel ? ` ${zoneLabel}` : ''}
-        </Text>
-        <Text style={s.date}>
-          {tz
-            ? String(next?.address ?? '').split('\n').slice(-1)[0].split(',')[0]
-            : now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
-        </Text>
+        {appt ? (
+          <>
+            <Text style={[s.clock, appt.late && { color: '#EF4444' }]} numberOfLines={1}>
+              {appt.kind} {appt.text}
+            </Text>
+            <Text style={s.date}>{appt.clock}</Text>
+          </>
+        ) : (
+          <Text style={s.date}>
+            {now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
+          </Text>
+        )}
       </View>
+
       <View style={s.right}>
         <TouchableOpacity style={s.bell} onPress={() => router.push('/notifications')} hitSlop={8}>
           <Text style={s.bellText}>🔔</Text>

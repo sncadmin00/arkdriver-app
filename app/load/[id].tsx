@@ -4,7 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchLoadDetail, checkInStop, fetchSettlement, fetchNavigation, mondayOf, ApiError } from '@/lib/api';
+import Countdown from '@/components/Countdown';
+import { fetchLoadDetail, checkInStop, fetchSettlement, fetchNavigation, fetchProfile, mondayOf, ApiError } from '@/lib/api';
 
 const STATUS_COLORS: Record<string, string> = {
   booked: '#3B82F6', dispatched: '#8B5CF6', at_pickup: '#EAB308',
@@ -80,6 +81,8 @@ export default function LoadDetail() {
   const router = useRouter();
   const qc = useQueryClient();
   const { t } = useTranslation();
+  const { data: prof } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
+  const chatUnread = prof?.chat?.unread ?? 0;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['load', id],
@@ -231,7 +234,14 @@ export default function LoadDetail() {
               <View style={[s.card, s.active]}>
                 <Text style={s.kind}>{String(current.kind ?? '').toUpperCase()}</Text>
                 <Text style={s.addr}>{current.address}</Text>
-                {current.date && <Text style={s.when}>{current.date} {current.time ?? ''}</Text>}
+                {current.date ? <Text style={s.when}>{current.date}</Text> : null}
+                <Countdown
+                  date={current.date}
+                  time={current.time}
+                  timezone={current.timezone}
+                  kind={current.kind}
+                  showKind={false}
+                />
                 {current.arrivedAt && (
                   <Text style={s.stamp}>✓ Arrived {new Date(current.arrivedAt).toLocaleString()}</Text>
                 )}
@@ -245,22 +255,20 @@ export default function LoadDetail() {
                   <Text style={s.note}>{t('load.noPaperwork')}</Text>
                 )}
 
-                <TouchableOpacity
-                  style={[s.nav, { marginBottom: 0 }]}
-                  onPress={() => router.push({ pathname: '/chat', params: { loadRef: String(id) } })}
-                >
-                  <Text style={s.navText}>{t('tabs.chat')}</Text>
-                </TouchableOpacity>
-
                 <View style={s.navRow}>
                   <TouchableOpacity
                     style={[s.nav, { flex: 1 }]}
-                    onPress={() => router.push(`/load/map?id=${id}`)}
+                    onPress={() => router.push(`/load/map?id=${id}&focus=next`)}
                   >
                     <Text style={s.navText}>{t('load.map')}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[s.nav, s.navGo, { flex: 1 }]} onPress={navigate} disabled={navBusy}>
-                    {navBusy ? <ActivityIndicator color="#0B0F14" /> : <Text style={s.navGoText}>{t('load.navigate')}</Text>}
+                  <TouchableOpacity
+                    style={[s.nav, { flex: 1 }]}
+                    onPress={() => router.push({ pathname: '/chat', params: { loadRef: String(id) } })}
+                  >
+                    <Text style={s.navText}>
+                      {t('tabs.chat')}{chatUnread ? `  ${chatUnread}` : ''}
+                    </Text>
                   </TouchableOpacity>
                 </View>
 
@@ -348,10 +356,12 @@ export default function LoadDetail() {
           <Text style={s.section}>{t('load.details')}</Text>
           <View style={s.card}>
             <Row label={t("load.milesLabel")} value={load?.miles ? `${load.miles} mi` : null} />
-            {load?.route?.estimatedTollsUsd ? (
+            {load?.route?.provider === 'here' ? (
               <View style={s.row}>
                 <Text style={s.label}>{t('load.tollsLabel')}</Text>
-                <Text style={s.value}>${load.route.estimatedTollsUsd.toFixed(2)}</Text>
+                <Text style={s.value}>
+                  ${Number(load.route.estimatedTollsUsd ?? 0).toFixed(2)}
+                </Text>
               </View>
             ) : null}
             {payLine ? (

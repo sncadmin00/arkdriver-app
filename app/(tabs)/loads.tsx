@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLoads } from '@/lib/api';
+import Countdown from '@/components/Countdown';
 import type { Load } from '@/types';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -108,6 +109,17 @@ export default function LoadsScreen() {
                 </View>
                 <View style={styles.footer}>
                   <Text style={styles.miles}>{t('loads.miles', { count: item.miles })}</Text>
+                  {(() => {
+                    const beforeTransit = ['booked', 'dispatched', 'at_pickup'].includes(item.status);
+                    return (
+                      <Countdown
+                        date={beforeTransit ? item.pickupAt : item.deliverAt}
+                        time={beforeTransit ? item.pickupTime : item.deliverTime}
+                        timezone={beforeTransit ? item.pickupTimezone : item.deliverTimezone}
+                        kind={beforeTransit ? 'pickup' : 'delivery'}
+                      />
+                    );
+                  })()}
                 </View>
               </TouchableOpacity>
             )}
