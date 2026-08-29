@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchChatMessages, sendChatMessage, markChatRead, fetchLoads } from '@/lib/api';
 import supabase from '@/lib/supabase';
@@ -11,6 +11,7 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1F2937' },
   container: { flex: 1, backgroundColor: '#0B0F14' },
   header: { backgroundColor: '#1F2937', paddingHorizontal: 20, paddingBottom: 12 },
+  back: { color: '#F59E0B', fontSize: 15, marginBottom: 8 },
   title: { fontSize: 24, fontWeight: 'bold', color: '#FFFFFF' },
   chips: { flexDirection: 'row', marginTop: 12 },
   chip: { paddingHorizontal: 13, paddingVertical: 6, borderRadius: 14, marginRight: 8, backgroundColor: '#374151' },
@@ -48,6 +49,7 @@ function clock(iso?: string) {
 
 export default function ChatScreen() {
   const qc = useQueryClient();
+  const router = useRouter();
   const { t } = useTranslation();
   const { draft } = useLocalSearchParams();
   const [text, setText] = useState(typeof draft === 'string' ? draft : '');
@@ -103,6 +105,9 @@ export default function ChatScreen() {
         keyboardVerticalOffset={88}
       >
         <View style={s.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Text style={s.back}>← {t('common.back')}</Text>
+          </TouchableOpacity>
           <Text style={s.title}>{t('chat.title')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.chips}>
             <TouchableOpacity style={[s.chip, !loadRef && s.chipOn]} onPress={() => setLoadRef(undefined)}>

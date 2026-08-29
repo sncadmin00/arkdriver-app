@@ -203,7 +203,7 @@
     "inspection": "Ko'rik",
     "inspectionSub": "Ko'rik ro'yxati va nuqson hisobotlari",
     "report": "Xabar berish",
-    "truckmap": "Trak xaritasi"
+    "truckmap": "Xarita"
   },
   "pay": {
     "title": "To'lov",
@@ -358,7 +358,7 @@
     "urgentNote": "Jabrlanganlar bo'lsa — avval dispecherga qo'ng'iroq qiling."
   },
   "truckmap": {
-    "title": "Trak xaritasi",
+    "title": "Xarita",
     "search": "Qayerga?",
     "searching": "Qidirilmoqda...",
     "noResults": "Hech narsa topilmadi",
@@ -373,7 +373,8 @@
     "saveHint": "Uy, baza, doimiy to'xtash joyi",
     "distance": "{{miles}} mil",
     "noOrigin": "Joylashuv aniqlanmadi. Geolokatsiyani yoqing.",
-    "clear": "Yangi manzil"
+    "clear": "Yangi manzil",
+    "explainer": "Bu yerda marshrut, mil va taxminiy yo'l to'lovini ko'rish mumkin. Yurish uchun «Navigatsiya» ni bosing va trak navigatorini tanlang."
   },
   "notifications": {
     "title": "Bildirishnomalar",

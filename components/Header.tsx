@@ -1,11 +1,27 @@
+import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchProfile } from '@/lib/api';
+import Logo from './Logo';
 
 const s = StyleSheet.create({
   bar: { backgroundColor: '#1F2937', paddingHorizontal: 20, paddingBottom: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  left: { flex: 1, paddingRight: 12 },
+  left: { paddingRight: 12 },
+  logoRow: { flexDirection: 'row', alignItems: 'baseline' },
+  logoA: { color: '#FFFFFF', fontSize: 21, fontWeight: '300', letterSpacing: 2 },
+  tri: {
+    width: 0, height: 0, backgroundColor: 'transparent',
+    borderLeftWidth: 3.5, borderRightWidth: 3.5, borderBottomWidth: 7,
+    borderLeftColor: 'transparent', borderRightColor: 'transparent',
+    borderBottomColor: '#F59E0B',
+    position: 'absolute', left: 5.5, bottom: 1,
+  },
+  logo: { color: '#FFFFFF', fontSize: 21, fontWeight: '300', letterSpacing: 2 },
+  logoSub: { color: '#9CA3AF', fontSize: 12, fontWeight: '400', marginLeft: 6, letterSpacing: 0.5 },
+  middle: { flex: 1, alignItems: 'center' },
+  clock: { color: '#E5E7EB', fontSize: 15, fontWeight: '600' },
+  date: { color: '#6B7280', fontSize: 11, marginTop: 1 },
   title: { color: '#FFFFFF', fontSize: 22, fontWeight: 'bold' },
   sub: { color: '#9CA3AF', fontSize: 12, marginTop: 3 },
   right: { flexDirection: 'row', alignItems: 'center', gap: 14 },
@@ -22,6 +38,11 @@ function initials(name) {
 }
 
 export default function Header({ title, subtitle }) {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(id);
+  }, []);
   const router = useRouter();
   const { data } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
   const driver = data?.driver;
@@ -31,8 +52,18 @@ export default function Header({ title, subtitle }) {
   return (
     <View style={s.bar}>
       <View style={s.left}>
-        <Text style={s.title} numberOfLines={1}>{title}</Text>
+        <Logo />
+        {title ? <Text style={s.title} numberOfLines={1}>{title}</Text> : null}
         {subtitle ? <Text style={s.sub} numberOfLines={1}>{subtitle}</Text> : null}
+      </View>
+
+      <View style={s.middle}>
+        <Text style={s.clock}>
+          {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </Text>
+        <Text style={s.date}>
+          {now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
+        </Text>
       </View>
       <View style={s.right}>
         <TouchableOpacity style={s.bell} onPress={() => router.push('/notifications')} hitSlop={8}>

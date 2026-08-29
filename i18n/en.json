@@ -203,7 +203,7 @@
     "inspection": "Inspection",
     "inspectionSub": "Pre-trip checklist and defect reports",
     "report": "Report",
-    "truckmap": "Truck map"
+    "truckmap": "Map"
   },
   "pay": {
     "title": "Pay",
@@ -358,7 +358,7 @@
     "urgentNote": "Call dispatch first if anyone is hurt."
   },
   "truckmap": {
-    "title": "Truck map",
+    "title": "Map",
     "search": "Where to?",
     "searching": "Searching...",
     "noResults": "Nothing found",
@@ -373,7 +373,8 @@
     "saveHint": "Home, the yard, a regular stop",
     "distance": "{{miles}} mi",
     "noOrigin": "Can't find your position. Turn on location and try again.",
-    "clear": "New address"
+    "clear": "New address",
+    "explainer": "Check the route, mileage and approximate tolls here. To drive it, tap Navigate and pick a truck navigator."
   },
   "notifications": {
     "title": "Notifications",

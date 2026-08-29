@@ -245,6 +245,13 @@ export default function LoadDetail() {
                   <Text style={s.note}>{t('load.noPaperwork')}</Text>
                 )}
 
+                <TouchableOpacity
+                  style={[s.nav, { marginBottom: 0 }]}
+                  onPress={() => router.push({ pathname: '/chat', params: { loadRef: String(id) } })}
+                >
+                  <Text style={s.navText}>{t('tabs.chat')}</Text>
+                </TouchableOpacity>
+
                 <View style={s.navRow}>
                   <TouchableOpacity
                     style={[s.nav, { flex: 1 }]}

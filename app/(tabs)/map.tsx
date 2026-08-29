@@ -44,6 +44,7 @@ const s = StyleSheet.create({
   overlay: { position: 'absolute', top: 0, left: 0, right: 0, maxHeight: 280, backgroundColor: '#0B0F14EE' },
   overlayBusy: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0B0F1499' },
   hint: { color: '#6B7280', fontSize: 12, paddingHorizontal: 20, paddingBottom: 10 },
+  explainer: { color: '#6B7280', fontSize: 11, lineHeight: 16, marginTop: 12 },
   sheetWrap: { flex: 1, backgroundColor: '#000000AA', justifyContent: 'flex-end' },
   sheetBox: { backgroundColor: '#1F2937', borderTopLeftRadius: 18, borderTopRightRadius: 18, padding: 20, paddingBottom: 36 },
   sheetTitle: { color: '#6B7280', fontSize: 11, fontWeight: '700', letterSpacing: 0.6, marginBottom: 8 },
@@ -221,6 +222,7 @@ export default function TruckMap() {
             <Text style={[s.modeText, mode === 'bobtail' && s.modeOnText]}>{t('truckmap.modeBobtail')}</Text>
           </TouchableOpacity>
         </View>
+        <Text style={s.explainer}>{t('truckmap.explainer')}</Text>
       </View>
 
       <View style={{ flex: 1 }}>
