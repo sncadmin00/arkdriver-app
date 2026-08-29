@@ -54,7 +54,22 @@
     "ptiDo": "Пройти осмотр",
     "upcoming": "ДАЛЬШЕ",
     "moreLoads": "ещё {{count}}",
-    "weekMeta": "{{count}} груза · {{miles}} миль"
+    "weekMeta": "{{count}} груза · {{miles}} миль",
+    "truckFolder": "Папка трака",
+    "truckFolderSub": "Регистрация, страховка, инспекция",
+    "driverCard": "ВОДИТЕЛЬ",
+    "trailer": "Трейлер",
+    "powerOnly": "Power only",
+    "readyIn": "Готов через {{hours}} ч",
+    "setOff": "Уйти со смены",
+    "offUntil": "Не на смене до {{time}}",
+    "backOn": "Вернуться на смену",
+    "howLong": "На сколько?",
+    "hours2": "2 часа",
+    "hours4": "4 часа",
+    "hours8": "8 часов",
+    "hours10": "10 часов",
+    "tomorrow": "До завтра"
   },
   "loads": {
     "title": "Грузы",

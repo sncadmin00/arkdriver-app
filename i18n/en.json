@@ -54,7 +54,22 @@
     "ptiDo": "Do inspection",
     "upcoming": "UPCOMING",
     "moreLoads": "{{count}} more",
-    "weekMeta": "{{count}} loads · {{miles}} mi"
+    "weekMeta": "{{count}} loads · {{miles}} mi",
+    "truckFolder": "Truck folder",
+    "truckFolderSub": "Registration, insurance, inspection",
+    "driverCard": "DRIVER",
+    "trailer": "Trailer",
+    "powerOnly": "Power only",
+    "readyIn": "Ready in {{hours}}h",
+    "setOff": "Go off duty",
+    "offUntil": "Off until {{time}}",
+    "backOn": "Back on duty",
+    "howLong": "How long?",
+    "hours2": "2 hours",
+    "hours4": "4 hours",
+    "hours8": "8 hours",
+    "hours10": "10 hours",
+    "tomorrow": "Tomorrow"
   },
   "loads": {
     "title": "Loads",

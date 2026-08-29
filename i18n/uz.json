@@ -54,7 +54,22 @@
     "ptiDo": "Ko'rikni o'tkazish",
     "upcoming": "KEYINGI",
     "moreLoads": "yana {{count}}",
-    "weekMeta": "{{count}} yuk · {{miles}} mil"
+    "weekMeta": "{{count}} yuk · {{miles}} mil",
+    "truckFolder": "Trak papkasi",
+    "truckFolderSub": "Ro'yxat, sug'urta, ko'rik",
+    "driverCard": "HAYDOVCHI",
+    "trailer": "Treyler",
+    "powerOnly": "Power only",
+    "readyIn": "{{hours}} soatdan keyin tayyor",
+    "setOff": "Smenadan chiqish",
+    "offUntil": "{{time}} gacha smenada emas",
+    "backOn": "Smenaga qaytish",
+    "howLong": "Qancha vaqtga?",
+    "hours2": "2 soat",
+    "hours4": "4 soat",
+    "hours8": "8 soat",
+    "hours10": "10 soat",
+    "tomorrow": "Ertagacha"
   },
   "loads": {
     "title": "Yuklar",

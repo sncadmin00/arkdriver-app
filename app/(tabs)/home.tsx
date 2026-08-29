@@ -1,11 +1,12 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Linking, Alert } from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Linking, Alert, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Header from '@/components/Header';
 import {
-  fetchProfile, fetchLoads, fetchSettlement,
+  fetchProfile, fetchLoads, fetchSettlement, setOffStatus,
   fetchServices, fetchAnnouncements, fetchInspections, mondayOf,
 } from '@/lib/api';
 
@@ -31,6 +32,18 @@ const s = StyleSheet.create({
   btnGhostText: { color: '#F59E0B', fontWeight: '600', fontSize: 14 },
   empty: { color: '#9CA3AF', fontSize: 14 },
   emptySub: { color: '#6B7280', fontSize: 12, marginTop: 4 },
+  divider: { height: 1, backgroundColor: '#374151' },
+  carrierName: { color: '#9CA3AF', fontSize: 12, fontWeight: '600', marginBottom: 3 },
+  carrier: { color: '#6B7280', fontSize: 11, lineHeight: 16 },
+  sheetWrap: { flex: 1, backgroundColor: '#000000AA', justifyContent: 'flex-end' },
+  sheetBox: { backgroundColor: '#1F2937', borderTopLeftRadius: 18, borderTopRightRadius: 18, padding: 20, paddingBottom: 36 },
+  sheetTitle: { color: '#6B7280', fontSize: 11, fontWeight: '700', letterSpacing: 0.6, marginBottom: 8 },
+  sheetItem: { paddingVertical: 15, borderBottomColor: '#374151', borderBottomWidth: 1 },
+  sheetName: { color: '#FFFFFF', fontSize: 16 },
+  sheetCancel: { paddingVertical: 15, alignItems: 'center', marginTop: 6 },
+  kv: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
+  kvLabel: { color: '#9CA3AF', fontSize: 13 },
+  kvValue: { color: '#E5E7EB', fontSize: 13, fontWeight: '600' },
   payRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
   payAmount: { color: '#F59E0B', fontSize: 28, fontWeight: '800' },
   payMeta: { color: '#6B7280', fontSize: 12, marginTop: 4 },
@@ -76,6 +89,10 @@ export default function HomeScreen() {
 
   const driver = profile.data?.driver;
   const truck = profile.data?.truck;
+  const trailer = profile.data?.trailer;
+  const equipment = profile.data?.equipment;
+  const carrier = profile.data?.carrier;
+  const isOff = driver?.status === 'off';
   const emergency = profile.data?.support?.emergencyPhone;
   const comp = profile.data?.compliance;
 
@@ -92,6 +109,51 @@ export default function HomeScreen() {
   const inspectedToday = (inspections.data?.inspections ?? []).some(
     (i) => String(i.submittedAt ?? '').slice(0, 10) === today
   );
+
+  const [askOff, setAskOff] = useState(false);
+  const [dutyBusy, setDutyBusy] = useState(false);
+
+  const OFF_OPTIONS = [
+    { key: 'hours2', hours: 2 },
+    { key: 'hours4', hours: 4 },
+    { key: 'hours8', hours: 8 },
+    { key: 'hours10', hours: 10 },
+    { key: 'tomorrow', hours: null },
+  ];
+
+  async function goOff(hours) {
+    setAskOff(false);
+    setDutyBusy(true);
+    try {
+      let readyAt;
+      if (hours) {
+        readyAt = new Date(Date.now() + hours * 3600 * 1000).toISOString();
+      } else {
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        d.setHours(6, 0, 0, 0);
+        readyAt = d.toISOString();
+      }
+      await setOffStatus(readyAt);
+      qc.invalidateQueries({ queryKey: ['profile'] });
+    } catch (e) {
+      Alert.alert(t('common.error'), e.message);
+    } finally {
+      setDutyBusy(false);
+    }
+  }
+
+  async function goOnDuty() {
+    setDutyBusy(true);
+    try {
+      await setOffStatus(null);
+      qc.invalidateQueries({ queryKey: ['profile'] });
+    } catch (e) {
+      Alert.alert(t('common.error'), e.message);
+    } finally {
+      setDutyBusy(false);
+    }
+  }
 
   function callSupport() {
     if (!emergency) return;
@@ -114,13 +176,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
-      <Header
-        title={driver?.driverName ?? t('home.welcome')}
-        subtitle={[
-          truck?.unit ? t('home.unit', { unit: truck.unit }) : null,
-          driver?.status ? t('home.status', { status: driver.status }) : null,
-        ].filter(Boolean).join(' · ')}
-      />
+      <Header title="" />
 
       <ScrollView
         style={s.container}
@@ -133,7 +189,67 @@ export default function HomeScreen() {
           />
         }
       >
-        <Text style={[s.section, { marginTop: 0 }]}>{t('home.activeLoad')}</Text>
+        <Text style={[s.section, { marginTop: 0 }]}>{t('home.driverCard')}</Text>
+        <View style={[s.card, { marginBottom: 4 }]}>
+          <Text style={s.loadId}>{driver?.driverName ?? '—'}</Text>
+          <View style={[s.divider, { marginVertical: 12 }]} />
+          <View style={s.kv}>
+            <Text style={s.kvLabel}>{t('home.truck')}</Text>
+            <Text style={s.kvValue}>{truck?.unit ?? '—'}</Text>
+          </View>
+          <View style={s.kv}>
+            <Text style={s.kvLabel}>{t('home.trailer')}</Text>
+            <Text style={s.kvValue}>
+              {equipment?.code === 'PO' || (!trailer && equipment?.code === 'PO')
+                ? t('home.powerOnly')
+                : trailer?.unit ?? trailer ?? '—'}
+            </Text>
+          </View>
+          {truck?.vin ? (
+            <View style={s.kv}>
+              <Text style={s.kvLabel}>VIN</Text>
+              <Text style={s.kvValue}>{truck.vin}</Text>
+            </View>
+          ) : null}
+          <View style={s.kv}>
+            <Text style={s.kvLabel}>{t('more.status')}</Text>
+            <Text style={[s.kvValue, { color: isOff ? '#9CA3AF' : '#10B981' }]}>
+              {isOff && driver?.readyAt
+                ? t('home.offUntil', { time: new Date(driver.readyAt).toLocaleString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' }) })
+                : driver?.status ?? '—'}
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={[s.btn, s.btnGhost, { marginTop: 14 }]}
+            onPress={() => (isOff ? goOnDuty() : setAskOff(true))}
+            disabled={dutyBusy}
+          >
+            <Text style={s.btnGhostText}>
+              {dutyBusy ? '…' : isOff ? t('home.backOn') : t('home.setOff')}
+            </Text>
+          </TouchableOpacity>
+
+          {carrier ? (
+            <>
+              <View style={[s.divider, { marginTop: 16, marginBottom: 12 }]} />
+              {carrier.legalName ? <Text style={s.carrierName}>{carrier.legalName}</Text> : null}
+              {(carrier.mc || carrier.dot) ? (
+                <Text style={s.carrier}>
+                  {[carrier.mc ? `MC ${carrier.mc}` : null, carrier.dot ? `DOT ${carrier.dot}` : null]
+                    .filter(Boolean).join('  ·  ')}
+                </Text>
+              ) : null}
+              {carrier.address ? <Text style={s.carrier}>{carrier.address}</Text> : null}
+              {carrier.phone ? (
+                <TouchableOpacity onPress={() => Linking.openURL(`tel:${String(carrier.phone).replace(/[^\d+]/g, '')}`)}>
+                  <Text style={[s.carrier, { color: '#F59E0B' }]}>{carrier.phone}</Text>
+                </TouchableOpacity>
+              ) : null}
+            </>
+          ) : null}
+        </View>
+
+        <Text style={s.section}>{t('home.activeLoad')}</Text>
         {activeLoads.length ? (
           activeLoads.map((load) => (
             <View key={load.id} style={[s.card, s.cardActive, { marginBottom: 12 }]}>
@@ -194,6 +310,19 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </>
         ) : null}
+
+        <TouchableOpacity
+          style={[s.card, { marginTop: 20 }]}
+          onPress={() => router.push({ pathname: '/(tabs)/compliance', params: { tab: 'truck' } })}
+        >
+          <View style={s.payRow}>
+            <View style={{ flex: 1, paddingRight: 12 }}>
+              <Text style={s.svcName}>{t('home.truckFolder')}</Text>
+              <Text style={s.svcSub}>{t('home.truckFolderSub')}</Text>
+            </View>
+            <Text style={s.chev}>›</Text>
+          </View>
+        </TouchableOpacity>
 
         <Text style={s.section}>{t('home.pti')}</Text>
         <TouchableOpacity
@@ -256,6 +385,22 @@ export default function HomeScreen() {
           <Text style={s.reportText}>{t('home.reportIncident')}</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <Modal visible={askOff} transparent animationType="fade" onRequestClose={() => setAskOff(false)}>
+        <View style={s.sheetWrap}>
+          <View style={s.sheetBox}>
+            <Text style={s.sheetTitle}>{t('home.howLong')}</Text>
+            {OFF_OPTIONS.map((o) => (
+              <TouchableOpacity key={o.key} style={s.sheetItem} onPress={() => goOff(o.hours)}>
+                <Text style={s.sheetName}>{t(`home.${o.key}`)}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity style={s.sheetCancel} onPress={() => setAskOff(false)}>
+              <Text style={s.btnGhostText}>{t('common.cancel')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

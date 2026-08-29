@@ -4,6 +4,7 @@ import { WebView } from 'react-native-webview';
 import { Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { useLocalSearchParams } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchCompliance, fetchTruckDocuments, fetchDocumentUrl } from '@/lib/api';
 
