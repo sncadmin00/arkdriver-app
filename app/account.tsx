@@ -198,25 +198,6 @@ export default function MoreScreen() {
             </>
           )}
 
-          <Text style={s.section}>{t('more.announcements')}</Text>
-          <View style={s.card}>
-            {anns.length === 0 ? (
-              <Text style={s.empty}>{t('more.nothingNew')}</Text>
-            ) : (
-              anns.map((a: any, i: number) => (
-                <View key={a.id ?? i} style={[s.ann, i === anns.length - 1 && s.itemLast]}>
-                  {a.title ? <Text style={s.annTitle}>{a.title}</Text> : null}
-                  <Text style={s.annBody}>{a.body ?? a.message ?? a.text}</Text>
-                  {(a.publishedAt ?? a.created_at) ? (
-                    <Text style={s.annDate}>
-                      {new Date(a.publishedAt ?? a.created_at).toLocaleDateString()}
-                    </Text>
-                  ) : null}
-                </View>
-              ))
-            )}
-          </View>
-
           <Text style={s.section}>{t('more.language')}</Text>
           <View style={s.card}>
             {LANGUAGES.map((lang, i) => {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Linking, Alert, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Header from '@/components/Header';
 import Countdown from '@/components/Countdown';
+import { readMap, visible } from '@/lib/announcements';
 import {
   fetchProfile, fetchLoads, fetchSettlement, setOffStatus,
   fetchServices, fetchAnnouncements, fetchInspections, mondayOf,
@@ -118,13 +119,16 @@ export default function HomeScreen() {
 
   const list = (v) => (Array.isArray(v) ? v : v?.services ?? v?.announcements ?? v?.items ?? []);
   const svc = list(services.data);
-  const anns = list(announcements.data).slice(0, 2);
+  const annsAll = announcements.data?.announcements ?? list(announcements.data);
+  const anns = visible([...annsAll].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)), readAt).slice(0, 2);
 
   const today = new Date().toISOString().slice(0, 10);
   const inspectedToday = (inspections.data?.inspections ?? []).some(
     (i) => String(i.submittedAt ?? '').slice(0, 10) === today
   );
 
+  const [readAt, setReadAt] = useState({});
+  useEffect(() => { readMap().then(setReadAt); }, []);
   const [askOff, setAskOff] = useState(false);
   const [dutyBusy, setDutyBusy] = useState(false);
 
@@ -186,8 +190,18 @@ export default function HomeScreen() {
     if (item.webLink) Linking.openURL(item.webLink);
   }
 
-  const refreshing =
-    profile.isFetching || loads.isFetching || settlement.isFetching;
+  // Only spin when the driver actually pulled to refresh —
+  // background refetches shouldn't look like the app is stuck.
+  const [pulling, setPulling] = useState(false);
+
+  async function refresh() {
+    setPulling(true);
+    try {
+      await qc.refetchQueries({ type: 'active' });
+    } finally {
+      setPulling(false);
+    }
+  }
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
@@ -197,14 +211,41 @@ export default function HomeScreen() {
         style={s.container}
         contentContainerStyle={s.body}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            tintColor="#F59E0B"
-            onRefresh={() => qc.invalidateQueries()}
-          />
+          <RefreshControl refreshing={pulling} tintColor="#F59E0B" onRefresh={refresh} />
         }
       >
-        <Text style={[s.section, { marginTop: 0 }]}>{t('home.driverCard')}</Text>
+        {anns.length ? (
+          <>
+            <Text style={[s.section, { marginTop: 0 }]}>{t('home.announcements')}</Text>
+            <View style={s.card}>
+              {anns.map((a, i) => (
+                <TouchableOpacity
+                  key={a.id ?? i}
+                  onPress={() => router.push('/notifications')}
+                  style={[
+                    s.ann,
+                    i === anns.length - 1 && s.svcLast,
+                    a.severity === 'critical' ? { borderLeftColor: '#EF4444', borderLeftWidth: 3, paddingLeft: 10 }
+                      : a.severity === 'warning' ? { borderLeftColor: '#EAB308', borderLeftWidth: 3, paddingLeft: 10 } : null,
+                  ]}
+                >
+                  {a.title ? (
+                    <Text style={[
+                      s.annTitle,
+                      a.severity === 'critical' && { color: '#EF4444' },
+                      a.severity === 'warning' && { color: '#EAB308' },
+                    ]}>
+                      {a.pinned ? '📌 ' : ''}{a.title}
+                    </Text>
+                  ) : null}
+                  <Text style={s.annBody} numberOfLines={2}>{a.body}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        ) : null}
+
+        <Text style={[s.section, {}]}>{t('home.driverCard')}</Text>
         <View style={[s.card, { marginBottom: 4 }]}>
           <Text style={s.loadId}>{driver?.driverName ?? '—'}</Text>
           <View style={[s.divider, { marginVertical: 12 }]} />
@@ -362,20 +403,6 @@ export default function HomeScreen() {
                   </TouchableOpacity>
                 );
               })}
-            </View>
-          </>
-        ) : null}
-
-        {anns.length ? (
-          <>
-            <Text style={s.section}>{t('home.announcements')}</Text>
-            <View style={s.card}>
-              {anns.map((a, i) => (
-                <View key={a.id ?? i} style={[s.ann, i === anns.length - 1 && s.svcLast]}>
-                  {a.title ? <Text style={s.annTitle}>{a.title}</Text> : null}
-                  <Text style={s.annBody}>{a.body ?? a.message ?? a.text}</Text>
-                </View>
-              ))}
             </View>
           </>
         ) : null}

@@ -2,6 +2,8 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useEffect, useState } from 'react';
+import { readMap, markRead, visible } from '@/lib/announcements';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCompliance, fetchTruckDocuments, fetchAnnouncements } from '@/lib/api';
 
@@ -22,7 +24,9 @@ const s = StyleSheet.create({
   annTitle: { color: '#E5E7EB', fontSize: 14, fontWeight: '600', flex: 1 },
   annHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   pin: { fontSize: 12 },
-  annDate: { color: '#6B7280', fontSize: 11, marginTop: 5 },
+  annDate: { color: '#6B7280', fontSize: 11 },
+  annFoot: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6, width: '100%' },
+  newDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#F59E0B' },
   annBody: { color: '#9CA3AF', fontSize: 13, marginTop: 4, lineHeight: 18 },
   empty: { color: '#6B7280', textAlign: 'center', marginTop: 50, fontSize: 14 },
   link: { color: '#F59E0B', fontWeight: '600', fontSize: 14, textAlign: 'center', paddingVertical: 14 },
@@ -46,8 +50,20 @@ export default function Notifications() {
 
   const all = ann.data?.announcements ?? (Array.isArray(ann.data) ? ann.data : []);
   // Pinned first, then newest — the office pins what must not be missed.
-  const anns = [...all].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)).slice(0, 10);
+  const anns = visible([...all].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)), readAt).slice(0, 10);
   const nothing = !slots.length && !anns.length;
+
+  const [readAt, setReadAt] = useState({});
+  const [open, setOpen] = useState(null);
+
+  useEffect(() => {
+    readMap().then(setReadAt);
+  }, []);
+
+  async function toggle(a) {
+    setOpen((cur) => (cur === a.id ? null : a.id));
+    if (!readAt[a.id]) setReadAt(await markRead(a.id));
+  }
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
@@ -90,8 +106,10 @@ export default function Notifications() {
               {anns.map((a, i) => {
                 const tone = SEVERITY[a.severity] ?? SEVERITY.info;
                 return (
-                  <View
+                  <TouchableOpacity
                     key={a.id ?? i}
+                    activeOpacity={0.7}
+                    onPress={() => toggle(a)}
                     style={[
                       s.row,
                       { flexDirection: 'column', alignItems: 'flex-start' },
@@ -105,13 +123,18 @@ export default function Notifications() {
                         <Text style={[s.annTitle, a.severity !== 'info' && { color: tone }]}>{a.title}</Text>
                       ) : null}
                     </View>
-                    <Text style={s.annBody}>{a.body}</Text>
-                    {a.published_at ? (
-                      <Text style={s.annDate}>
-                        {new Date(a.published_at).toLocaleDateString()}
-                      </Text>
-                    ) : null}
-                  </View>
+                    <Text style={s.annBody} numberOfLines={open === a.id ? undefined : 2}>
+                      {a.body}
+                    </Text>
+                    <View style={s.annFoot}>
+                      {a.published_at ? (
+                        <Text style={s.annDate}>
+                          {new Date(a.published_at).toLocaleDateString()}
+                        </Text>
+                      ) : <View />}
+                      {!readAt[a.id] ? <View style={s.newDot} /> : null}
+                    </View>
+                  </TouchableOpacity>
                 );
               })}
             </View>

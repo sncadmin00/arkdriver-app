@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { readMap, unreadCount } from '@/lib/announcements';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { fetchProfile, fetchLoads, fetchLoadDetail } from '@/lib/api';
+import { fetchProfile, fetchLoads, fetchLoadDetail, fetchAnnouncements } from '@/lib/api';
 import Logo from './Logo';
 
 const s = StyleSheet.create({
@@ -29,6 +31,13 @@ export default function Header() {
   const router = useRouter();
   const { t } = useTranslation();
   const [now, setNow] = useState(new Date());
+  const [seenAt, setSeenAt] = useState(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      readMap().then(setSeenAt);
+    }, [])
+  );
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30000);
@@ -37,6 +46,7 @@ export default function Header() {
 
   const { data } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
   const { data: loads } = useQuery({ queryKey: ['loads', 'active'], queryFn: () => fetchLoads() });
+  const { data: ann } = useQuery({ queryKey: ['announcements'], queryFn: fetchAnnouncements });
 
   const activeId = loads?.[0]?.id;
   const { data: detail } = useQuery({
@@ -48,7 +58,9 @@ export default function Header() {
   const driver = data?.driver;
   const comp = data?.compliance;
   const chatUnread = data?.chat?.unread ?? 0;
-  const unread = chatUnread > 0 || (comp?.gaps ?? 0) + (comp?.expiringSoon ?? 0) > 0;
+  const anns = ann?.announcements ?? [];
+  const urgent = unreadCount(anns, seenAt ?? {}) > 0;
+  const unread = chatUnread > 0 || urgent || (comp?.gaps ?? 0) + (comp?.expiringSoon ?? 0) > 0;
 
   const stops = detail?.stops ?? [];
   const next = stops.find((x) => x.current) ?? stops.find((x) => !x.complete);
