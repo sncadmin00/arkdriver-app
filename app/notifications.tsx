@@ -19,13 +19,17 @@ const s = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 4, marginRight: 12 },
   label: { color: '#E5E7EB', fontSize: 14, flex: 1, paddingRight: 10 },
   state: { fontSize: 12, fontWeight: '600' },
-  annTitle: { color: '#E5E7EB', fontSize: 14, fontWeight: '600' },
+  annTitle: { color: '#E5E7EB', fontSize: 14, fontWeight: '600', flex: 1 },
+  annHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  pin: { fontSize: 12 },
+  annDate: { color: '#6B7280', fontSize: 11, marginTop: 5 },
   annBody: { color: '#9CA3AF', fontSize: 13, marginTop: 4, lineHeight: 18 },
   empty: { color: '#6B7280', textAlign: 'center', marginTop: 50, fontSize: 14 },
   link: { color: '#F59E0B', fontWeight: '600', fontSize: 14, textAlign: 'center', paddingVertical: 14 },
 });
 
 const COLOR = { expired: '#EF4444', soon: '#EAB308', missing: '#6B7280' };
+const SEVERITY = { info: '#9CA3AF', warning: '#EAB308', critical: '#EF4444' };
 
 export default function Notifications() {
   const router = useRouter();
@@ -40,7 +44,9 @@ export default function Notifications() {
     ...(truck.data?.slots ?? []),
   ].filter((x) => x.required !== false && ['expired', 'soon', 'missing'].includes(x.state));
 
-  const anns = (Array.isArray(ann.data) ? ann.data : ann.data?.announcements ?? []).slice(0, 5);
+  const all = ann.data?.announcements ?? (Array.isArray(ann.data) ? ann.data : []);
+  // Pinned first, then newest — the office pins what must not be missed.
+  const anns = [...all].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)).slice(0, 10);
   const nothing = !slots.length && !anns.length;
 
   return (
@@ -81,12 +87,33 @@ export default function Notifications() {
           <>
             <Text style={s.section}>{t('notifications.announcements')}</Text>
             <View style={s.card}>
-              {anns.map((a, i) => (
-                <View key={a.id ?? i} style={[s.row, { flexDirection: 'column', alignItems: 'flex-start' }, i === anns.length - 1 && s.last]}>
-                  {a.title ? <Text style={s.annTitle}>{a.title}</Text> : null}
-                  <Text style={s.annBody}>{a.body ?? a.message ?? a.text}</Text>
-                </View>
-              ))}
+              {anns.map((a, i) => {
+                const tone = SEVERITY[a.severity] ?? SEVERITY.info;
+                return (
+                  <View
+                    key={a.id ?? i}
+                    style={[
+                      s.row,
+                      { flexDirection: 'column', alignItems: 'flex-start' },
+                      i === anns.length - 1 && s.last,
+                      a.severity && a.severity !== 'info' ? { borderLeftColor: tone, borderLeftWidth: 3 } : null,
+                    ]}
+                  >
+                    <View style={s.annHead}>
+                      {a.pinned ? <Text style={s.pin}>📌</Text> : null}
+                      {a.title ? (
+                        <Text style={[s.annTitle, a.severity !== 'info' && { color: tone }]}>{a.title}</Text>
+                      ) : null}
+                    </View>
+                    <Text style={s.annBody}>{a.body}</Text>
+                    {a.published_at ? (
+                      <Text style={s.annDate}>
+                        {new Date(a.published_at).toLocaleDateString()}
+                      </Text>
+                    ) : null}
+                  </View>
+                );
+              })}
             </View>
           </>
         ) : null}
