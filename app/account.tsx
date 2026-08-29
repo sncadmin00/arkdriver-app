@@ -56,8 +56,10 @@ export default function MoreScreen() {
   const { data: services } = useQuery({ queryKey: ['services'], queryFn: fetchServices });
   const { data: announcements } = useQuery({ queryKey: ['announcements'], queryFn: fetchAnnouncements });
 
+  const profileData = profile;
   const driver = profile?.driver;
   const truck = profile?.truck;
+  const carrier = profileData?.carrier;
   const emergency = profile?.support?.emergencyPhone;
   const isOff = driver?.status === 'off';
 
@@ -255,6 +257,27 @@ export default function MoreScreen() {
               );
             })}
           </View>
+
+          {carrier ? (
+            <>
+              <Text style={s.section}>CARRIER</Text>
+              <View style={s.card}>
+                {carrier.legalName ? <Text style={s.itemTitle}>{carrier.legalName}</Text> : null}
+                {(carrier.mc || carrier.dot) ? (
+                  <Text style={[s.itemSub, { marginTop: 6 }]}>
+                    {[carrier.mc ? `MC ${carrier.mc}` : null, carrier.dot ? `DOT ${carrier.dot}` : null]
+                      .filter(Boolean).join('  ·  ')}
+                  </Text>
+                ) : null}
+                {carrier.address ? <Text style={s.itemSub}>{carrier.address}</Text> : null}
+                {carrier.phone ? (
+                  <TouchableOpacity onPress={() => Linking.openURL(`tel:${String(carrier.phone).replace(/[^\d+]/g, '')}`)}>
+                    <Text style={[s.itemSub, { color: '#F59E0B', marginTop: 6 }]}>{carrier.phone}</Text>
+                  </TouchableOpacity>
+                ) : null}
+              </View>
+            </>
+          ) : null}
 
           <TouchableOpacity style={s.out} onPress={signOut}>
             <Text style={s.outText}>{t('more.signOut')}</Text>

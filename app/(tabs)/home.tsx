@@ -205,12 +205,6 @@ export default function HomeScreen() {
                 : trailer?.unit ?? trailer ?? '—'}
             </Text>
           </View>
-          {truck?.vin ? (
-            <View style={s.kv}>
-              <Text style={s.kvLabel}>VIN</Text>
-              <Text style={s.kvValue}>{truck.vin}</Text>
-            </View>
-          ) : null}
           <View style={s.kv}>
             <Text style={s.kvLabel}>{t('more.status')}</Text>
             <Text style={[s.kvValue, { color: isOff ? '#9CA3AF' : '#10B981' }]}>
@@ -229,24 +223,6 @@ export default function HomeScreen() {
             </Text>
           </TouchableOpacity>
 
-          {carrier ? (
-            <>
-              <View style={[s.divider, { marginTop: 16, marginBottom: 12 }]} />
-              {carrier.legalName ? <Text style={s.carrierName}>{carrier.legalName}</Text> : null}
-              {(carrier.mc || carrier.dot) ? (
-                <Text style={s.carrier}>
-                  {[carrier.mc ? `MC ${carrier.mc}` : null, carrier.dot ? `DOT ${carrier.dot}` : null]
-                    .filter(Boolean).join('  ·  ')}
-                </Text>
-              ) : null}
-              {carrier.address ? <Text style={s.carrier}>{carrier.address}</Text> : null}
-              {carrier.phone ? (
-                <TouchableOpacity onPress={() => Linking.openURL(`tel:${String(carrier.phone).replace(/[^\d+]/g, '')}`)}>
-                  <Text style={[s.carrier, { color: '#F59E0B' }]}>{carrier.phone}</Text>
-                </TouchableOpacity>
-              ) : null}
-            </>
-          ) : null}
         </View>
 
         <Text style={s.section}>{t('home.activeLoad')}</Text>
