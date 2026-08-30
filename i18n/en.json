@@ -74,7 +74,9 @@
     "apptNow": "due now",
     "apptLate": "{{time}} late",
     "pickupShort": "Pickup",
-    "deliveryShort": "Delivery"
+    "deliveryShort": "Delivery",
+    "grossLabel": "Gross this week",
+    "afterStatement": "Deductions apply once the statement is dispatched."
   },
   "loads": {
     "title": "Loads",
@@ -266,7 +268,18 @@
     "disputeMessage": "Question about the {{label}} deduction of {{amount}} for the week of {{week}}.",
     "payments": "PAYMENT HISTORY",
     "noPayments": "No payments recorded yet.",
-    "weekOf": "Week of {{week}}"
+    "weekOf": "Week of {{week}}",
+    "netReady": "NET TO YOU",
+    "ytdIncome": "Income year to date",
+    "grossYtd": "Freight gross",
+    "statementOut": "Statement dispatched — breakdown below.",
+    "netFinal": "NET TO YOU",
+    "companyFee": "Company share",
+    "breakdown": "BREAKDOWN",
+    "openStatement": "Open statement PDF",
+    "pickWeek": "Choose week",
+    "current": "current",
+    "noStatements": "No statements yet."
   },
   "expenses": {
     "title": "Expenses",

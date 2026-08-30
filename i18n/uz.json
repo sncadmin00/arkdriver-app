@@ -74,7 +74,9 @@
     "apptNow": "hozir",
     "apptLate": "{{time}} kechikish",
     "pickupShort": "Yuklash",
-    "deliveryShort": "Tushirish"
+    "deliveryShort": "Tushirish",
+    "grossLabel": "Shu hafta gross",
+    "afterStatement": "Ushlab qolishlar statement yuborilgandan keyin paydo bo'ladi."
   },
   "loads": {
     "title": "Yuklar",
@@ -266,7 +268,18 @@
     "disputeMessage": "{{week}} haftasidagi «{{label}}» ushlab qolish ({{amount}}) bo'yicha savol.",
     "payments": "TO'LOVLAR TARIXI",
     "noPayments": "Hozircha to'lov bo'lmagan.",
-    "weekOf": "{{week}} haftasi"
+    "weekOf": "{{week}} haftasi",
+    "netReady": "SIZGA SOF",
+    "ytdIncome": "Yil boshidan daromad",
+    "grossYtd": "Yuklar bo'yicha gross",
+    "statementOut": "Statement yuborildi — tafsilot quyida.",
+    "netFinal": "SIZGA SOF",
+    "companyFee": "Kompaniya ulushi",
+    "breakdown": "HISOB-KITOB",
+    "openStatement": "Statement PDF ni ochish",
+    "pickWeek": "Haftani tanlash",
+    "current": "joriy",
+    "noStatements": "Hozircha statement yo'q."
   },
   "expenses": {
     "title": "Xarajatlar",

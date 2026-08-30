@@ -164,7 +164,12 @@ export function mondayOf(d: Date) {
   const x = new Date(d);
   const day = (x.getDay() + 6) % 7;
   x.setDate(x.getDate() - day);
-  return x.toISOString().slice(0, 10);
+  // Format from local parts — toISOString() shifts to UTC and can roll
+  // into the next week for anyone west of Greenwich in the evening.
+  const y = x.getFullYear();
+  const m = String(x.getMonth() + 1).padStart(2, '0');
+  const dd = String(x.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
 }
 
 export function shiftWeek(iso: string, weeks: number) {
@@ -250,4 +255,10 @@ export async function fetchPlaces() {
 
 export async function savePlace(payload: { label: string; address: string; mode?: string; lat?: number; lng?: number }) {
   return apiPost<any>('/api/public/driver/map/places', payload);
+}
+
+export async function fetchStatementUrl(week: string) {
+  return apiGet<{ url: string; fileName?: string }>(
+    `/api/public/driver/settlement/${week}/statement/url`
+  );
 }

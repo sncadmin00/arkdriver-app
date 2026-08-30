@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { View as RNView, Modal, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { fetchSettlement, fetchDebts, fetchAccounting, fetchFuel, fetchTolls, fetchYtd, fetchTaxDocuments, fetchTaxDocumentUrl, fetchProfile, createBankLink, mondayOf, shiftWeek } from '@/lib/api';
+import { fetchSettlement, fetchDebts, fetchAccounting, fetchFuel, fetchTolls, fetchYtd, fetchTaxDocuments, fetchTaxDocumentUrl, fetchProfile, createBankLink, fetchStatementUrl, mondayOf, shiftWeek } from '@/lib/api';
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1F2937' },
@@ -44,6 +44,18 @@ const s = StyleSheet.create({
   strike: { color: '#6B7280', fontSize: 12, textDecorationLine: 'line-through', marginTop: 2 },
   rpm: { color: '#F59E0B', fontSize: 12, fontWeight: '600', marginTop: 3 },
   chev: { color: '#6B7280', fontSize: 18, marginLeft: 8 },
+  sheetWrap: { flex: 1, backgroundColor: '#000000AA', justifyContent: 'flex-end' },
+  sheetBox: { backgroundColor: '#1F2937', borderTopLeftRadius: 18, borderTopRightRadius: 18, padding: 20, paddingBottom: 36 },
+  sheetTitle: { color: '#6B7280', fontSize: 11, fontWeight: '700', letterSpacing: 0.6, marginBottom: 10 },
+  sheetCancel: { paddingVertical: 15, alignItems: 'center', marginTop: 6 },
+  weekRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, borderBottomColor: '#374151', borderBottomWidth: 1 },
+  weekRowDate: { color: '#FFFFFF', fontSize: 15 },
+  weekRowAmt: { color: '#E5E7EB', fontSize: 15, fontWeight: '600' },
+  weekRowTag: { color: '#F59E0B', fontSize: 12, fontWeight: '600' },
+  yearChip: { paddingHorizontal: 13, paddingVertical: 6, borderRadius: 14, marginRight: 8, backgroundColor: '#374151' },
+  yearChipOn: { backgroundColor: '#F59E0B' },
+  yearText: { color: '#9CA3AF', fontSize: 13, fontWeight: '600' },
+  yearTextOn: { color: '#0B0F14' },
   bankBtn: { borderColor: '#F59E0B', borderWidth: 1, borderRadius: 8, paddingVertical: 11, alignItems: 'center', marginTop: 14 },
   bankBtnText: { color: '#F59E0B', fontWeight: '600', fontSize: 14 },
   mBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#1F2937', paddingTop: 56, paddingBottom: 14, paddingHorizontal: 20 },
@@ -150,10 +162,21 @@ export default function PayScreen() {
   const prof = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
 
   const [viewer, setViewer] = useState(null);
+  const [pickWeek, setPickWeek] = useState(false);
+  const [pickYear, setPickYear] = useState(String(new Date().getFullYear()));
 
   const y = ytd.data?.ytd ?? ytd.data;
   const taxYears = tax.data?.years ?? tax.data?.documents ?? tax.data ?? [];
   const bank = prof.data?.bank;
+
+  async function openStatement() {
+    try {
+      const res = await fetchStatementUrl(week);
+      if (res?.url) setViewer(res.url);
+    } catch (e) {
+      Alert.alert(t('common.error'), e.message);
+    }
+  }
 
   async function openTax(year) {
     try {
@@ -205,7 +228,10 @@ export default function PayScreen() {
   const fines = applied.filter((a) => a.kind === 'fine' && a.week_of === week);
   const payment = (acc.data?.payments ?? []).find((p) => p.week_of === week);
 
+  const dispatched = settlement?.statementDispatched === true;
   const paid = settlement?.paid === true;
+  const freightGross = settlement?.freightGross
+    ?? (settlement?.loads ?? []).reduce((sum, l) => sum + (l.rate ?? l.pay ?? 0), 0);
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
@@ -218,10 +244,10 @@ export default function PayScreen() {
           <TouchableOpacity style={s.navBtn} onPress={() => setWeek(shiftWeek(week, -1))}>
             <Text style={s.navText}>{'‹'}</Text>
           </TouchableOpacity>
-          <View>
-            <Text style={s.week}>{fmtWeek(week)}</Text>
+          <TouchableOpacity onPress={() => setPickWeek(true)}>
+            <Text style={s.week}>{fmtWeek(week)} ▾</Text>
             <Text style={s.weekSub}>{atCurrent ? t('pay.currentWeek') : week}</Text>
-          </View>
+          </TouchableOpacity>
           <TouchableOpacity
             style={[s.navBtn, atCurrent && s.navOff]}
             disabled={atCurrent}
@@ -243,19 +269,13 @@ export default function PayScreen() {
         {st.error && <Text style={s.err}>{st.error.message}</Text>}
 
         {settlement && (
-          <View style={[s.hero, paid ? s.heroPaid : s.heroEst]}>
-            <Text style={s.heroLabel}>{paid ? t('pay.paid') : t('pay.estimate')}</Text>
-            <Text style={[s.heroAmount, paid ? s.heroPaidAmount : s.heroEstAmount]}>
-              {money(settlement.payable)}
-            </Text>
-            <Text style={[s.heroNote, { color: paid ? '#10B981' : '#EAB308' }]}>
-              {paid
-                ? payment?.paid_at
-                  ? t('pay.paidOn', { date: new Date(payment.paid_at).toLocaleDateString() })
-                  : t('pay.final')
-                : t('pay.estimateNote')}
-            </Text>
-          </View>
+            <View style={[s.hero, { borderColor: '#F59E0B' }]}>
+              <Text style={s.heroLabel}>{t('home.grossLabel')}</Text>
+              <Text style={[s.heroAmount, { color: '#F59E0B' }]}>{money(freightGross)}</Text>
+              <Text style={[s.heroNote, { color: '#6B7280' }]}>
+                {dispatched ? t('pay.statementOut') : t('home.afterStatement')}
+              </Text>
+            </View>
         )}
 
         {settlement && (
@@ -272,16 +292,16 @@ export default function PayScreen() {
                         <Text style={s.loadRef}>{l.reference}</Text>
                         <Text style={s.loadMiles}>{l.miles} mi</Text>
                       </View>
-                      <Text style={s.value}>{money(l.pay)}</Text>
+                      <Text style={s.value}>{money(l.rate ?? l.pay)}</Text>
                     </View>
                   ))}
                   <View style={s.divider} />
                   <View style={s.row}>
                     <Text style={s.total}>{t('pay.grossMiles', { miles: settlement.miles })}</Text>
                     <View style={{ alignItems: 'flex-end' }}>
-                      <Text style={s.total}>{money(settlement.gross)}</Text>
+                      <Text style={s.total}>{money(freightGross)}</Text>
                       {settlement.miles > 0 ? (
-                        <Text style={s.rpm}>{money(settlement.gross / settlement.miles)}/mi</Text>
+                        <Text style={s.rpm}>{money(freightGross / settlement.miles)}/mi</Text>
                       ) : null}
                     </View>
                   </View>
@@ -291,7 +311,61 @@ export default function PayScreen() {
           </>
         )}
 
-        {bonuses.length > 0 && (
+        {dispatched && settlement ? (
+          <>
+            <Text style={s.section}>{t('pay.breakdown')}</Text>
+            <View style={s.card}>
+              <View style={s.row}>
+                <Text style={s.label}>{t('home.grossLabel')}</Text>
+                <Text style={s.value}>{money(freightGross)}</Text>
+              </View>
+              {settlement.companyShare ? (
+                <View style={s.row}>
+                  <Text style={s.label}>
+                    {t('pay.companyFee')}
+                    {settlement.payRate ? ` (${100 - settlement.payRate}%)` : ''}
+                  </Text>
+                  <Text style={[s.value, s.neg]}>-{money(settlement.companyShare)}</Text>
+                </View>
+              ) : null}
+              <View style={s.row}>
+                <Text style={s.label}>{t('pay.gross')}</Text>
+                <Text style={s.value}>{money(settlement.gross)}</Text>
+              </View>
+              {settlement.additionTotal ? (
+                <View style={s.row}>
+                  <Text style={s.label}>{t('pay.additions')}</Text>
+                  <Text style={[s.value, s.pos]}>+{money(settlement.additionTotal)}</Text>
+                </View>
+              ) : null}
+              <View style={s.row}>
+                <Text style={s.label}>{t('pay.deductions')}</Text>
+                <Text style={[s.value, s.neg]}>-{money(settlement.deductionTotal)}</Text>
+              </View>
+              {settlement.carryIn ? (
+                <View style={s.row}>
+                  <Text style={s.label}>{t('pay.carriedIn')}</Text>
+                  <Text style={[s.value, settlement.carryIn < 0 && s.neg]}>{money(settlement.carryIn)}</Text>
+                </View>
+              ) : null}
+              <View style={s.divider} />
+              <View style={s.row}>
+                <Text style={s.total}>{paid ? t('pay.paid') : t('pay.netFinal')}</Text>
+                <Text style={[s.total, paid ? s.pos : { color: '#EAB308' }]}>
+                  {money(settlement.payable)}
+                </Text>
+              </View>
+              {settlement.payDescription ? (
+                <Text style={[s.empty, { marginTop: 10 }]}>{settlement.payDescription}</Text>
+              ) : null}
+              <TouchableOpacity style={s.bankBtn} onPress={openStatement}>
+                <Text style={s.bankBtnText}>{t('pay.openStatement')}</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : null}
+
+        {dispatched && bonuses.length > 0 && (
           <>
             <Text style={s.section}>{t('pay.bonuses')}</Text>
             <View style={s.card}>
@@ -305,7 +379,7 @@ export default function PayScreen() {
           </>
         )}
 
-        {fines.length > 0 && (
+        {dispatched && fines.length > 0 && (
           <>
             <Text style={s.section}>{t('pay.fines')}</Text>
             <View style={s.card}>
@@ -319,7 +393,7 @@ export default function PayScreen() {
           </>
         )}
 
-        {settlement && (settlement.additions ?? []).length > 0 && (
+        {dispatched && settlement && (settlement.additions ?? []).length > 0 && (
           <>
             <Text style={s.section}>{t('pay.additions')}</Text>
             <View style={s.card}>
@@ -333,7 +407,7 @@ export default function PayScreen() {
           </>
         )}
 
-        {settlement && (
+        {dispatched && settlement && (
           <>
             <Text style={s.section}>{t('pay.deductions')}</Text>
             <View style={s.card}>
@@ -388,9 +462,17 @@ export default function PayScreen() {
           <>
             <Text style={s.section}>{t('pay.ytd')}</Text>
             <View style={s.card}>
-              <Text style={s.heroLabel}>{t('pay.ytdNet')}</Text>
-              <Text style={[s.heroAmount, { fontSize: 30 }]}>{money(y.net)}</Text>
+              <Text style={s.heroLabel}>{t('pay.ytdIncome')}</Text>
+              <Text style={[s.heroAmount, { fontSize: 30 }]}>
+                {money(y.reportableTotal ?? y.net)}
+              </Text>
               <View style={s.divider} />
+              {y.freightGross ? (
+                <View style={s.row}>
+                  <Text style={s.label}>{t('pay.grossYtd')}</Text>
+                  <Text style={s.value}>{money(y.freightGross)}</Text>
+                </View>
+              ) : null}
               <View style={s.row}>
                 <Text style={s.label}>{t('pay.ytdGross')}</Text>
                 <View style={{ alignItems: 'flex-end' }}>
@@ -490,10 +572,10 @@ export default function PayScreen() {
           </TouchableOpacity>
         </View>
 
-        <TxnSection title={t('pay.fuel')} data={fuel.data} showGallons />
-        <TxnSection title={t('pay.tolls')} data={tolls.data} />
+        {dispatched ? <TxnSection title={t('pay.fuel')} data={fuel.data} showGallons /> : null}
+        {dispatched ? <TxnSection title={t('pay.tolls')} data={tolls.data} /> : null}
 
-        {debts.length > 0 && (
+        {dispatched && debts.length > 0 && (
           <>
             <Text style={s.section}>{t('pay.balances')}</Text>
             <View style={s.card}>
@@ -515,6 +597,77 @@ export default function PayScreen() {
           </>
         )}
       </ScrollView>
+
+      <Modal visible={pickWeek} transparent animationType="fade" onRequestClose={() => setPickWeek(false)}>
+        <View style={s.sheetWrap}>
+          <View style={s.sheetBox}>
+            <Text style={s.sheetTitle}>{t('pay.pickWeek')}</Text>
+
+            {(() => {
+              const payments = acc.data?.payments ?? [];
+              const years = [...new Set(payments.map((p) => String(p.week_of).slice(0, 4)))].sort().reverse();
+              const showYears = years.length > 1;
+
+              const rows = payments
+                .filter((p) => String(p.week_of).slice(0, 4) === pickYear)
+                .sort((a, b) => (a.week_of < b.week_of ? 1 : -1));
+
+              const thisYear = String(new Date().getFullYear());
+
+              return (
+                <>
+                  {showYears ? (
+                    <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+                      {years.map((yy) => (
+                        <TouchableOpacity
+                          key={yy}
+                          style={[s.yearChip, pickYear === yy && s.yearChipOn]}
+                          onPress={() => setPickYear(yy)}
+                        >
+                          <Text style={[s.yearText, pickYear === yy && s.yearTextOn]}>{yy}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  ) : null}
+
+                  <ScrollView style={{ maxHeight: 340 }}>
+                    {pickYear === thisYear ? (
+                      <TouchableOpacity
+                        style={s.weekRow}
+                        onPress={() => { setWeek(thisWeek); setPickWeek(false); }}
+                      >
+                        <Text style={s.weekRowDate}>{fmtWeek(thisWeek)}</Text>
+                        <Text style={s.weekRowTag}>{t('pay.current')}</Text>
+                      </TouchableOpacity>
+                    ) : null}
+
+                    {!rows.length && pickYear !== thisYear ? (
+                      <Text style={s.empty}>{t('pay.noStatements')}</Text>
+                    ) : null}
+
+                    {rows.map((p, i) => (
+                      <TouchableOpacity
+                        key={p.id ?? i}
+                        style={s.weekRow}
+                        onPress={() => { setWeek(p.week_of); setPickWeek(false); }}
+                      >
+                        <Text style={s.weekRowDate}>{fmtWeek(p.week_of)}</Text>
+                        <Text style={[s.weekRowAmt, p.status === 'paid' && s.pos]}>
+                          {money((p.amount_cents ?? 0) / 100)}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </>
+              );
+            })()}
+
+            <TouchableOpacity style={s.sheetCancel} onPress={() => setPickWeek(false)}>
+              <Text style={s.bankBtnText}>{t('common.cancel')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <Modal visible={!!viewer} animationType="slide" onRequestClose={() => setViewer(null)}>
         <View style={{ flex: 1, backgroundColor: '#0B0F14' }}>

@@ -74,7 +74,9 @@
     "apptNow": "сейчас",
     "apptLate": "опоздание {{time}}",
     "pickupShort": "Загрузка",
-    "deliveryShort": "Выгрузка"
+    "deliveryShort": "Выгрузка",
+    "grossLabel": "Гросс за неделю",
+    "afterStatement": "Удержания появятся после отправки статемента."
   },
   "loads": {
     "title": "Грузы",
@@ -266,7 +268,18 @@
     "disputeMessage": "Вопрос по удержанию «{{label}}» на {{amount}} за неделю {{week}}.",
     "payments": "ИСТОРИЯ ВЫПЛАТ",
     "noPayments": "Выплат пока не было.",
-    "weekOf": "Неделя {{week}}"
+    "weekOf": "Неделя {{week}}",
+    "netReady": "ЧИСТЫМИ К ВЫПЛАТЕ",
+    "ytdIncome": "Доход с начала года",
+    "grossYtd": "Гросс по грузам",
+    "statementOut": "Статемент отправлен — раскладка ниже.",
+    "netFinal": "ЧИСТЫМИ К ВЫПЛАТЕ",
+    "companyFee": "Доля компании",
+    "breakdown": "РАСЧЁТ",
+    "openStatement": "Открыть статемент PDF",
+    "pickWeek": "Выбрать неделю",
+    "current": "текущая",
+    "noStatements": "Статементов пока нет."
   },
   "expenses": {
     "title": "Расходы",

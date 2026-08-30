@@ -49,6 +49,7 @@ const s = StyleSheet.create({
   kvLabel: { color: '#9CA3AF', fontSize: 13 },
   kvValue: { color: '#E5E7EB', fontSize: 13, fontWeight: '600' },
   payRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
+  payLabel: { color: '#6B7280', fontSize: 11, fontWeight: '600', marginBottom: 2 },
   payAmount: { color: '#F59E0B', fontSize: 28, fontWeight: '800' },
   payMeta: { color: '#6B7280', fontSize: 12, marginTop: 4 },
   payRpm: { color: '#9CA3AF', fontSize: 13, fontWeight: '600' },
@@ -115,7 +116,10 @@ export default function HomeScreen() {
   const activeLoads = loads.data ?? [];
 
   const st = settlement.data?.settlement;
-  const rpm = st?.miles > 0 ? st.gross / st.miles : null;
+  // Until a statement is dispatched the only number anyone knows is freight gross.
+  // The 85% split and weekly deductions land later, so a net figure here would move.
+  const loadGross = st?.freightGross ?? (st?.loads ?? []).reduce((sum, l) => sum + (l.rate ?? l.pay ?? 0), 0);
+  const rpm = st?.miles > 0 && loadGross > 0 ? loadGross / st.miles : null;
 
   const list = (v) => (Array.isArray(v) ? v : v?.services ?? v?.announcements ?? v?.items ?? []);
   const svc = list(services.data);
@@ -347,7 +351,8 @@ export default function HomeScreen() {
             <TouchableOpacity style={s.card} onPress={() => router.push('/(tabs)/pay')}>
               <View style={s.payRow}>
                 <View>
-                  <Text style={s.payAmount}>{money(st.payable)}</Text>
+                  <Text style={s.payLabel}>{t('home.grossLabel')}</Text>
+                  <Text style={s.payAmount}>{money(loadGross)}</Text>
                   <Text style={s.payMeta}>
                     {t('home.weekMeta', { count: st.loadCount ?? 0, miles: st.miles ?? 0 })}
                   </Text>
