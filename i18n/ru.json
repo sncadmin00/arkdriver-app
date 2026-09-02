@@ -23,7 +23,8 @@
     "compliance": "Документы",
     "more": "Ещё",
     "map": "Карта",
-    "pay": "Оплата"
+    "pay": "Оплата",
+    "maintenance": "Обслуживание"
   },
   "home": {
     "welcome": "Добро пожаловать",
@@ -403,5 +404,26 @@
     "expired": "Просрочен",
     "missing": "Отсутствует",
     "viewDocs": "Открыть документы"
+  },
+  "maintenance": {
+    "title": "Обслуживание",
+    "ytdSpending": "Расходы в этом году",
+    "total": "Всего",
+    "allRecords": "Все записи",
+    "openIssues": "Открытые проблемы",
+    "noRecords": "Нет записей об обслуживании",
+    "createRecord": "Новая запись",
+    "date": "Дата",
+    "notes": "Заметки",
+    "nextDue": "Следующее обслуживание",
+    "cost": "Стоимость",
+    "description": "Описание",
+    "serviceType": "Тип обслуживания",
+    "unit": "Юнит",
+    "mileage": "Пробег",
+    "issuesFound": "Найденные проблемы",
+    "invoices": "Инвойсы",
+    "recordUpdated": "Запись обновлена",
+    "recordCreated": "Запись создана"
   }
 }

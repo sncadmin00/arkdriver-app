@@ -262,3 +262,60 @@ export async function fetchStatementUrl(week: string) {
     `/api/public/driver/settlement/${week}/statement/url`
   );
 }
+export async function fetchMaintenance() {
+  return apiGet<{ maintenance: any[] }>('/api/public/driver/maintenance');
+}
+
+export async function fetchMaintenanceDetail(id: string) {
+  return apiGet<any>(`/api/public/driver/maintenance/${id}`);
+}
+
+export async function fetchMaintenanceYTD() {
+  return apiGet<{ units: any[]; total: number }>('/api/public/driver/maintenance/ytd-summary');
+}
+
+export async function createMaintenance(payload: {
+  unitId: string;
+  serviceType: string;
+  mileageAtService: number;
+  cost: number;
+  description?: string;
+  issuesFound?: string[];
+  invoiceUrl?: string;
+  intervalMiles?: number;
+  notes?: string;
+}) {
+  return apiPost<any>('/api/public/driver/maintenance', payload);
+}
+
+export async function updateMaintenance(id: string, payload: {
+  status?: 'open' | 'closed';
+  notes?: string;
+}) {
+  return apiPost<any>(`/api/public/driver/maintenance/${id}`, payload);
+}
+
+export async function uploadMaintenanceInvoice(maintenanceId: string, file: {
+  uri: string;
+  name: string;
+  type: string;
+  size?: number;
+}) {
+  const formData = new FormData();
+  formData.append('file', file as any);
+  
+  const res = await fetch(
+    `${API_BASE}/api/public/driver/maintenance/${maintenanceId}/invoices`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        'Accept-Language': i18n.language || 'en',
+      } as any,
+      body: formData,
+    }
+  );
+  
+  if (!res.ok) throw await toApiError(res);
+  return res.json();
+}

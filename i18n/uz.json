@@ -23,7 +23,8 @@
     "compliance": "Hujjatlar",
     "more": "Yana",
     "map": "Xarita",
-    "pay": "To'lov"
+    "pay": "To'lov",
+    "maintenance": "Xizmat ko'rsatish"
   },
   "home": {
     "welcome": "Xush kelibsiz",
@@ -403,5 +404,26 @@
     "expired": "Muddati o'tgan",
     "missing": "Yo'q",
     "viewDocs": "Hujjatlarni ochish"
+  },
+  "maintenance": {
+    "title": "Xizmat ko'rsatish",
+    "ytdSpending": "Bu yil sarflandi",
+    "total": "Jami",
+    "allRecords": "Barcha yozuvlar",
+    "openIssues": "Ochiq muammolar",
+    "noRecords": "Hozircha xizmat yozuvi yo'q",
+    "createRecord": "Yozuv qo'shish",
+    "date": "Sana",
+    "notes": "Izohlar",
+    "nextDue": "Keyingi xizmat",
+    "cost": "Narx",
+    "description": "Tavsif",
+    "serviceType": "Xizmat turi",
+    "unit": "Avtomobil",
+    "mileage": "Km",
+    "issuesFound": "Topilgan muammolar",
+    "invoices": "Hisob-kitob",
+    "recordUpdated": "Yozuv yangilandi",
+    "recordCreated": "Yozuv yaratildi"
   }
 }

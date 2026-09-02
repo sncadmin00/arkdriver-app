@@ -9,6 +9,7 @@ import LoadsScreen from './loads';
 import MapScreen from './map';
 import PayScreen from './pay';
 import ComplianceScreen from './compliance';
+import MaintenanceScreen from './maintenance';
 
 const Tab = createBottomTabNavigator();
 
@@ -43,6 +44,7 @@ export default function TabsLayout() {
       <Tab.Screen name="loads" component={LoadsScreen} options={{ title: t('tabs.loads'), tabBarIcon: icon('📦') }} />
       <Tab.Screen name="map" component={MapScreen} options={{ title: t('tabs.map'), tabBarIcon: icon('🗺️') }} />
       <Tab.Screen name="pay" component={PayScreen} options={{ title: t('tabs.pay'), tabBarIcon: icon('💵') }} />
+      <Tab.Screen name="maintenance" component={MaintenanceScreen} options={{ title: t('tabs.maintenance'), tabBarIcon: icon('🔧') }} />
       <Tab.Screen name="compliance" component={ComplianceScreen} options={{ title: t('tabs.compliance'), tabBarIcon: icon('📋') }} />
     </Tab.Navigator>
   );

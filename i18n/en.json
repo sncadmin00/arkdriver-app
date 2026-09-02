@@ -23,7 +23,8 @@
     "compliance": "Compliance",
     "more": "More",
     "map": "Map",
-    "pay": "Pay"
+    "pay": "Pay",
+    "maintenance": "Maintenance"
   },
   "home": {
     "welcome": "Welcome",
@@ -403,5 +404,26 @@
     "expired": "Expired",
     "missing": "Missing",
     "viewDocs": "Open compliance"
+  },
+  "maintenance": {
+    "title": "Maintenance",
+    "ytdSpending": "This Year Spending",
+    "total": "Total",
+    "allRecords": "All Records",
+    "openIssues": "Open Issues",
+    "noRecords": "No maintenance records yet",
+    "createRecord": "Log Maintenance",
+    "date": "Date",
+    "notes": "Notes",
+    "nextDue": "Next Due",
+    "cost": "Cost",
+    "description": "Description",
+    "serviceType": "Service Type",
+    "unit": "Unit",
+    "mileage": "Mileage",
+    "issuesFound": "Issues Found",
+    "invoices": "Invoices",
+    "recordUpdated": "Record updated",
+    "recordCreated": "Record created"
   }
 }
