@@ -20,7 +20,7 @@
     "home": "Asosiy",
     "loads": "Yuklar",
     "chat": "Chat",
-    "compliance": "Hujjatlar",
+    "compliance": "Compliance",
     "more": "Yana",
     "map": "Xarita",
     "pay": "Daromad",
@@ -168,7 +168,7 @@
     "dispatch": "Dispecher"
   },
   "compliance": {
-    "title": "Hujjatlar",
+    "title": "Compliance",
     "myDocs": "Mening hujjatlarim",
     "truckFolder": "Trak papkasi",
     "allGood": "Barcha hujjatlar joyida.",
@@ -180,7 +180,13 @@
     "view": "Ochish",
     "share": "Yuborish",
     "managedByOffice": "Hujjatlarni ofis boshqaradi. Yangilash uchun dispecherga yuboring.",
-    "shareNote": "Havola 10 daqiqa amal qiladi."
+    "shareNote": "Havola 10 daqiqa amal qiladi.",
+    "inspections": "Tekshiruvlar",
+    "noInspections": "Hozircha tekshiruv yo'q.",
+    "preTrip": "Reysdan oldin",
+    "postTrip": "Reysdan keyin",
+    "defects": "Nuqson: {{count}}",
+    "clean": "Nuqsonsiz"
   },
   "more": {
     "title": "Yana",
@@ -214,7 +220,7 @@
     "inspectionSub": "Ko'rik ro'yxati va nuqson hisobotlari",
     "report": "Xabar berish",
     "truckmap": "Xarita",
-    "compliance": "Hujjatlar",
+    "compliance": "Compliance",
     "complianceSub": "CDL, tibbiy karta, DQ fayl"
   },
   "pay": {

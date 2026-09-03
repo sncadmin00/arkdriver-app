@@ -20,7 +20,7 @@
     "home": "Главная",
     "loads": "Грузы",
     "chat": "Чат",
-    "compliance": "Документы",
+    "compliance": "Compliance",
     "more": "Ещё",
     "map": "Карта",
     "pay": "Доход",
@@ -168,7 +168,7 @@
     "dispatch": "Диспетчер"
   },
   "compliance": {
-    "title": "Документы",
+    "title": "Compliance",
     "myDocs": "Мои документы",
     "truckFolder": "Папка трака",
     "allGood": "Все документы в порядке.",
@@ -180,7 +180,13 @@
     "view": "Открыть",
     "share": "Отправить",
     "managedByOffice": "Документами управляет офис. Чтобы обновить, отправьте документ диспетчеру.",
-    "shareNote": "Ссылка действует 10 минут."
+    "shareNote": "Ссылка действует 10 минут.",
+    "inspections": "Осмотры",
+    "noInspections": "Пока нет осмотров.",
+    "preTrip": "Перед рейсом",
+    "postTrip": "После рейса",
+    "defects": "Дефектов: {{count}}",
+    "clean": "Без дефектов"
   },
   "more": {
     "title": "Ещё",
@@ -214,7 +220,7 @@
     "inspectionSub": "Чеклист осмотра и отчёты о дефектах",
     "report": "Сообщить",
     "truckmap": "Карта",
-    "compliance": "Документы",
+    "compliance": "Compliance",
     "complianceSub": "CDL, медкарта, DQ файл"
   },
   "pay": {

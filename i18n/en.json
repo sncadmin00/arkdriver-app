@@ -20,7 +20,7 @@
     "home": "Home",
     "loads": "Loads",
     "chat": "Chat",
-    "compliance": "Documents",
+    "compliance": "Compliance",
     "more": "More",
     "map": "Map",
     "pay": "Income",
@@ -180,7 +180,13 @@
     "view": "View",
     "share": "Share",
     "managedByOffice": "Documents are managed by the office. To update one, send it to dispatch.",
-    "shareNote": "Link expires in 10 minutes."
+    "shareNote": "Link expires in 10 minutes.",
+    "inspections": "Inspections",
+    "noInspections": "No inspections yet.",
+    "preTrip": "Pre-trip",
+    "postTrip": "Post-trip",
+    "defects": "{{count}} defects",
+    "clean": "No defects"
   },
   "more": {
     "title": "More",
@@ -214,7 +220,7 @@
     "inspectionSub": "Pre-trip checklist and defect reports",
     "report": "Report",
     "truckmap": "Map",
-    "compliance": "Documents",
+    "compliance": "Compliance",
     "complianceSub": "CDL, medical card, DQ file"
   },
   "pay": {

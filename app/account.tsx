@@ -152,14 +152,9 @@ export default function MoreScreen() {
           <Text style={s.section}>{t('home.work')}</Text>
           <View style={[s.card, { marginBottom: 20 }]}>
 
-            <TouchableOpacity style={s.item} onPress={() => router.push('/compliance')}>
+            <TouchableOpacity style={[s.item, s.itemLast]} onPress={() => router.push('/compliance')}>
               <Text style={s.itemTitle}>{t('more.compliance')}</Text>
               <Text style={s.itemSub}>{t('more.complianceSub')}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={[s.item, s.itemLast]} onPress={() => router.push('/inspection')}>
-              <Text style={s.itemTitle}>{t('more.inspection')}</Text>
-              <Text style={s.itemSub}>{t('more.inspectionSub')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -174,29 +169,6 @@ export default function MoreScreen() {
               </TouchableOpacity>
             </>
           ) : null}
-
-          {svc.length > 0 && (
-            <>
-              <Text style={s.section}>{t('more.services')}</Text>
-              <View style={s.card}>
-                {svc.map((item: any, i: number) => {
-                  const soon = item.status && item.status !== 'live';
-                  return (
-                    <TouchableOpacity
-                      key={item.handle ?? i}
-                      style={[s.item, i === svc.length - 1 && s.itemLast]}
-                      disabled={soon}
-                      onPress={() => openService(item)}
-                    >
-                      <Text style={[s.itemTitle, soon && { color: '#6B7280' }]}>{item.name}</Text>
-                      {item.description ? <Text style={s.itemSub}>{item.description}</Text> : null}
-                      {soon ? <Text style={s.soon}>{t('more.comingSoon')}</Text> : null}
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </>
-          )}
 
           <Text style={s.section}>{t('more.language')}</Text>
           <View style={s.card}>

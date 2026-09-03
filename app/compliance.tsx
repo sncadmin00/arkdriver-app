@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchCompliance, fetchTruckDocuments, fetchDocumentUrl } from '@/lib/api';
+import { fetchCompliance, fetchTruckDocuments, fetchDocumentUrl, fetchInspections } from '@/lib/api';
 
 const STATE: Record<string, { color: string; bg: string }> = {
   ok:      { color: '#10B981', bg: '#10B98118' },
@@ -27,6 +27,13 @@ const s = StyleSheet.create({
   tabText: { color: '#9CA3AF', fontSize: 13, fontWeight: '600' },
   tabOnText: { color: '#0B0F14' },
   body: { padding: 20, paddingBottom: 50 },
+  inspCard: { backgroundColor: '#1F2937', borderRadius: 12, marginBottom: 12, borderColor: '#374151', borderWidth: 1, padding: 15 },
+  inspTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 },
+  inspType: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
+  inspDate: { color: '#9CA3AF', fontSize: 12, marginTop: 2 },
+  inspMeta: { color: '#6B7280', fontSize: 12, marginTop: 6 },
+  inspDefect: { color: '#FCA5A5', fontSize: 12, marginTop: 6 },
+  inspEmpty: { color: '#6B7280', fontSize: 13, textAlign: 'center', marginTop: 30 },
   banner: { borderRadius: 10, padding: 14, marginBottom: 18, borderWidth: 1 },
   bannerText: { fontSize: 13, fontWeight: '600', lineHeight: 19 },
   unit: { color: '#6B7280', fontSize: 12, marginBottom: 14 },
@@ -189,12 +196,14 @@ export default function ComplianceScreen() {
   const qc = useQueryClient();
   const { t } = useTranslation();
   const router = useRouter();
-  const [tab, setTab] = useState<'dq' | 'truck'>('dq');
+  const [tab, setTab] = useState<'dq' | 'truck' | 'insp'>('dq');
 
   const dq = useQuery({ queryKey: ['compliance'], queryFn: fetchCompliance });
   const truck = useQuery({ queryKey: ['truck-documents'], queryFn: fetchTruckDocuments });
 
-  const active = tab === 'dq' ? dq : truck;
+  const insp = useQuery({ queryKey: ['inspections'], queryFn: () => fetchInspections(20) });
+  const active = tab === 'dq' ? dq : tab === 'truck' ? truck : insp;
+  const inspList = Array.isArray(insp.data) ? insp.data : insp.data?.inspections ?? [];
   const slots: any[] = active.data?.slots ?? [];
   const shown = slots.filter((x: any) => x.required !== false || x.documentId);
 
@@ -204,13 +213,16 @@ export default function ComplianceScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={s.back}>← {t('common.back')}</Text>
         </TouchableOpacity>
-        <Text style={s.title}>{t('more.compliance')}</Text>
+        <Text style={s.title}>{t('compliance.title')}</Text>
         <View style={s.tabs}>
           <TouchableOpacity style={[s.tab, tab === 'dq' && s.tabOn]} onPress={() => setTab('dq')}>
             <Text style={[s.tabText, tab === 'dq' && s.tabOnText]}>{t('compliance.myDocs')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[s.tab, tab === 'truck' && s.tabOn]} onPress={() => setTab('truck')}>
             <Text style={[s.tabText, tab === 'truck' && s.tabOnText]}>{t('compliance.truckFolder')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[s.tab, tab === 'insp' && s.tabOn]} onPress={() => setTab('insp')}>
+            <Text style={[s.tabText, tab === 'insp' && s.tabOnText]}>{t('compliance.inspections')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -240,6 +252,38 @@ export default function ComplianceScreen() {
             {truck.data.truck.vin ? ` · VIN ${truck.data.truck.vin}` : ''}
           </Text>
         ) : null}
+
+        {tab === 'insp' && !insp.isLoading && inspList.length === 0 ? (
+          <Text style={s.inspEmpty}>{t('compliance.noInspections')}</Text>
+        ) : null}
+
+        {tab === 'insp' && inspList.map((r: any) => (
+          <View key={r.id} style={s.inspCard}>
+            <View style={s.inspTop}>
+              <View style={{ flex: 1 }}>
+                <Text style={s.inspType}>
+                  {r.inspectionType === 'post_trip' ? t('compliance.postTrip') : t('compliance.preTrip')}
+                </Text>
+                <Text style={s.inspDate}>
+                  {r.submittedAt ? new Date(r.submittedAt).toLocaleString() : '—'}
+                </Text>
+              </View>
+              <View style={[s.pill, { backgroundColor: r.hasDefects ? '#EF444418' : '#10B98118' }]}>
+                <Text style={[s.pillText, { color: r.hasDefects ? '#EF4444' : '#10B981' }]}>
+                  {r.hasDefects ? t('compliance.defects', { count: r.defectCount ?? 0 }) : t('compliance.clean')}
+                </Text>
+              </View>
+            </View>
+            <Text style={s.inspMeta}>
+              {r.truckUnit ? `Unit ${r.truckUnit}` : '—'}
+              {r.trailerUnit ? ` · ${r.trailerUnit}` : ''}
+              {typeof r.odometer === 'number' ? ` · ${r.odometer.toLocaleString()} mi` : ''}
+            </Text>
+            {(r.defects ?? []).map((d: any) => (
+              <Text key={d.id} style={s.inspDefect}>⚠️ {d.itemLabel}{d.note ? ` — ${d.note}` : ''}</Text>
+            ))}
+          </View>
+        ))}
 
         {shown.map((slot: any) => (
           <Slot key={slot.key} slot={slot} shareable={tab === 'truck'} />
