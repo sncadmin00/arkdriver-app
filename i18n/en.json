@@ -20,11 +20,13 @@
     "home": "Home",
     "loads": "Loads",
     "chat": "Chat",
-    "compliance": "Compliance",
+    "compliance": "Documents",
     "more": "More",
     "map": "Map",
-    "pay": "Pay",
-    "maintenance": "Maintenance"
+    "pay": "Income",
+    "maintenance": "Maintenance",
+    "income": "Income",
+    "expenses": "Expenses"
   },
   "home": {
     "welcome": "Welcome",

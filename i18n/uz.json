@@ -23,8 +23,10 @@
     "compliance": "Hujjatlar",
     "more": "Yana",
     "map": "Xarita",
-    "pay": "To'lov",
-    "maintenance": "Xizmat ko'rsatish"
+    "pay": "Daromad",
+    "maintenance": "Xizmat ko'rsatish",
+    "income": "Daromad",
+    "expenses": "Xarajatlar"
   },
   "home": {
     "welcome": "Xush kelibsiz",
