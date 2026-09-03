@@ -213,7 +213,9 @@
     "inspection": "Ko'rik",
     "inspectionSub": "Ko'rik ro'yxati va nuqson hisobotlari",
     "report": "Xabar berish",
-    "truckmap": "Xarita"
+    "truckmap": "Xarita",
+    "compliance": "Hujjatlar",
+    "complianceSub": "CDL, tibbiy karta, DQ fayl"
   },
   "pay": {
     "title": "To'lov",

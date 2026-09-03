@@ -4,7 +4,7 @@ import { WebView } from 'react-native-webview';
 import { Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchCompliance, fetchTruckDocuments, fetchDocumentUrl } from '@/lib/api';
 
@@ -19,6 +19,7 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1F2937' },
   container: { flex: 1, backgroundColor: '#0B0F14' },
   header: { backgroundColor: '#1F2937', paddingHorizontal: 20, paddingBottom: 12 },
+  back: { color: '#F59E0B', fontSize: 15, fontWeight: '600', marginBottom: 10 },
   title: { fontSize: 24, fontWeight: 'bold', color: '#FFFFFF' },
   tabs: { flexDirection: 'row', marginTop: 14 },
   tab: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 14, marginRight: 8, backgroundColor: '#374151' },
@@ -187,6 +188,7 @@ function Banner({ summary }: { summary: any }) {
 export default function ComplianceScreen() {
   const qc = useQueryClient();
   const { t } = useTranslation();
+  const router = useRouter();
   const [tab, setTab] = useState<'dq' | 'truck'>('dq');
 
   const dq = useQuery({ queryKey: ['compliance'], queryFn: fetchCompliance });
@@ -199,7 +201,10 @@ export default function ComplianceScreen() {
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <View style={s.header}>
-        <Text style={s.title}>{t('compliance.title')}</Text>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={s.back}>← {t('common.back')}</Text>
+        </TouchableOpacity>
+        <Text style={s.title}>{t('more.compliance')}</Text>
         <View style={s.tabs}>
           <TouchableOpacity style={[s.tab, tab === 'dq' && s.tabOn]} onPress={() => setTab('dq')}>
             <Text style={[s.tabText, tab === 'dq' && s.tabOnText]}>{t('compliance.myDocs')}</Text>

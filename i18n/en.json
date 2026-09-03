@@ -213,7 +213,9 @@
     "inspection": "Inspection",
     "inspectionSub": "Pre-trip checklist and defect reports",
     "report": "Report",
-    "truckmap": "Map"
+    "truckmap": "Map",
+    "compliance": "Documents",
+    "complianceSub": "CDL, medical card, DQ file"
   },
   "pay": {
     "title": "Pay",

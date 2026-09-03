@@ -213,7 +213,9 @@
     "inspection": "Осмотр",
     "inspectionSub": "Чеклист осмотра и отчёты о дефектах",
     "report": "Сообщить",
-    "truckmap": "Карта"
+    "truckmap": "Карта",
+    "compliance": "Документы",
+    "complianceSub": "CDL, медкарта, DQ файл"
   },
   "pay": {
     "title": "Оплата",
