@@ -152,7 +152,6 @@ export default function MoreScreen() {
           <Text style={s.section}>{t('home.work')}</Text>
           <View style={[s.card, { marginBottom: 20 }]}>
 
-            </TouchableOpacity>
 
             <TouchableOpacity style={[s.item, s.itemLast]} onPress={() => router.push('/inspection')}>
               <Text style={s.itemTitle}>{t('more.inspection')}</Text>
