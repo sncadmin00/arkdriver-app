@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator } from 'expo-router/js-tabs';
 import { Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import supabase from '@/lib/supabase';

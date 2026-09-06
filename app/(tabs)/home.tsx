@@ -82,9 +82,15 @@ const STATUS_COLORS = {
 function cityState(addr) {
   const lines = String(addr ?? '').split('\n').map((x) => x.trim()).filter(Boolean);
   const last = lines[lines.length - 1] ?? '';
-  const m = last.match(/^(.+?),\s*([A-Za-z]{2})\b/);
+  // Anchor at the end: the city is the segment right before the state code.
+  const m = last.match(/([^,]+),\s*([A-Za-z]{2})(?:\s+\d{5}(?:-\d{4})?)?\.?\s*$/);
   if (!m) return last;
-  const city = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
+  const city = m[1]
+    .trim()
+    .toLowerCase()
+    // Brokers often omit the comma after a unit number: "suite 100 northlake".
+    .replace(/^(?:suite|ste\.?|apt\.?|apartment|unit|bldg\.?|building|fl\.?|floor|rm\.?|room|dock|door|#)\s*[\w-]*\s+/i, '')
+    .replace(/\b[a-z]/g, (c) => c.toUpperCase());
   return `${city}, ${m[2].toUpperCase()}`;
 }
 
