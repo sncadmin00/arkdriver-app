@@ -2,7 +2,7 @@
   "expo": {
     "name": "ARK Driver",
     "slug": "arkdriver-app",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "scheme": "driver",
@@ -27,10 +27,15 @@
         "NSCameraUsageDescription": "ARK Driver uses the camera so you can photograph receipts, invoices and inspection findings and attach them to your expense and maintenance records.",
         "NSPhotoLibraryUsageDescription": "ARK Driver needs access to your photo library so you can attach existing receipt and document photos to your expense records.",
         "NSLocationWhenInUseUsageDescription": "ARK Driver uses your location to show your position on the truck map, calculate routes and mileage for your assigned loads, and attach the location to incident reports you submit."
-      }
+      },
+      "icon": "./assets/icon.png"
     },
     "android": {
-      "package": "com.arkcarriers.driver"
+      "package": "com.arkcarriers.driver",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B0F14"
+      }
     },
     "plugins": [
       "expo-router",
@@ -39,13 +44,23 @@
       "expo-secure-store",
       "expo-sharing",
       "expo-status-bar",
-      "react-native-document-scanner-plugin"
+      "react-native-document-scanner-plugin",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0B0F14"
+        }
+      ]
     ],
     "extra": {
       "router": {},
       "eas": {
         "projectId": "eaa9fa2f-34f2-4f72-bbd0-34e750d75824"
       }
-    }
+    },
+    "icon": "./assets/icon.png"
   }
 }
