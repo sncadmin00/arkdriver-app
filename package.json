@@ -13,6 +13,7 @@
     "@tanstack/react-query": "^5.102.6",
     "expo": "^57.0.0",
     "expo-constants": "~57.0.17",
+    "expo-dev-client": "~57.0.19",
     "expo-image-picker": "~57.0.16",
     "expo-linking": "~57.0.9",
     "expo-localization": "~57.0.1",

@@ -436,5 +436,22 @@
     "recordUpdated": "Record updated",
     "recordCreated": "Record created",
     "scanReceipt": "Photo"
+  },
+  "deleteAccount": {
+    "entry": "Delete account",
+    "title": "Delete account",
+    "intro": "This sends a request to your carrier to close your ARK Driver account. Your sign-in will be revoked and your personal profile removed.",
+    "keptTitle": "WHAT YOUR CARRIER KEEPS",
+    "keptInspections": "Inspection and incident reports required by FMCSA",
+    "keptDocs": "Load paperwork you submitted (BOL, POD)",
+    "keptPay": "Settlement and payroll records",
+    "reasonLabel": "Reason (optional)",
+    "reasonHint": "Let your office know why, if you want to.",
+    "action": "Request account deletion",
+    "confirmTitle": "Delete your account?",
+    "confirmBody": "Your carrier will be notified and your access will be revoked. This cannot be undone from the app.",
+    "confirmAction": "Request deletion",
+    "pendingTitle": "Deletion requested",
+    "pendingBody": "You asked to delete your account on {{date}}. Your carrier is processing the request. Contact your dispatch office if you change your mind."
   }
 }

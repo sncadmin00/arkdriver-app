@@ -319,3 +319,20 @@ export async function uploadMaintenanceInvoice(maintenanceId: string, file: {
   if (!res.ok) throw await toApiError(res);
   return res.json();
 }
+
+export async function fetchDeletionRequest() {
+  return apiGet<{ request: null | {
+    requestId: string;
+    status: 'pending' | 'completed' | 'rejected';
+    requestedAt: string;
+    reason: string | null;
+    processedAt: string | null;
+  } }>('/api/public/driver/account/deletion-request');
+}
+
+export async function requestAccountDeletion(reason?: string) {
+  return apiPost<{ request: { requestId: string; status: string; requestedAt: string }; created: boolean }>(
+    '/api/public/driver/account/deletion-request',
+    reason ? { reason } : {}
+  );
+}

@@ -216,6 +216,15 @@ export default function MoreScreen() {
             </>
           ) : null}
 
+          <TouchableOpacity
+            style={{ paddingVertical: 14, alignItems: 'center', marginBottom: 4 }}
+            onPress={() => router.push('/account-delete')}
+          >
+            <Text style={{ color: '#EF4444', fontSize: 14, fontWeight: '600' }}>
+              {t('deleteAccount.entry')}
+            </Text>
+          </TouchableOpacity>
+
           <TouchableOpacity style={s.out} onPress={signOut}>
             <Text style={s.outText}>{t('more.signOut')}</Text>
           </TouchableOpacity>

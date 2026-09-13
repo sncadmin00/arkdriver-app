@@ -436,5 +436,22 @@
     "recordUpdated": "Yozuv yangilandi",
     "recordCreated": "Yozuv yaratildi",
     "scanReceipt": "Suratga olish"
+  },
+  "deleteAccount": {
+    "entry": "Akkauntni o'chirish",
+    "title": "Akkauntni o'chirish",
+    "intro": "Bu tashuvchiga ARK Driver akkauntingizni yopish so'rovini yuboradi. Kirish bekor qilinadi, shaxsiy profil o'chiriladi.",
+    "keptTitle": "TASHUVCHIDA QOLADIGAN MAʼLUMOTLAR",
+    "keptInspections": "FMCSA talab qiladigan tekshiruv va hodisa hisobotlari",
+    "keptDocs": "Siz yuklagan yuk hujjatlari (BOL, POD)",
+    "keptPay": "Hisob-kitob va toʻlov yozuvlari",
+    "reasonLabel": "Sabab (ixtiyoriy)",
+    "reasonHint": "Xohlasangiz, ofisga sababni yozing.",
+    "action": "Akkauntni o'chirishni so'rash",
+    "confirmTitle": "Akkaunt o'chirilsinmi?",
+    "confirmBody": "Tashuvchi xabardor qilinadi, kirish bekor qilinadi. Buni ilovadan qaytarib bo'lmaydi.",
+    "confirmAction": "So'rov yuborish",
+    "pendingTitle": "So'rov yuborildi",
+    "pendingBody": "Siz {{date}} kuni akkauntni o'chirishni so'radingiz. Tashuvchi so'rovni ko'rib chiqmoqda. Fikringiz o'zgarsa, dispetcherga murojaat qiling."
   }
 }
