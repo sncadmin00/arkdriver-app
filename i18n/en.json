@@ -434,6 +434,7 @@
     "issuesFound": "Issues Found",
     "invoices": "Invoices",
     "recordUpdated": "Record updated",
-    "recordCreated": "Record created"
+    "recordCreated": "Record created",
+    "scanReceipt": "Photo"
   }
 }

@@ -434,6 +434,7 @@
     "issuesFound": "Topilgan muammolar",
     "invoices": "Hisob-kitob",
     "recordUpdated": "Yozuv yangilandi",
-    "recordCreated": "Yozuv yaratildi"
+    "recordCreated": "Yozuv yaratildi",
+    "scanReceipt": "Suratga olish"
   }
 }

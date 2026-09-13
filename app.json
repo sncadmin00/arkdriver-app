@@ -15,8 +15,18 @@
           "hammer",
           "comgooglemaps",
           "maps",
+          "waze",
+          "truckerpath",
+          "com.sygic.truck",
+          "hammer",
+          "comgooglemaps",
+          "maps",
           "waze"
-        ]
+        ],
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "ARK Driver uses the camera so you can photograph receipts, invoices and inspection findings and attach them to your expense and maintenance records.",
+        "NSPhotoLibraryUsageDescription": "ARK Driver needs access to your photo library so you can attach existing receipt and document photos to your expense records.",
+        "NSLocationWhenInUseUsageDescription": "ARK Driver uses your location to show your position on the truck map, calculate routes and mileage for your assigned loads, and attach the location to incident reports you submit."
       }
     },
     "android": {
@@ -28,7 +38,14 @@
       "expo-sqlite",
       "expo-secure-store",
       "expo-sharing",
-      "expo-status-bar"
-    ]
+      "expo-status-bar",
+      "react-native-document-scanner-plugin"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "eaa9fa2f-34f2-4f72-bbd0-34e750d75824"
+      }
+    }
   }
 }

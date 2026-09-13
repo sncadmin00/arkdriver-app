@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
+import DocumentScanner, { ResponseType } from 'react-native-document-scanner-plugin';
 import { uploadDocument, ApiError } from '@/lib/api';
 
 const s = StyleSheet.create({
@@ -43,23 +44,32 @@ export default function UploadDoc() {
   const label = String(docKey ?? 'doc').toUpperCase();
 
   async function capture(fromLibrary: boolean) {
-    const perm = fromLibrary
-      ? await ImagePicker.requestMediaLibraryPermissionsAsync()
-      : await ImagePicker.requestCameraPermissionsAsync();
+    if (!fromLibrary) {
+      try {
+        const { scannedImages } = await DocumentScanner.scanDocument({
+          responseType: ResponseType.Base64,
+          croppedImageQuality: 40,
+          maxNumDocuments: 1,
+        });
+        const b64 = scannedImages?.[0];
+        if (b64) setPhoto({ uri: `data:image/jpeg;base64,${b64}`, base64: b64 });
+      } catch (e: any) {
+        Alert.alert('Scanner error', e?.message ?? 'Could not open scanner');
+      }
+      return;
+    }
+
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
       Alert.alert('Permission needed', 'Allow access to continue.');
       return;
     }
-    const opts: ImagePicker.ImagePickerOptions = {
+    const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       quality: 0.4,
       base64: true,
       allowsEditing: false,
-    };
-    const res = fromLibrary
-      ? await ImagePicker.launchImageLibraryAsync(opts)
-      : await ImagePicker.launchCameraAsync(opts);
-
+    });
     if (res.canceled || !res.assets?.[0]?.base64) return;
     setPhoto({ uri: res.assets[0].uri, base64: res.assets[0].base64! });
   }

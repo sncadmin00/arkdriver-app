@@ -434,6 +434,7 @@
     "issuesFound": "Найденные проблемы",
     "invoices": "Инвойсы",
     "recordUpdated": "Запись обновлена",
-    "recordCreated": "Запись создана"
+    "recordCreated": "Запись создана",
+    "scanReceipt": "Снять фото"
   }
 }

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
+import DocumentScanner from 'react-native-document-scanner-plugin';
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1F2937' },
@@ -36,18 +37,11 @@ export default function AddExpenseScreen() {
   const [photo, setPhoto] = useState<string | null>(null);
 
   const handleScanDocument = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Camera access required');
-      return;
-    }
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [8.5, 11],
-      quality: 0.9,
-    });
-    if (!result.canceled) {
-      setPhoto(result.assets[0].uri);
+    try {
+      const { scannedImages } = await DocumentScanner.scanDocument({ maxNumDocuments: 1 });
+      if (scannedImages?.length) setPhoto(scannedImages[0]);
+    } catch (e: any) {
+      Alert.alert(t('common.error'), e?.message ?? 'Scanner failed');
     }
   };
 
