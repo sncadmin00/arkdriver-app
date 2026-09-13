@@ -194,7 +194,7 @@
     "driverId": "Driver ID",
     "truck": "Truck",
     "vin": "VIN",
-    "status": "Status",
+    "status": "Availability",
     "availability": "AVAILABILITY",
     "onDuty": "You are available for dispatch.",
     "offDuty": "You are off duty. Dispatch will not assign new loads.",

@@ -110,6 +110,10 @@ export default function LoadsScreen() {
                 <View style={styles.footer}>
                   <Text style={styles.miles}>{t('loads.miles', { count: item.miles })}</Text>
                   {(() => {
+                    // A finished load has no appointment left to count down to —
+                    // showing "8d late" on a delivered, paid load is just noise.
+                    const ACTIVE = ['booked', 'dispatched', 'at_pickup', 'in_transit', 'at_delivery'];
+                    if (!ACTIVE.includes(item.status)) return null;
                     const beforeTransit = ['booked', 'dispatched', 'at_pickup'].includes(item.status);
                     return (
                       <Countdown
