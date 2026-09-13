@@ -81,6 +81,13 @@ function fmtWeek(iso) {
 }
 
 
+// "2026-08-24" parses as UTC midnight and renders as the previous day in US
+// timezones. Treat a bare date as local.
+function localDate(value) {
+  const s = String(value);
+  return new Date(s.length === 10 ? `${s}T00:00:00` : s);
+}
+
 function TxnSection({ title, data, showGallons }) {
   const { t: tr } = useTranslation();
   const rows = data?.transactions ?? data?.items ?? [];
@@ -100,7 +107,7 @@ function TxnSection({ title, data, showGallons }) {
               <View style={{ flex: 1, paddingRight: 12 }}>
                 <Text style={s.loadRef}>{r.location ?? r.description ?? '—'}</Text>
                 <Text style={s.loadMiles}>
-                  {r.date ? new Date(r.date).toLocaleDateString() : ''}
+                  {r.date ? localDate(r.date).toLocaleDateString() : ''}
                   {showGallons && r.gallons ? ` · ${r.gallons} gal` : ''}
                   {showGallons && r.pricePerGallon ? ` @ ${money(r.pricePerGallon)}` : ''}
                   {r.unit ? ` · unit ${r.unit}` : ''}
@@ -125,7 +132,7 @@ function TxnSection({ title, data, showGallons }) {
               </View>
             ) : null}
             <View style={s.row}>
-              <Text style={s.label}>{t('pay.gross')}</Text>
+              <Text style={s.label}>{tr('pay.gross')}</Text>
               <Text style={s.value}>{money(t.gross)}</Text>
             </View>
             {t.discount ? (
@@ -411,15 +418,40 @@ export default function PayScreen() {
           <>
             <Text style={s.section}>{t('pay.deductions')}</Text>
             <View style={s.card}>
-              {(settlement.deductions ?? []).map((d, i) => (
-                <TouchableOpacity key={i} style={s.row} onPress={() => dispute(d)}>
-                  <Text style={s.label}>{d.label}</Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={[s.value, s.neg]}>-{money(d.amount)}</Text>
-                    <Text style={s.chev}>›</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
+              {(() => {
+                // Fuel and tolls are itemised in their own sections further down.
+                // Here they collapse into one line each, so the deduction list
+                // stays readable instead of repeating dozens of transactions.
+                const ROLLED = { fuel: t('pay.fuel'), tolls: t('pay.tolls') };
+                const rows = [];
+                const sums = {};
+                for (const d of settlement.deductions ?? []) {
+                  if (ROLLED[d.category]) {
+                    sums[d.category] = (sums[d.category] ?? 0) + d.amount;
+                  } else {
+                    rows.push(d);
+                  }
+                }
+                return (
+                  <>
+                    {rows.map((d, i) => (
+                      <TouchableOpacity key={`d${i}`} style={s.row} onPress={() => dispute(d)}>
+                        <Text style={s.label}>{d.label}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                          <Text style={[s.value, s.neg]}>-{money(d.amount)}</Text>
+                          <Text style={s.chev}>›</Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                    {Object.keys(sums).map((k) => (
+                      <View key={k} style={s.row}>
+                        <Text style={s.label}>{ROLLED[k]}</Text>
+                        <Text style={[s.value, s.neg]}>-{money(sums[k])}</Text>
+                      </View>
+                    ))}
+                  </>
+                );
+              })()}
               <View style={s.divider} />
               <View style={s.row}>
                 <Text style={s.total}>{t('pay.total')}</Text>

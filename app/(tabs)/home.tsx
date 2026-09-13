@@ -120,6 +120,11 @@ export default function HomeScreen() {
   const comp = profile.data?.compliance;
 
   const activeLoads = loads.data ?? [];
+  // A driver hauling freight is not "ready" — show what they are actually doing.
+  // Availability stays the dispatcher's field; this line is the driver's view of it.
+  const onLoad = activeLoads.find((l: any) =>
+    ['dispatched', 'at_pickup', 'in_transit', 'at_delivery'].includes(l?.status)
+  )?.status ?? null;
 
   const st = settlement.data?.settlement;
   // Until a statement is dispatched the only number anyone knows is freight gross.
@@ -273,9 +278,13 @@ export default function HomeScreen() {
           </View>
           <View style={s.kv}>
             <Text style={s.kvLabel}>{t('more.status')}</Text>
-            <Text style={[s.kvValue, { color: isOff ? '#9CA3AF' : '#10B981' }]}>
+            <Text style={[s.kvValue, { color: isOff ? '#9CA3AF' : onLoad ? '#F59E0B' : '#10B981' }]}>
               {isOff && driver?.readyAt
                 ? t('home.offUntil', { time: new Date(driver.readyAt).toLocaleString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' }) })
+                : isOff
+                ? driver?.status ?? '—'
+                : onLoad
+                ? onLoad.replace('_', ' ')
                 : driver?.status ?? '—'}
             </Text>
           </View>
