@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { createBottomTabNavigator } from 'expo-router/js-tabs';
-import { Text } from 'react-native';
+import { HomeIcon, LoadsIcon, MapIcon, IncomeIcon, ExpensesIcon } from '@/components/TabIcons';
 import { useTranslation } from 'react-i18next';
 import supabase from '@/lib/supabase';
 import HomeScreen from './home';
@@ -12,7 +12,7 @@ import ExpensesScreen from './expenses';
 
 const Tab = createBottomTabNavigator();
 
-const icon = (glyph) => ({ color }) => <Text style={{ fontSize: 20, color }}>{glyph}</Text>;
+const icon = (Cmp) => ({ color }) => <Cmp color={color} />;
 
 export default function TabsLayout() {
   const router = useRouter();
@@ -39,11 +39,11 @@ export default function TabsLayout() {
         tabBarStyle: { backgroundColor: '#1F2937', borderTopColor: '#374151' },
       }}
     >
-      <Tab.Screen name="home" component={HomeScreen} options={{ title: t('tabs.home'), tabBarIcon: icon('🏠') }} />
-      <Tab.Screen name="loads" component={LoadsScreen} options={{ title: t('tabs.loads'), tabBarIcon: icon('📦') }} />
-      <Tab.Screen name="map" component={MapScreen} options={{ title: t('tabs.map'), tabBarIcon: icon('🗺️') }} />
-      <Tab.Screen name="income" component={IncomeScreen} options={{ title: t('tabs.income'), tabBarIcon: icon('💰') }} />
-      <Tab.Screen name="expenses" component={ExpensesScreen} options={{ title: t('tabs.expenses'), tabBarIcon: icon('💸') }} />
+      <Tab.Screen name="home" component={HomeScreen} options={{ title: t('tabs.home'), tabBarIcon: icon(HomeIcon) }} />
+      <Tab.Screen name="loads" component={LoadsScreen} options={{ title: t('tabs.loads'), tabBarIcon: icon(LoadsIcon) }} />
+      <Tab.Screen name="map" component={MapScreen} options={{ title: t('tabs.map'), tabBarIcon: icon(MapIcon) }} />
+      <Tab.Screen name="income" component={IncomeScreen} options={{ title: t('tabs.income'), tabBarIcon: icon(IncomeIcon) }} />
+      <Tab.Screen name="expenses" component={ExpensesScreen} options={{ title: t('tabs.expenses'), tabBarIcon: icon(ExpensesIcon) }} />
     </Tab.Navigator>
   );
 }

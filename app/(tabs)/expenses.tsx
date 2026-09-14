@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMaintenance, fetchMaintenanceYTD } from '@/lib/api';
+import { RepairIcon, FoodIcon, ParkingIcon, FuelIcon, OtherIcon } from '@/components/CategoryIcons';
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1F2937' },
@@ -33,11 +34,11 @@ const styles = StyleSheet.create({
 });
 
 const categories = [
-  { id: 'repair', label: 'Repair', icon: '🔧' },
-  { id: 'food', label: 'Food', icon: '🍔' },
-  { id: 'parking', label: 'Parking', icon: '🅿️' },
-  { id: 'fuel', label: 'Fuel', icon: '⛽' },
-  { id: 'other', label: 'Other', icon: '📌' },
+  { id: 'repair', label: 'Repair', Icon: RepairIcon },
+  { id: 'food', label: 'Food', Icon: FoodIcon },
+  { id: 'parking', label: 'Parking', Icon: ParkingIcon },
+  { id: 'fuel', label: 'Fuel', Icon: FuelIcon },
+  { id: 'other', label: 'Other', Icon: OtherIcon },
 ];
 
 export default function ExpensesScreen() {
@@ -80,7 +81,7 @@ export default function ExpensesScreen() {
                 style={[styles.categoryBtn, selectedCategory === cat.id && styles.categoryBtnActive]}
                 onPress={() => setSelectedCategory(cat.id)}
               >
-                <Text style={styles.categoryIcon}>{cat.icon}</Text>
+                <cat.Icon color={selectedCategory === cat.id ? '#0B0F14' : '#E5E7EB'} />
                 <Text style={[styles.categoryText, selectedCategory === cat.id && styles.categoryTextActive]}>
                   {cat.label}
                 </Text>
