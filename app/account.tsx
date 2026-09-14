@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Linking, A
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchProfile, fetchServices, fetchAnnouncements, setOffStatus } from '@/lib/api';
+import { fetchProfile, fetchServices, fetchAnnouncements, setOffStatus, fetchLoads } from '@/lib/api';
 import supabase from '@/lib/supabase';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES, setLanguage } from '@/i18n';
@@ -56,6 +56,11 @@ export default function MoreScreen() {
   const { t, i18n } = useTranslation();
 
   const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
+  const { data: loadsData } = useQuery({ queryKey: ['loads', 'active'], queryFn: () => fetchLoads() });
+  // Same rule as the home screen: a driver hauling freight is not "ready".
+  const onLoad = (loadsData ?? []).find((l) =>
+    ['dispatched', 'at_pickup', 'in_transit', 'at_delivery'].includes(l?.status)
+  )?.status ?? null;
   const { data: services } = useQuery({ queryKey: ['services'], queryFn: fetchServices });
   const { data: announcements } = useQuery({ queryKey: ['announcements'], queryFn: fetchAnnouncements });
 
@@ -135,8 +140,8 @@ export default function MoreScreen() {
             ) : null}
             <View style={s.row}>
               <Text style={s.label}>{t('more.status')}</Text>
-              <Text style={[s.value, { color: isOff ? '#9CA3AF' : '#10B981' }]}>
-                {driver?.status ?? '—'}
+              <Text style={[s.value, { color: isOff ? '#9CA3AF' : onLoad ? '#F59E0B' : '#10B981' }]}>
+                {!isOff && onLoad ? onLoad.replace('_', ' ') : driver?.status ?? '—'}
               </Text>
             </View>
             <TouchableOpacity
