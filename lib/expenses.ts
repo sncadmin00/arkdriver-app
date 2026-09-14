@@ -1,5 +1,6 @@
 import * as SQLite from 'expo-sqlite';
-import * as FileSystem from 'expo-file-system';
+// SDK 54 moved documentDirectory/copyAsync to the legacy entry point.
+import * as FileSystem from 'expo-file-system/legacy';
 
 const db = SQLite.openDatabaseSync('expenses.db');
 
