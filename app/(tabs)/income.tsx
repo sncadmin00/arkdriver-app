@@ -243,9 +243,6 @@ export default function PayScreen() {
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <View style={s.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={s.back}>← {t('more.title')}</Text>
-        </TouchableOpacity>
         <Text style={s.title}>{t('pay.title')}</Text>
         <View style={s.nav}>
           <TouchableOpacity style={s.navBtn} onPress={() => setWeek(shiftWeek(week, -1))}>

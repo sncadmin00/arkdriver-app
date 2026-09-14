@@ -79,7 +79,8 @@
     "pickupShort": "Загрузка",
     "deliveryShort": "Выгрузка",
     "grossLabel": "Гросс за неделю",
-    "afterStatement": "Удержания появятся после отправки статемента."
+    "afterStatement": "Удержания появятся после отправки статемента.",
+    "apptWindow": "окно до {{time}}"
   },
   "loads": {
     "title": "Грузы",

@@ -122,9 +122,6 @@ export default function ExpensesScreen() {
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <View style={s.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={s.back}>← {t('more.title')}</Text>
-        </TouchableOpacity>
         <Text style={s.title}>{t('expenses.title')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.chips}>
           {yearList.map((y) => (

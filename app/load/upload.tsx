@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import DocumentScanner, { ResponseType } from 'react-native-document-scanner-plugin';
+import { PDFDocument } from 'pdf-lib';
 import { uploadDocument, ApiError } from '@/lib/api';
 
 const s = StyleSheet.create({
@@ -38,6 +39,8 @@ export default function UploadDoc() {
   const qc = useQueryClient();
 
   const [photo, setPhoto] = useState<{ uri: string; base64: string } | null>(null);
+  // A multi-page scan is filed as one PDF, not one document per sheet.
+  const [pdf, setPdf] = useState<{ base64: string; pageCount: number } | null>(null);
   const [signatureName, setSignatureName] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -46,15 +49,26 @@ export default function UploadDoc() {
   async function capture(fromLibrary: boolean) {
     if (!fromLibrary) {
       try {
+        // BOLs and PODs routinely run several pages. Scan them all, then bind
+        // them into a single PDF so the office gets one document, not a pile.
         const { scannedImages } = await DocumentScanner.scanDocument({
           responseType: ResponseType.Base64,
           croppedImageQuality: 40,
-          maxNumDocuments: 1,
         });
-        const b64 = scannedImages?.[0];
-        if (b64) setPhoto({ uri: `data:image/jpeg;base64,${b64}`, base64: b64 });
+        if (!scannedImages?.length) return;
+
+        const doc = await PDFDocument.create();
+        for (const b64 of scannedImages) {
+          const img = await doc.embedJpg(`data:image/jpeg;base64,${b64}`);
+          const page = doc.addPage([img.width, img.height]);
+          page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+        }
+        const base64 = await doc.saveAsBase64();
+
+        setPdf({ base64, pageCount: scannedImages.length });
+        setPhoto({ uri: `data:image/jpeg;base64,${scannedImages[0]}`, base64: scannedImages[0] });
       } catch (e: any) {
-        Alert.alert('Scanner error', e?.message ?? 'Could not open scanner');
+        Alert.alert('Scanner error', String(e?.message ?? e));
       }
       return;
     }
@@ -78,9 +92,9 @@ export default function UploadDoc() {
     mutationFn: () =>
       uploadDocument(id!, {
         docKey: String(docKey),
-        fileName: `${docKey}-${id}-${stopIndex}.jpg`,
-        mimeType: 'image/jpeg',
-        contentBase64: photo!.base64,
+        fileName: `${docKey}-${id}-${stopIndex}.${pdf ? 'pdf' : 'jpg'}`,
+        mimeType: pdf ? 'application/pdf' : 'image/jpeg',
+        contentBase64: pdf ? pdf.base64 : photo!.base64,
         signatureName: signatureName.trim() || undefined,
         notes: notes.trim() || undefined,
         stopIndex: Number(stopIndex),
@@ -88,7 +102,7 @@ export default function UploadDoc() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['load', id] });
       qc.invalidateQueries({ queryKey: ['loads'] });
-      Alert.alert('Uploaded', `${label} filed to stop ${Number(stopIndex) + 1}.`, [
+      Alert.alert('Uploaded', `${label} filed to stop ${Number(stopIndex) + 1}${pdf && pdf.pageCount > 1 ? ` (${pdf.pageCount} pages)` : ''}.`, [
         { text: 'OK', onPress: () => router.back() },
       ]);
     },

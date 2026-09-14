@@ -79,7 +79,8 @@
     "pickupShort": "Yuklash",
     "deliveryShort": "Tushirish",
     "grossLabel": "Shu hafta gross",
-    "afterStatement": "Ushlab qolishlar statement yuborilgandan keyin paydo bo'ladi."
+    "afterStatement": "Ushlab qolishlar statement yuborilgandan keyin paydo bo'ladi.",
+    "apptWindow": "{{time}} gacha oyna"
   },
   "loads": {
     "title": "Yuklar",

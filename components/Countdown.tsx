@@ -10,7 +10,7 @@ const s = StyleSheet.create({
   clock: { color: '#6B7280', fontSize: 11, marginLeft: 8 },
 });
 
-export default function Countdown({ date, time, timezone, kind, showKind = true }) {
+export default function Countdown({ date, time, timezone, kind, timeType, timeEnd, showKind = true }) {
   const { t } = useTranslation();
   const [now, setNow] = useState(new Date());
 
@@ -19,11 +19,26 @@ export default function Countdown({ date, time, timezone, kind, showKind = true 
     return () => clearInterval(id);
   }, []);
 
-  const c = countdown(date, time, timezone, now);
+  // On a first-come-first-served stop there is no appointment to miss: the
+  // driver is only late once the window has closed, so count to timeEnd.
+  const fcfs = timeType === 'fcfs' && !!timeEnd;
+  const c = countdown(date, fcfs ? timeEnd : time, timezone, now);
   if (!c) return null;
 
-  const color = c.late ? '#EF4444' : c.due || c.soon ? '#EAB308' : '#10B981';
-  const label = c.due
+  const start = fcfs ? countdown(date, time, timezone, now) : null;
+  const inWindow = fcfs && start && start.diffMin <= 0 && c.diffMin > 0;
+
+  const color = inWindow
+    ? '#10B981'
+    : c.late
+    ? '#EF4444'
+    : c.due || c.soon
+    ? '#EAB308'
+    : '#10B981';
+
+  const label = inWindow
+    ? t('home.apptWindow', { time: timeEnd })
+    : c.due
     ? t('home.apptNow')
     : c.late
     ? t('home.apptLate', { time: c.span })
@@ -39,7 +54,7 @@ export default function Countdown({ date, time, timezone, kind, showKind = true 
           {label}
         </Text>
       </View>
-      {time ? <Text style={s.clock}>{time}{zone ? ` ${zone}` : ''}</Text> : null}
+      {time ? <Text style={s.clock}>{fcfs ? `${time}–${timeEnd}` : time}{zone ? ` ${zone}` : ''}</Text> : null}
     </View>
   );
 }

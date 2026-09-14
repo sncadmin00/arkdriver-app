@@ -329,6 +329,8 @@ export default function HomeScreen() {
                     date={beforeTransit ? load.pickupAt : load.deliverAt}
                     time={beforeTransit ? load.pickupTime : load.deliverTime}
                     timezone={beforeTransit ? load.pickupTimezone : load.deliverTimezone}
+                    timeType={beforeTransit ? load.pickupTimeType : load.deliverTimeType}
+                    timeEnd={beforeTransit ? load.pickupTimeEnd : load.deliverTimeEnd}
                     kind={beforeTransit ? 'pickup' : 'delivery'}
                   />
                 );

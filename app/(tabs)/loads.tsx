@@ -120,6 +120,8 @@ export default function LoadsScreen() {
                         date={beforeTransit ? item.pickupAt : item.deliverAt}
                         time={beforeTransit ? item.pickupTime : item.deliverTime}
                         timezone={beforeTransit ? item.pickupTimezone : item.deliverTimezone}
+                        timeType={beforeTransit ? item.pickupTimeType : item.deliverTimeType}
+                        timeEnd={beforeTransit ? item.pickupTimeEnd : item.deliverTimeEnd}
                         kind={beforeTransit ? 'pickup' : 'delivery'}
                       />
                     );

@@ -79,7 +79,8 @@
     "pickupShort": "Pickup",
     "deliveryShort": "Delivery",
     "grossLabel": "Gross this week",
-    "afterStatement": "Deductions apply once the statement is dispatched."
+    "afterStatement": "Deductions apply once the statement is dispatched.",
+    "apptWindow": "window until {{time}}"
   },
   "loads": {
     "title": "Loads",

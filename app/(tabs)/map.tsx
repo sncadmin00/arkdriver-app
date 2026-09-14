@@ -195,9 +195,6 @@ export default function TruckMap() {
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <View style={s.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={s.back}>← {t('more.title')}</Text>
-        </TouchableOpacity>
         <Text style={s.title}>{t('truckmap.title')}</Text>
         <TextInput
           style={s.search}
