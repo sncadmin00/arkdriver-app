@@ -20,12 +20,24 @@ export default function TabsLayout() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    let alive = true;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!alive) return;
       if (!session) router.replace('/(auth)/login');
       setIsLoading(false);
+    });
+
+    // Checking once at startup left a driver stranded when the token expired
+    // mid-shift: every screen errored and nothing sent them back to login.
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) router.replace('/(auth)/login');
+    });
+
+    return () => {
+      alive = false;
+      sub.subscription.unsubscribe();
     };
-    checkAuth();
   }, []);
 
   if (isLoading) return null;

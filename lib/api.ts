@@ -23,6 +23,13 @@ export class ApiError extends Error {
 }
 
 async function toApiError(res: Response): Promise<ApiError> {
+  // A rejected token means the session is gone for good — the office may have
+  // closed the account, or the password changed. Clear it so the app returns
+  // to the login screen instead of showing "Not authenticated" on every tab.
+  if (res.status === 401) {
+    supabase.auth.signOut().catch(() => {});
+  }
+
   const text = await res.text();
   try {
     const body = JSON.parse(text);
