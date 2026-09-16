@@ -321,7 +321,9 @@
     "cat_repair": "Ремонт",
     "cat_equipment": "Оборудование",
     "cat_tolls": "Платные дороги",
-    "cat_other": "Прочее"
+    "cat_other": "Прочее",
+    "odometer": "Пробег",
+    "odometerRequired": "Укажите показания одометра"
   },
   "inspection": {
     "title": "Осмотр",

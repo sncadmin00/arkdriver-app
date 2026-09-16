@@ -17,6 +17,17 @@ db.execSync(`
   );
 `);
 
+// Repairs on a company truck belong in the truck's service history, not just
+// on the driver's phone. These two columns carry the odometer the server needs
+// and remember whether the record has made it there yet.
+for (const col of ['odometer INTEGER', 'synced INTEGER NOT NULL DEFAULT 0']) {
+  try {
+    db.execSync(`ALTER TABLE expenses ADD COLUMN ${col};`);
+  } catch {
+    // Already added on a previous launch.
+  }
+}
+
 export const CATEGORIES = [
   'fuel', 'parking', 'meals', 'lodging', 'repair', 'equipment', 'tolls', 'other',
 ];
@@ -39,10 +50,21 @@ export async function saveReceipt(uri) {
 export function addExpense(e) {
   const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   db.runSync(
-    'INSERT INTO expenses (id, date, category, amount, note, photo, gallons, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    [id, e.date, e.category, e.amount, e.note ?? null, e.photo ?? null, e.gallons ?? null, new Date().toISOString()]
+    'INSERT INTO expenses (id, date, category, amount, note, photo, gallons, odometer, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [id, e.date, e.category, e.amount, e.note ?? null, e.photo ?? null, e.gallons ?? null, e.odometer ?? null, new Date().toISOString()]
   );
   return id;
+}
+
+/** Repairs that still owe the office a copy. */
+export function unsyncedRepairs() {
+  return db.getAllSync(
+    "SELECT * FROM expenses WHERE category = 'repair' AND synced = 0 AND odometer IS NOT NULL"
+  );
+}
+
+export function markSynced(id) {
+  db.runSync('UPDATE expenses SET synced = 1 WHERE id = ?', [id]);
 }
 
 export function listExpenses(year) {

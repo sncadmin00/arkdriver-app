@@ -321,7 +321,9 @@
     "cat_repair": "Repair",
     "cat_equipment": "Equipment",
     "cat_tolls": "Tolls",
-    "cat_other": "Other"
+    "cat_other": "Other",
+    "odometer": "Odometer",
+    "odometerRequired": "Enter the odometer reading"
   },
   "inspection": {
     "title": "Inspection",

@@ -321,7 +321,9 @@
     "cat_repair": "Ta'mirlash",
     "cat_equipment": "Jihoz",
     "cat_tolls": "Yo'l to'lovi",
-    "cat_other": "Boshqa"
+    "cat_other": "Boshqa",
+    "odometer": "Kilometraj",
+    "odometerRequired": "Odometr ko'rsatkichini kiriting"
   },
   "inspection": {
     "title": "Ko'rik",

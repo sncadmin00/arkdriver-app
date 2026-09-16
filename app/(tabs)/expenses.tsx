@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Image, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -6,6 +6,9 @@ import { useTranslation } from 'react-i18next';
 import DocumentScanner from 'react-native-document-scanner-plugin';
 import * as Sharing from 'expo-sharing';
 import { CATEGORIES, addExpense, listExpenses, deleteExpense, totals, years, saveReceipt, exportCsv } from '@/lib/expenses';
+import { useQuery } from '@tanstack/react-query';
+import { fetchInspectionTemplate } from '@/lib/api';
+import { syncRepairs } from '@/lib/repairSync';
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1F2937' },
@@ -63,6 +66,22 @@ export default function ExpensesScreen() {
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [tick, setTick] = useState(0);
   const [form, setForm] = useState(null);
+  const [view, setView] = useState(null);
+
+  // The truck already reports its odometer through the ELD, so a repair should
+  // arrive pre-filled rather than asking the driver to read the dash.
+  const { data: tpl } = useQuery({
+    queryKey: ['inspection-template'],
+    queryFn: fetchInspectionTemplate,
+  });
+  const eldOdometer = tpl?.context?.lastOdometer?.value ?? null;
+
+  // The template can land after the sheet is already open, so fill the field
+  // when the reading arrives rather than only at the moment it opens.
+  useEffect(() => {
+    if (eldOdometer == null) return;
+    setForm((f) => (f && !f.odometer ? { ...f, odometer: String(eldOdometer) } : f));
+  }, [eldOdometer]);
 
   const rows = listExpenses(year === 'all' ? undefined : year);
   const sum = totals(year === 'all' ? undefined : year);
@@ -72,7 +91,7 @@ export default function ExpensesScreen() {
     : [String(new Date().getFullYear()), ...available];
 
   function openForm() {
-    setForm({ date: today(), category: 'fuel', amount: '', note: '', gallons: '', photo: null });
+    setForm({ date: today(), category: 'fuel', amount: '', note: '', gallons: '', odometer: eldOdometer != null ? String(eldOdometer) : '', photo: null });
   }
 
   async function pickPhoto() {
@@ -91,6 +110,11 @@ export default function ExpensesScreen() {
   function save() {
     const amount = parseFloat(String(form.amount).replace(',', '.'));
     if (!amount || amount <= 0) return Alert.alert(t('expenses.amountRequired'));
+    const odometer = form.odometer ? parseInt(form.odometer, 10) : null;
+    if (form.category === 'repair' && !odometer) {
+      return Alert.alert(t('expenses.odometerRequired'));
+    }
+
     addExpense({
       date: form.date,
       category: form.category,
@@ -98,9 +122,14 @@ export default function ExpensesScreen() {
       note: form.note,
       photo: form.photo,
       gallons: form.gallons ? parseFloat(form.gallons) : null,
+      odometer,
     });
     setForm(null);
     setTick((x) => x + 1);
+
+    // A repair also belongs in the truck's service history. The row is already
+    // safe on the phone, so a failed push just waits for the next launch.
+    if (form.category === 'repair') syncRepairs().catch(() => {});
   }
 
   function remove(id) {
@@ -167,13 +196,19 @@ export default function ExpensesScreen() {
           <Text style={s.empty}>{t('expenses.noneYet')}</Text>
         ) : (
           rows.map((r) => (
-            <TouchableOpacity key={r.id} style={s.row} onLongPress={() => remove(r.id)}>
+            <TouchableOpacity
+              key={r.id}
+              style={s.row}
+              onPress={() => setView(r)}
+              onLongPress={() => remove(r.id)}
+            >
               {r.photo ? <Image source={{ uri: r.photo }} style={s.thumb} /> : <View style={s.thumb} />}
               <View style={{ flex: 1 }}>
                 <Text style={s.rowCat}>{t(`expenses.cat_${r.category}`)}</Text>
                 <Text style={s.rowMeta}>
                   {r.date}
                   {r.gallons ? ` · ${r.gallons} gal` : ''}
+                  {r.odometer ? ` · ${Number(r.odometer).toLocaleString()} mi` : ''}
                   {r.note ? ` · ${r.note}` : ''}
                 </Text>
               </View>
@@ -184,6 +219,68 @@ export default function ExpensesScreen() {
 
         <Text style={s.note}>{t('expenses.exportNote')}</Text>
       </ScrollView>
+
+      <Modal visible={!!view} animationType="slide" onRequestClose={() => setView(null)}>
+        <View style={s.modal}>
+          <View style={s.mBar}>
+            <TouchableOpacity onPress={() => setView(null)}>
+              <Text style={s.mAction}>{t('common.close')}</Text>
+            </TouchableOpacity>
+            <Text style={s.mTitle}>
+              {view ? t(`expenses.cat_${view.category}`) : ''}
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                const id = view.id;
+                setView(null);
+                remove(id);
+              }}
+            >
+              <Text style={[s.mAction, { color: '#EF4444' }]}>{t('expenses.delete')}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView contentContainerStyle={{ padding: 20 }}>
+            <Text style={s.label}>{t('expenses.amount').toUpperCase()}</Text>
+            <Text style={s.rowAmount}>{view ? money(view.amount) : ''}</Text>
+
+            <Text style={[s.label, { marginTop: 18 }]}>{t('expenses.date').toUpperCase()}</Text>
+            <Text style={s.rowMeta}>{view?.date}</Text>
+
+            {view?.odometer ? (
+              <>
+                <Text style={[s.label, { marginTop: 18 }]}>{t('expenses.odometer').toUpperCase()}</Text>
+                <Text style={s.rowMeta}>{Number(view.odometer).toLocaleString()} mi</Text>
+              </>
+            ) : null}
+
+            {view?.gallons ? (
+              <>
+                <Text style={[s.label, { marginTop: 18 }]}>{t('expenses.gallons').toUpperCase()}</Text>
+                <Text style={s.rowMeta}>{view.gallons}</Text>
+              </>
+            ) : null}
+
+            {view?.note ? (
+              <>
+                <Text style={[s.label, { marginTop: 18 }]}>{t('expenses.note').toUpperCase()}</Text>
+                <Text style={s.rowMeta}>{view.note}</Text>
+              </>
+            ) : null}
+
+            {view?.photo ? (
+              <>
+                <Text style={[s.label, { marginTop: 18 }]}>{t('expenses.receipt').toUpperCase()}</Text>
+                <Image
+                  source={{ uri: view.photo }}
+                  style={{ width: '100%', height: 420, borderRadius: 10, marginTop: 8 }}
+                  resizeMode="contain"
+                />
+              </>
+            ) : null}
+          </ScrollView>
+        </View>
+      </Modal>
 
       <Modal visible={!!form} animationType="slide" onRequestClose={() => setForm(null)}>
         <View style={s.modal}>
@@ -222,6 +319,20 @@ export default function ExpensesScreen() {
               value={form?.amount}
               onChangeText={(v) => setForm((f) => ({ ...f, amount: v }))}
             />
+
+            {form?.category === 'repair' ? (
+              <>
+                <Text style={s.label}>{t('expenses.odometer').toUpperCase()}</Text>
+                <TextInput
+                  style={s.input}
+                  placeholder="0"
+                  placeholderTextColor="#6B7280"
+                  keyboardType="number-pad"
+                  value={form?.odometer}
+                  onChangeText={(v) => setForm((f) => ({ ...f, odometer: v }))}
+                />
+              </>
+            ) : null}
 
             {form?.category === 'fuel' ? (
               <>
