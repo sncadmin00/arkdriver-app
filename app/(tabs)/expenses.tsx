@@ -129,7 +129,11 @@ export default function ExpensesScreen() {
 
     // A repair also belongs in the truck's service history. The row is already
     // safe on the phone, so a failed push just waits for the next launch.
-    if (form.category === 'repair') syncRepairs().catch(() => {});
+    if (form.category === 'repair') {
+      // Quiet by design: the row is already safe locally, and a driver out of
+      // signal should not be met with an error every time they log a repair.
+      syncRepairs().catch(() => {});
+    }
   }
 
   function remove(id) {

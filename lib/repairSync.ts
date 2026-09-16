@@ -17,20 +17,27 @@ export async function syncRepairs(): Promise<number> {
   if (!unitId) return 0;
 
   let sent = 0;
+  let lastError: any = null;
   for (const row of rows) {
     try {
       await createMaintenance({
         unitId,
-        serviceType: 'other',
-        mileageAtService: row.odometer,
+        // The endpoint validates snake_case keys — camelCase reads as missing.
+        service_type: 'other',
+        type: 'repair',
+        mileage: row.odometer,
         cost: row.amount,
         description: row.note || undefined,
       });
       markSynced(row.id);
       sent += 1;
-    } catch {
+    } catch (e: any) {
       // Offline or rejected — the row stays unsynced and we try again later.
+      // Surfaced while we confirm the office actually receives these.
+      console.warn('repair sync failed:', e?.status, e?.code, e?.message);
+      lastError = e;
     }
   }
+  if (!sent && lastError) throw lastError;
   return sent;
 }
