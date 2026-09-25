@@ -2,13 +2,25 @@
 // Never convert them — compare against "now" as seen in that same zone.
 export function countdown(dateStr, timeStr, timezone, now = new Date()) {
   if (!dateStr) return null;
-  const target = new Date(`${dateStr}T${timeStr || '00:00'}:00`);
+  const [y, mo, d] = String(dateStr).split('-').map(Number);
+  const [hh = 0, mm = 0] = String(timeStr || '00:00').split(':').map(Number);
+  const target = Date.UTC(y, mo - 1, d, hh, mm);
   if (isNaN(target)) return null;
 
-  let nowThere = now;
+  // Wall clock "now" in the stop's zone, compared as if both were UTC.
+  let nowThere = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(),
+    now.getHours(), now.getMinutes(), now.getSeconds());
   if (timezone) {
     try {
-      nowThere = new Date(now.toLocaleString('en-US', { timeZone: timezone }));
+      const p = Object.fromEntries(
+        new Intl.DateTimeFormat('en-US', {
+          timeZone: timezone, hourCycle: 'h23',
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit', second: '2-digit',
+        }).formatToParts(now).map((x) => [x.type, x.value])
+      );
+      const t = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
+      if (!isNaN(t)) nowThere = t;
     } catch {}
   }
 

@@ -82,7 +82,6 @@ export default function LoadDetail() {
   const qc = useQueryClient();
   const { t } = useTranslation();
   const { data: prof } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
-  const chatUnread = prof?.chat?.unread ?? 0;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['load', id],
@@ -239,6 +238,8 @@ export default function LoadDetail() {
                   date={current.date}
                   time={current.time}
                   timezone={current.timezone}
+                  timeType={current.timeType}
+                  timeEnd={current.timeEnd}
                   kind={current.kind}
                   showKind={false}
                 />
@@ -267,7 +268,7 @@ export default function LoadDetail() {
                     onPress={() => router.push({ pathname: '/chat', params: { loadRef: String(id) } })}
                   >
                     <Text style={s.navText}>
-                      {t('tabs.chat')}{chatUnread ? `  ${chatUnread}` : ''}
+                      {t('tabs.chat')}
                     </Text>
                   </TouchableOpacity>
                 </View>
