@@ -87,6 +87,7 @@ export default function UploadDoc() {
       allowsEditing: false,
     });
     if (res.canceled || !res.assets?.[0]?.base64) return;
+    setPdf(null);
     setPhoto({ uri: res.assets[0].uri, base64: res.assets[0].base64! });
   }
 
@@ -114,7 +115,7 @@ export default function UploadDoc() {
     },
   });
 
-  const sizeKb = photo ? Math.round((photo.base64.length * 3) / 4 / 1024) : 0;
+  const sizeKb = photo ? Math.round(((pdf ? pdf.base64 : photo.base64).length * 3) / 4 / 1024) : 0;
   const ready = !!photo && !upload.isPending;
 
   return (
