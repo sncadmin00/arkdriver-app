@@ -103,7 +103,7 @@ export default function ExpensesScreen() {
       const saved = await saveReceipt(uri.startsWith('file://') ? uri : `file://${uri}`);
       setForm((f) => ({ ...f, photo: saved }));
     } catch (e: any) {
-      Alert.alert('Receipt error', String(e?.message ?? e));
+      Alert.alert(t('alerts.receipt'), String(e?.message ?? e));
     }
   }
 

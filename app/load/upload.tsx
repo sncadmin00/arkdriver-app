@@ -7,6 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 import DocumentScanner, { ResponseType } from 'react-native-document-scanner-plugin';
 import { PDFDocument } from 'pdf-lib';
 import { uploadDocument, ApiError } from '@/lib/api';
+import { useTranslation } from 'react-i18next';
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1F2937' },
@@ -32,6 +33,7 @@ const s = StyleSheet.create({
 });
 
 export default function UploadDoc() {
+  const { t } = useTranslation();
   const { id, stopIndex, docKey, kind } = useLocalSearchParams<{
     id: string; stopIndex: string; docKey: string; kind: string;
   }>();
@@ -68,14 +70,14 @@ export default function UploadDoc() {
         setPdf({ base64, pageCount: scannedImages.length });
         setPhoto({ uri: `data:image/jpeg;base64,${scannedImages[0]}`, base64: scannedImages[0] });
       } catch (e: any) {
-        Alert.alert('Scanner error', String(e?.message ?? e));
+        Alert.alert(t('alerts.scanner'), String(e?.message ?? e));
       }
       return;
     }
 
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('Permission needed', 'Allow access to continue.');
+      Alert.alert(t('uploadDoc.permTitle'), t('uploadDoc.permBody'));
       return;
     }
     const res = await ImagePicker.launchImageLibraryAsync({
@@ -102,13 +104,13 @@ export default function UploadDoc() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['load', id] });
       qc.invalidateQueries({ queryKey: ['loads'] });
-      Alert.alert('Uploaded', `${label} filed to stop ${Number(stopIndex) + 1}${pdf && pdf.pageCount > 1 ? ` (${pdf.pageCount} pages)` : ''}.`, [
+      Alert.alert(t('uploadDoc.doneTitle'), t('uploadDoc.doneBody', { label, stop: Number(stopIndex) + 1 }) + (pdf && pdf.pageCount > 1 ? t('uploadDoc.pages', { count: pdf.pageCount }) : ''), [
         { text: 'OK', onPress: () => router.back() },
       ]);
     },
     onError: (e: Error) => {
       const code = e instanceof ApiError ? e.code : undefined;
-      Alert.alert(code ? code.replace('_', ' ') : 'Upload failed', e.message);
+      Alert.alert(code ? code.replace('_', ' ') : t('alerts.upload'), e.message);
     },
   });
 
@@ -120,48 +122,48 @@ export default function UploadDoc() {
       <ScrollView style={s.container} keyboardShouldPersistTaps="handled">
         <View style={s.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Text style={s.back}>← Back</Text>
+            <Text style={s.back}>{t('uploadDoc.back')}</Text>
           </TouchableOpacity>
-          <Text style={s.title}>Upload {label}</Text>
-          <Text style={s.sub}>{id} · stop {Number(stopIndex) + 1} · {kind}</Text>
+          <Text style={s.title}>{t('uploadDoc.title', { label })}</Text>
+          <Text style={s.sub}>{t('uploadDoc.sub', { id, stop: Number(stopIndex) + 1, kind: kind === 'pickup' ? t('home.pickupShort') : t('home.deliveryShort') })}</Text>
         </View>
 
         <View style={s.body}>
-          <Text style={s.section}>PHOTO</Text>
+          <Text style={s.section}>{t('uploadDoc.photo')}</Text>
           {photo ? (
             <>
               <Image source={{ uri: photo.uri }} style={s.preview} resizeMode="contain" />
               <Text style={s.size}>{sizeKb} KB</Text>
               <TouchableOpacity onPress={() => capture(false)}>
-                <Text style={s.retake}>Retake</Text>
+                <Text style={s.retake}>{t('uploadDoc.retake')}</Text>
               </TouchableOpacity>
             </>
           ) : (
             <>
               <TouchableOpacity style={s.pick} onPress={() => capture(false)}>
-                <Text style={s.pickText}>Take photo</Text>
-                <Text style={s.pickHint}>Capture the signed {label}</Text>
+                <Text style={s.pickText}>{t('uploadDoc.takePhoto')}</Text>
+                <Text style={s.pickHint}>{t('uploadDoc.captureHint', { label })}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => capture(true)}>
-                <Text style={s.retake}>Choose from library</Text>
+                <Text style={s.retake}>{t('uploadDoc.library')}</Text>
               </TouchableOpacity>
             </>
           )}
 
-          <Text style={s.section}>SIGNED BY</Text>
+          <Text style={s.section}>{t('uploadDoc.signedBy')}</Text>
           <TextInput
             style={s.input}
-            placeholder="Name of person who signed"
+            placeholder={t('uploadDoc.signedByPh')}
             placeholderTextColor="#6B7280"
             value={signatureName}
             onChangeText={setSignatureName}
           />
-          <Text style={s.hint}>Optional — receiver or shipper name</Text>
+          <Text style={s.hint}>{t('uploadDoc.signedByHint')}</Text>
 
-          <Text style={s.section}>NOTES</Text>
+          <Text style={s.section}>{t('uploadDoc.notes')}</Text>
           <TextInput
             style={[s.input, { height: 80, textAlignVertical: 'top' }]}
-            placeholder="e.g. Receiver signed at dock 4"
+            placeholder={t('uploadDoc.notesPh')}
             placeholderTextColor="#6B7280"
             value={notes}
             onChangeText={setNotes}
@@ -177,7 +179,7 @@ export default function UploadDoc() {
               <ActivityIndicator color="#0B0F14" />
             ) : (
               <Text style={ready ? s.btnText : s.btnOffText}>
-                {photo ? `Upload ${label}` : 'Take a photo first'}
+                {photo ? t('uploadDoc.title', { label }) : t('uploadDoc.photoFirst')}
               </Text>
             )}
           </TouchableOpacity>

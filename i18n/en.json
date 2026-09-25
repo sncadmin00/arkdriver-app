@@ -462,5 +462,32 @@
     "body": "The app hit an error. Tap below to try again.",
     "retry": "Try again",
     "home": "Go to home"
+  },
+  "alerts": {
+    "receipt": "Receipt error",
+    "scanner": "Scanner error",
+    "upload": "Upload failed",
+    "checkin": "Check-in failed"
+  },
+  "uploadDoc": {
+    "permTitle": "Permission needed",
+    "permBody": "Allow access to continue.",
+    "doneTitle": "Uploaded",
+    "doneBody": "{{label}} filed to stop {{stop}}.",
+    "pages": " Pages: {{count}}.",
+    "back": "← Back",
+    "title": "Upload {{label}}",
+    "sub": "{{id}} · stop {{stop}} · {{kind}}",
+    "photo": "PHOTO",
+    "retake": "Retake",
+    "takePhoto": "Take photo",
+    "captureHint": "Capture the signed {{label}}",
+    "library": "Choose from library",
+    "signedBy": "SIGNED BY",
+    "signedByPh": "Name of person who signed",
+    "signedByHint": "Optional — receiver or shipper name",
+    "notes": "NOTES",
+    "notesPh": "e.g. Receiver signed at dock 4",
+    "photoFirst": "Take a photo first"
   }
 }

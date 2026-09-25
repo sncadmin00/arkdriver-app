@@ -198,7 +198,7 @@ export default function LoadDetail() {
         already_arrived: 'Already checked in',
         already_departed: 'Already departed',
       };
-      Alert.alert(titles[code ?? ''] ?? 'Check-in failed', e.message);
+      Alert.alert(titles[code ?? ''] ?? t('alerts.checkin'), e.message);
     },
   });
 

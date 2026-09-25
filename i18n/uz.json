@@ -462,5 +462,32 @@
     "body": "Ilovada xatolik yuz berdi. Qayta urinib ko'rish uchun bosing.",
     "retry": "Qayta urinish",
     "home": "Bosh sahifaga"
+  },
+  "alerts": {
+    "receipt": "Chek xatosi",
+    "scanner": "Skaner xatosi",
+    "upload": "Yuklab bo'lmadi",
+    "checkin": "Kelishni belgilab bo'lmadi"
+  },
+  "uploadDoc": {
+    "permTitle": "Ruxsat kerak",
+    "permBody": "Davom etish uchun ruxsat bering.",
+    "doneTitle": "Yuklandi",
+    "doneBody": "{{label}} {{stop}}-to'xtashga biriktirildi.",
+    "pages": " Sahifalar: {{count}}.",
+    "back": "← Orqaga",
+    "title": "{{label}} yuklash",
+    "sub": "{{id}} · {{stop}}-to'xtash · {{kind}}",
+    "photo": "RASM",
+    "retake": "Qayta olish",
+    "takePhoto": "Rasmga olish",
+    "captureHint": "Imzolangan {{label}}ni rasmga oling",
+    "library": "Galereyadan tanlash",
+    "signedBy": "KIM IMZOLADI",
+    "signedByPh": "Imzolagan shaxs ismi",
+    "signedByHint": "Ixtiyoriy — qabul qiluvchi yoki jo'natuvchi ismi",
+    "notes": "IZOHLAR",
+    "notesPh": "Masalan: qabul qiluvchi 4-dokda imzoladi",
+    "photoFirst": "Avval rasmga oling"
   }
 }
