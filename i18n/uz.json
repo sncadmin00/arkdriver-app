@@ -456,5 +456,11 @@
     "confirmAction": "So'rov yuborish",
     "pendingTitle": "So'rov yuborildi",
     "pendingBody": "Siz {{date}} kuni akkauntni o'chirishni so'radingiz. Tashuvchi so'rovni ko'rib chiqmoqda. Fikringiz o'zgarsa, dispetcherga murojaat qiling."
+  },
+  "crash": {
+    "title": "Nimadir xato ketdi",
+    "body": "Ilovada xatolik yuz berdi. Qayta urinib ko'rish uchun bosing.",
+    "retry": "Qayta urinish",
+    "home": "Bosh sahifaga"
   }
 }

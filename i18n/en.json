@@ -456,5 +456,11 @@
     "confirmAction": "Request deletion",
     "pendingTitle": "Deletion requested",
     "pendingBody": "You asked to delete your account on {{date}}. Your carrier is processing the request. Contact your dispatch office if you change your mind."
+  },
+  "crash": {
+    "title": "Something went wrong",
+    "body": "The app hit an error. Tap below to try again.",
+    "retry": "Try again",
+    "home": "Go to home"
   }
 }
