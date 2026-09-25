@@ -93,7 +93,7 @@ export default function Notifications() {
                 </View>
               ))}
             </View>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/compliance')}>
+            <TouchableOpacity onPress={() => router.push('/compliance')}>
               <Text style={s.link}>{t('notifications.viewDocs')}</Text>
             </TouchableOpacity>
           </>

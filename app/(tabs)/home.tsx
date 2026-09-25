@@ -365,7 +365,7 @@ export default function HomeScreen() {
         {st ? (
           <>
             <Text style={s.section}>{t('home.thisWeek')}</Text>
-            <TouchableOpacity style={s.card} onPress={() => router.push('/(tabs)/pay')}>
+            <TouchableOpacity style={s.card} onPress={() => router.push('/income')}>
               <View style={s.payRow}>
                 <View>
                   <Text style={s.payLabel}>{t('home.grossLabel')}</Text>
@@ -382,7 +382,7 @@ export default function HomeScreen() {
 
         <TouchableOpacity
           style={[s.card, { marginTop: 20 }]}
-          onPress={() => router.push({ pathname: '/(tabs)/compliance', params: { tab: 'truck' } })}
+          onPress={() => router.push('/compliance?tab=truck')}
         >
           <View style={s.payRow}>
             <View style={{ flex: 1, paddingRight: 12 }}>

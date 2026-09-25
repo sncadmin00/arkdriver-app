@@ -196,7 +196,10 @@ export default function ComplianceScreen() {
   const qc = useQueryClient();
   const { t } = useTranslation();
   const router = useRouter();
-  const [tab, setTab] = useState<'dq' | 'truck' | 'insp'>('dq');
+  const { tab: tabParam } = useLocalSearchParams<{ tab?: string }>();
+  const [tab, setTab] = useState<'dq' | 'truck' | 'insp'>(
+    tabParam === 'truck' || tabParam === 'insp' ? tabParam : 'dq'
+  );
 
   const dq = useQuery({ queryKey: ['compliance'], queryFn: fetchCompliance });
   const truck = useQuery({ queryKey: ['truck-documents'], queryFn: fetchTruckDocuments });
