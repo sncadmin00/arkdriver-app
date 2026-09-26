@@ -112,7 +112,7 @@ export default function MoreScreen() {
   }
 
   return (
-    <SafeAreaView style={s.safe} edges={['top']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <ScrollView style={s.container}>
         <View style={s.header}>
           <TouchableOpacity onPress={() => router.back()}>

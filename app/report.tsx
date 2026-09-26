@@ -212,7 +212,7 @@ export default function ReportScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={s.safe} edges={['top']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <View style={s.header}>
         <TouchableOpacity onPress={() => (kind ? setKind(null) : router.back())}>
           <Text style={s.back}>← {kind ? t('incident.title') : t('more.title')}</Text>

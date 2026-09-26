@@ -206,7 +206,7 @@ export default function LoadDetail() {
   const blocked = !!current?.arrivedAt && missing.length > 0;
 
   return (
-    <SafeAreaView style={s.safe} edges={['top']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <ScrollView style={s.container}>
         <View style={s.header}>
           <TouchableOpacity onPress={() => router.back()}>

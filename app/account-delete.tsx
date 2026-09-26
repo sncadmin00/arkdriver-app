@@ -55,7 +55,7 @@ export default function AccountDeleteScreen() {
   const pending = existing.data?.request;
 
   return (
-    <SafeAreaView style={s.safe} edges={['top']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <View style={s.container}>
         <View style={s.header}>
           <TouchableOpacity onPress={() => router.back()}>

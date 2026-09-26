@@ -188,7 +188,7 @@ export default function TripMap() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={s.safe} edges={['top']}>
+      <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
         <View style={s.center}><ActivityIndicator color="#F59E0B" size="large" /></View>
         <Modal visible={!!navApps} transparent animationType="fade" onRequestClose={() => setNavApps(null)}>
         <View style={s.sheetWrap}>
@@ -214,7 +214,7 @@ export default function TripMap() {
 
   if (error || !located.length) {
     return (
-      <SafeAreaView style={s.safe} edges={['top']}>
+      <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
         <View style={s.bar}>
           <TouchableOpacity onPress={() => router.back()}><Text style={s.back}>← {t('common.back')}</Text></TouchableOpacity>
           <Text style={s.title}>{id}</Text>
@@ -246,7 +246,7 @@ export default function TripMap() {
   }
 
   return (
-    <SafeAreaView style={s.safe} edges={['top']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <View style={s.bar}>
         <TouchableOpacity onPress={() => router.back()}><Text style={s.back}>← {t('common.back')}</Text></TouchableOpacity>
         <Text style={s.title}>{id}</Text>

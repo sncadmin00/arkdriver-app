@@ -98,11 +98,11 @@ export default function ChatScreen() {
   const ready = text.trim().length > 0 && !send.isPending;
 
   return (
-    <SafeAreaView style={s.safe} edges={['top']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={88}
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
       >
         <View style={s.header}>
           <TouchableOpacity onPress={() => router.back()}>

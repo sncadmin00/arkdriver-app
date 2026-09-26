@@ -211,7 +211,7 @@ export default function ComplianceScreen() {
   const shown = slots.filter((x: any) => x.required !== false || x.documentId);
 
   return (
-    <SafeAreaView style={s.safe} edges={['top']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <View style={s.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={s.back}>← {t('common.back')}</Text>

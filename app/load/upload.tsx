@@ -119,7 +119,7 @@ export default function UploadDoc() {
   const ready = !!photo && !upload.isPending;
 
   return (
-    <SafeAreaView style={s.safe} edges={['top']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <ScrollView style={s.container} keyboardShouldPersistTaps="handled">
         <View style={s.header}>
           <TouchableOpacity onPress={() => router.back()}>

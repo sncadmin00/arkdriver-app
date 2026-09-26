@@ -304,7 +304,7 @@ export default function InspectionScreen() {
   const [tab, setTab] = useState('new');
 
   return (
-    <SafeAreaView style={s.safe} edges={['top']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <View style={s.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={s.back}>← {t('more.title')}</Text>
